@@ -25,9 +25,9 @@ private:
 	friend FInventoryList;
 	friend UInventoryManagerComponent;
 
-	// The equipment class that got equipped
+	// Total count of the item
 	UPROPERTY()
-	TSubclassOf<UInventoryItemDefinition> ItemDefinition;
+	int32 StackCount = 0;
 
 	UPROPERTY()
 	TObjectPtr<AInventoryItemInstance> Instance = nullptr;
@@ -39,23 +39,38 @@ struct FInventoryList
 {
 	GENERATED_BODY()
 
-	TArray<AInventoryItemInstance*> GetAllItems() const;
+	FInventoryList()
+		: OwnerComponent(nullptr)
+	{
+	}
+
+	FInventoryList(UPawnComponent* InOwnerComponent)
+		: OwnerComponent(InOwnerComponent)
+	{
+	}
 
 public:
-	AInventoryItemInstance* AddEntry(TSubclassOf<UInventoryItemDefinition> InventoryItemDefinition);
+
+	TArray<AInventoryItemInstance*> GetAllItems() const;
+
+	AInventoryItemInstance* AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount);
 	void RemoveEntry(AInventoryItemInstance* Instance);
+
+	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
+	{
+		return false;
+	}
+private:
+	friend UInventoryManagerComponent;
+
+private:
 
 	// Replicated list of equipment entries
 	UPROPERTY()
 	TArray<FInventoryEntry> Entries;
 
 	UPROPERTY(NotReplicated)
-	TObjectPtr<UActorComponent> OwnerComponent;
-
-	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
-	{
-		return false;
-	}
+	TObjectPtr<UPawnComponent> OwnerComponent;
 };
 
 template<>
@@ -74,7 +89,7 @@ public:
 	UInventoryManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
-	AInventoryItemInstance* AddItem(TSubclassOf<UInventoryItemDefinition> ItemDefinition);
+	AInventoryItemInstance* AddItem(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount = 1);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
 	void RemoveItem(AInventoryItemInstance* ItemInstance);

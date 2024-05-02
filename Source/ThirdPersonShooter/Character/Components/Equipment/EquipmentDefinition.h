@@ -21,18 +21,19 @@ class UEquipmentDefinition : public UObject
 public:
 	UEquipmentDefinition(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	// Class to spawn
+	// Actor class to spawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Default")
 	TSubclassOf<AEquipmentInstance> InstanceType;
 
-	// Gameplay ability sets to grant when this is equipped
+	// Gameplay ability sets to grant when this item is equipped
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	TArray<TObjectPtr<const UModularAbilitySet>> AbilitySetsToGrant;
 
+	// Socket tag to attach the equipment to when not in active use (holstered)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Spawn Info", Meta = (Categories = "Equipment.Socket"))
 	FGameplayTag AttachSocket;
 
-	// Socket tag to attach the equipment to
+	// Transform to apply to the equipment when attached to the socket
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Spawn Info")
 	FTransform AttachTransform;
 

@@ -27,6 +27,26 @@ public:
 
 /**
  * UInventoryItemDefinition
+ * ---
+ * This isn't used, I'm experimenting with this being a struct instead of a class so I don't have to create a new subclass for every unique item
+ */
+USTRUCT(Blueprintable)
+struct FInventoryItemDefinitionAlt
+{
+	GENERATED_BODY()
+
+public:
+	FInventoryItemDefinitionAlt() {}
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display)
+	FText DisplayName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display, Instanced)
+	TArray<TObjectPtr<UInventoryItemFragment>> Fragments;
+};
+
+/**
+ * UInventoryItemDefinition
  */
 UCLASS(Blueprintable, Const, Abstract)
 class UInventoryItemDefinition : public UObject

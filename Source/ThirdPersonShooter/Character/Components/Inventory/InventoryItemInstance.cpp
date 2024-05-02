@@ -47,7 +47,14 @@ void AInventoryItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCou
 
 int32 AInventoryItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
 {
-	return StatTags[Tag];
+	if (StatTags.Contains(Tag))
+	{
+		return StatTags[Tag];
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 bool AInventoryItemInstance::HasStatTag(FGameplayTag Tag) const

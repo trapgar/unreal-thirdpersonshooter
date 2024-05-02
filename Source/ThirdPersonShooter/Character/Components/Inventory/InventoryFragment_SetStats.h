@@ -18,6 +18,8 @@ class UInventoryFragment_SetStats : public UInventoryItemFragment
 	GENERATED_BODY()
 
 protected:
+
+	// List of initial stats for item (starting magazine ammo, etc.)
 	UPROPERTY(EditDefaultsOnly, Category=Equipment)
 	TMap<FGameplayTag, int32> InitialItemStats;
 

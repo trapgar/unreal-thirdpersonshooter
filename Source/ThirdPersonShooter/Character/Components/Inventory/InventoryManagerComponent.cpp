@@ -15,26 +15,44 @@ struct FReplicationFlags;
 
 FString FInventoryEntry::GetDebugString() const
 {
-	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(ItemDefinition.Get()));
+	TSubclassOf<UInventoryItemDefinition> ItemDef;
+	if (Instance != nullptr)
+	{
+		ItemDef = Instance->GetItemDef();
+	}
+
+	return FString::Printf(TEXT("%s (%d x %s)"), *GetNameSafe(Instance), StackCount, *GetNameSafe(ItemDef));
 }
 
 //////////////////////////////////////////////////////////////////////
 // FInventoryList
 
-AInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDefinition)
+AInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount)
 {
 	AInventoryItemInstance* Result = nullptr;
 
-	check(ItemDefinition != nullptr);
+	check(ItemDef != nullptr);
  	check(OwnerComponent);
+
+	AActor* OwningActor = OwnerComponent->GetOwner();
+	check(OwningActor->HasAuthority());
 	check(OwnerComponent->GetOwner()->HasAuthority());
 	
 	TSubclassOf<AInventoryItemInstance> InstanceType = AInventoryItemInstance::StaticClass();
 	
 	FInventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.ItemDefinition = ItemDefinition;
-	NewEntry.Instance = NewObject<AInventoryItemInstance>(OwnerComponent->GetOwner(), InstanceType);  //@TODO: Using the actor instead of component as the outer due to UE-127172
-	NewEntry.Instance->SetItemDef(ItemDefinition);
+	NewEntry.Instance = NewObject<AInventoryItemInstance>(OwnerComponent->GetOwner());  //@TODO: Using the actor instead of component as the outer due to UE-127172
+	NewEntry.Instance->SetItemDef(ItemDef);
+
+	for (UInventoryItemFragment* Fragment : GetDefault<UInventoryItemDefinition>(ItemDef)->Fragments)
+	{
+		if (Fragment != nullptr)
+		{
+			Fragment->OnInstanceCreated(NewEntry.Instance);
+		}
+	}
+
+	NewEntry.StackCount = StackCount;
 	Result = NewEntry.Instance;
 
 	// MarkItemDirty(NewEntry);
@@ -46,6 +64,7 @@ TArray<AInventoryItemInstance*> FInventoryList::GetAllItems() const
 {
 	TArray<AInventoryItemInstance*> Results;
 	Results.Reserve(Entries.Num());
+
 	for (const FInventoryEntry& Entry : Entries)
 	{
 		if (Entry.Instance != nullptr) //@TODO: Would prefer to not deal with this here and hide it further?
@@ -53,6 +72,7 @@ TArray<AInventoryItemInstance*> FInventoryList::GetAllItems() const
 			Results.Add(Entry.Instance);
 		}
 	}
+
 	return Results;
 }
 
@@ -76,6 +96,7 @@ void FInventoryList::RemoveEntry(AInventoryItemInstance *Instance)
 
 UInventoryManagerComponent::UInventoryManagerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
+	, InventoryList(this)
 {
 	SetIsReplicatedByDefault(true);
 	bWantsInitializeComponent = true;
@@ -88,12 +109,12 @@ void UInventoryManagerComponent::GetLifetimeReplicatedProps(TArray< FLifetimePro
 	DOREPLIFETIME(ThisClass, InventoryList);
 }
 
-AInventoryItemInstance* UInventoryManagerComponent::AddItem(TSubclassOf<UInventoryItemDefinition> ItemClass)
+AInventoryItemInstance* UInventoryManagerComponent::AddItem(TSubclassOf<UInventoryItemDefinition> ItemClass, int32 StackCount)
 {
 	AInventoryItemInstance* Result = nullptr;
 	if (ItemClass != nullptr)
 	{
-		Result = InventoryList.AddEntry(ItemClass);
+		Result = InventoryList.AddEntry(ItemClass, StackCount);
 		if (Result != nullptr)
 		{
 			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())

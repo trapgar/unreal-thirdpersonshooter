@@ -16,6 +16,8 @@ class UInventoryFragment_EquippableItem : public UInventoryItemFragment
 	GENERATED_BODY()
 
 public:
+
+	// Equipment item definition
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Equipment)
 	TSubclassOf<UEquipmentDefinition> EquipmentDefinition;
 };
