@@ -5,14 +5,20 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Engine/ActorChannel.h"
-#include "EquipmentDefinition.h"
-#include "EquipmentInstance.h"
+// #include "EquipmentItemDefinition.h"
+// #include "EquipmentItemInstance.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
+#include "Character/Components/Inventory/InventoryFragment_EquippableItem.h"
+#include "NativeGameplayTags.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EquipmentManagerComponent)
 
 class FLifetimeProperty;
 struct FReplicationFlags;
+
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_SlotsChanged, "Equipment.Message.SlotsChanged");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
 
 //////////////////////////////////////////////////////////////////////
 // FAppliedEquipmentEntry
@@ -32,25 +38,25 @@ UAbilitySystemComponent* FEquipmentList::GetAbilitySystemComponent() const
 	return Cast<UAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningActor));
 }
 
-AEquipmentInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentDefinition> EquipmentDefinition)
+AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition)
 {
-	AEquipmentInstance* Result = nullptr;
+	AEquipmentItemInstance* Result = nullptr;
 
 	check(EquipmentDefinition != nullptr);
  	check(OwnerComponent);
 	check(OwnerComponent->GetOwner()->HasAuthority());
 	
-	const UEquipmentDefinition* EquipmentCDO = GetDefault<UEquipmentDefinition>(EquipmentDefinition);
+	const UEquipmentItemDefinition* EquipmentCDO = GetDefault<UEquipmentItemDefinition>(EquipmentDefinition);
 
-	TSubclassOf<AEquipmentInstance> InstanceType = EquipmentCDO->InstanceType;
+	TSubclassOf<AEquipmentItemInstance> InstanceType = EquipmentCDO->InstanceType;
 	if (InstanceType == nullptr)
 	{
-		InstanceType = AEquipmentInstance::StaticClass();
+		InstanceType = AEquipmentItemInstance::StaticClass();
 	}
 	
 	FAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
 	NewEntry.EquipmentDefinition = EquipmentDefinition;
-	NewEntry.Instance = NewObject<AEquipmentInstance>(OwnerComponent->GetOwner(), InstanceType);  //@TODO: Using the actor instead of component as the outer due to UE-127172
+	NewEntry.Instance = NewObject<AEquipmentItemInstance>(OwnerComponent->GetOwner(), InstanceType);  //@TODO: Using the actor instead of component as the outer due to UE-127172
 	Result = NewEntry.Instance;
 
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
@@ -70,7 +76,7 @@ AEquipmentInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentDefinition> E
 	return Result;
 }
 
-void FEquipmentList::RemoveEntry(AEquipmentInstance* Instance)
+void FEquipmentList::RemoveEntry(AEquipmentItemInstance* Instance)
 {
 	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
 	{
@@ -107,9 +113,9 @@ void UEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray< FLifetimePro
 	DOREPLIFETIME(ThisClass, EquipmentList);
 }
 
-AEquipmentInstance* UEquipmentManagerComponent::EquipItem(TSubclassOf<UEquipmentDefinition> EquipmentClass)
+AEquipmentItemInstance* UEquipmentManagerComponent::EquipItem(TSubclassOf<UEquipmentItemDefinition> EquipmentClass)
 {
-	AEquipmentInstance* Result = nullptr;
+	AEquipmentItemInstance* Result = nullptr;
 	if (EquipmentClass != nullptr)
 	{
 		Result = EquipmentList.AddEntry(EquipmentClass);
@@ -126,7 +132,7 @@ AEquipmentInstance* UEquipmentManagerComponent::EquipItem(TSubclassOf<UEquipment
 	return Result;
 }
 
-void UEquipmentManagerComponent::UnequipItem(AEquipmentInstance* ItemInstance)
+void UEquipmentManagerComponent::UnequipItem(AEquipmentItemInstance* ItemInstance)
 {
 	if (ItemInstance != nullptr)
 	{
@@ -146,7 +152,7 @@ bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 
 	for (FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
 	{
-		AEquipmentInstance* Instance = Entry.Instance;
+		AEquipmentItemInstance* Instance = Entry.Instance;
 
 		if (IsValid(Instance))
 		{
@@ -164,7 +170,7 @@ void UEquipmentManagerComponent::InitializeComponent()
 
 void UEquipmentManagerComponent::UninitializeComponent()
 {
-	TArray<AEquipmentInstance*> AllEquipmentInstances;
+	TArray<AEquipmentItemInstance*> AllEquipmentInstances;
 
 	// gathering all instances before removal to avoid side effects affecting the equipment list iterator	
 	for (const FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
@@ -172,7 +178,7 @@ void UEquipmentManagerComponent::UninitializeComponent()
 		AllEquipmentInstances.Add(Entry.Instance);
 	}
 
-	for (AEquipmentInstance* EquipInstance : AllEquipmentInstances)
+	for (AEquipmentItemInstance* EquipInstance : AllEquipmentInstances)
 	{
 		UnequipItem(EquipInstance);
 	}
@@ -189,7 +195,7 @@ void UEquipmentManagerComponent::ReadyForReplication()
 	{
 		for (const FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
 		{
-			AEquipmentInstance* Instance = Entry.Instance;
+			AEquipmentItemInstance* Instance = Entry.Instance;
 
 			if (IsValid(Instance))
 			{
@@ -199,11 +205,11 @@ void UEquipmentManagerComponent::ReadyForReplication()
 	}
 }
 
-AEquipmentInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubclassOf<AEquipmentInstance> InstanceType)
+AEquipmentItemInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubclassOf<AEquipmentItemInstance> InstanceType)
 {
 	for (FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
 	{
-		if (AEquipmentInstance* Instance = Entry.Instance)
+		if (AEquipmentItemInstance* Instance = Entry.Instance)
 		{
 			if (Instance->IsA(InstanceType))
 			{
@@ -215,12 +221,12 @@ AEquipmentInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubclass
 	return nullptr;
 }
 
-TArray<AEquipmentInstance*> UEquipmentManagerComponent::GetEquipmentInstancesOfType(TSubclassOf<AEquipmentInstance> InstanceType) const
+TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const
 {
-	TArray<AEquipmentInstance*> Results;
+	TArray<AEquipmentItemInstance*> Results;
 	for (const FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
 	{
-		if (AEquipmentInstance* Instance = Entry.Instance)
+		if (AEquipmentItemInstance* Instance = Entry.Instance)
 		{
 			if (Instance->IsA(InstanceType))
 			{
@@ -229,4 +235,90 @@ TArray<AEquipmentInstance*> UEquipmentManagerComponent::GetEquipmentInstancesOfT
 		}
 	}
 	return Results;
+}
+
+void UEquipmentManagerComponent::AddItemToSlot(int32 SlotIndex, AEquipmentItemInstance* Item)
+{
+	if (Slots.IsValidIndex(SlotIndex) && (Item != nullptr))
+	{
+		if (Slots[SlotIndex] == nullptr)
+		{
+			Slots[SlotIndex] = Item;
+			OnRep_Slots();
+		}
+	}
+}
+
+AEquipmentItemInstance* UEquipmentManagerComponent::RemoveItemFromSlot(int32 SlotIndex)
+{
+	AEquipmentItemInstance* Result = nullptr;
+
+	if (ActiveSlotIndex == SlotIndex)
+	{
+		UnequipItem();
+		ActiveSlotIndex = -1;
+	}
+
+	if (Slots.IsValidIndex(SlotIndex))
+	{
+		Result = Slots[SlotIndex];
+
+		if (Result != nullptr)
+		{
+			Slots[SlotIndex] = nullptr;
+			OnRep_Slots();
+		}
+	}
+
+	return Result;
+}
+
+void UEquipmentManagerComponent::OnRep_Slots()
+{
+	FEquipmentSlotsChangedMessage Message;
+	Message.Owner = GetOwner<APawn>();
+	Message.Slots = Slots;
+
+	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
+	MessageSystem.BroadcastMessage(TAG_Equipment_Message_SlotsChanged, Message);
+}
+
+void UEquipmentManagerComponent::OnRep_ActiveSlotIndex()
+{
+	FEquipmentActiveIndexChangedMessage Message;
+	Message.Owner = GetOwner<APawn>();
+	Message.ActiveIndex = ActiveSlotIndex;
+
+	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
+	MessageSystem.BroadcastMessage(TAG_Equipment_Message_ActiveIndexChanged, Message);
+}
+
+void UEquipmentManagerComponent::EquipItem()
+{
+	// check(Slots.IsValidIndex(ActiveSlotIndex));
+	// check(EquippedItem == nullptr);
+
+	// if (ULyraInventoryItemInstance* SlotItem = Slots[ActiveSlotIndex])
+	// {
+	// 	if (const UInventoryFragment_EquippableItem* EquipInfo = SlotItem->FindFragmentByClass<UInventoryFragment_EquippableItem>())
+	// 	{
+	// 		TSubclassOf<ULyraEquipmentDefinition> EquipDef = EquipInfo->EquipmentDefinition;
+	// 		if (EquipDef != nullptr)
+	// 		{
+	// 			if (ULyraEquipmentManagerComponent* EquipmentManager = FindEquipmentManager())
+	// 			{
+	// 				EquippedItem = EquipmentManager->EquipItem(EquipDef);
+	// 				if (EquippedItem != nullptr)
+	// 				{
+	// 					EquippedItem->SetInstigator(SlotItem);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+}
+
+void UEquipmentManagerComponent::UnequipItem()
+{
+	
 }

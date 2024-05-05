@@ -3,27 +3,27 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "Templates/SubclassOf.h"
-#include "EquipmentInstance.h"
+#include "EquipmentItemInstance.h"
 #include "Character/Components/Ability/ModularAbilitySet.h"
 
-#include "EquipmentDefinition.generated.h"
+#include "EquipmentItemDefinition.generated.h"
 
 /**
- * UEquipmentDefinition
+ * UEquipmentItemDefinition
  *
  * Definition of a piece of equipment that can be applied to a pawn
  */
 UCLASS(Blueprintable, Const, Abstract, BlueprintType)
-class UEquipmentDefinition : public UObject
+class UEquipmentItemDefinition : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UEquipmentDefinition(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UEquipmentItemDefinition(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	// Actor class to spawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Default")
-	TSubclassOf<AEquipmentInstance> InstanceType;
+	TSubclassOf<AEquipmentItemInstance> InstanceType;
 
 	// Gameplay ability sets to grant when this item is equipped
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")

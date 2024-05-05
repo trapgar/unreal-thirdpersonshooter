@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "EquipmentInstance.h"
-#include "EquipmentDefinition.h"
+#include "EquipmentItemInstance.h"
+#include "EquipmentItemDefinition.h"
 #include "Character/Components/Ability/ModularAbilitySet.h"
 #include "Components/PawnComponent.h"
 // #include "Net/Serialization/FastArraySerializer.h"
@@ -12,12 +12,43 @@
 
 class UActorComponent;
 class UAbilitySystemComponent;
-class UEquipmentDefinition;
-class AEquipmentInstance;
+class UEquipmentItemDefinition;
+class AEquipmentItemInstance;
 class UEquipmentManagerComponent;
 class UObject;
 struct FFrame;
 struct FEquipmentList;
+
+
+USTRUCT(BlueprintType)
+struct FEquipmentSlotsChangedMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category=Equipment)
+	TObjectPtr<APawn> Owner = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category = Equipment)
+	TArray<TObjectPtr<AEquipmentItemInstance>> Slots;
+};
+
+
+USTRUCT(BlueprintType)
+struct FEquipmentActiveIndexChangedMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category=Equipment)
+	TObjectPtr<APawn> Owner = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category=Equipment)
+	int32 ActiveIndex = 0;
+};
+
+
+
+// --------------------------------------------------------
+
 
 
 /** A single piece of applied equipment */
@@ -37,10 +68,10 @@ private:
 
 	// The equipment class that got equipped
 	UPROPERTY()
-	TSubclassOf<UEquipmentDefinition> EquipmentDefinition;
+	TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition;
 
 	UPROPERTY()
-	TObjectPtr<AEquipmentInstance> Instance = nullptr;
+	TObjectPtr<AEquipmentItemInstance> Instance = nullptr;
 
 	// Authority-only list of granted handles
 	UPROPERTY(NotReplicated)
@@ -54,8 +85,8 @@ struct FEquipmentList
 	GENERATED_BODY()
 
 public:
-	AEquipmentInstance* AddEntry(TSubclassOf<UEquipmentDefinition> EquipmentDefinition);
-	void RemoveEntry(AEquipmentInstance* Instance);
+	AEquipmentItemInstance* AddEntry(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition);
+	void RemoveEntry(AEquipmentItemInstance* Instance);
 
 	// Replicated list of equipment entries
 	UPROPERTY()
@@ -99,10 +130,10 @@ public:
 	UEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	AEquipmentInstance* EquipItem(TSubclassOf<UEquipmentDefinition> EquipmentDefinition);
+	AEquipmentItemInstance* EquipItem(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	void UnequipItem(AEquipmentInstance* ItemInstance);
+	void UnequipItem(AEquipmentItemInstance* ItemInstance);
 
 	//~UObject interface
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
@@ -117,11 +148,11 @@ public:
 
 	/** Returns the first equipped instance of a given type, or nullptr if none are found */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	AEquipmentInstance* GetFirstInstanceOfType(TSubclassOf<AEquipmentInstance> InstanceType);
+	AEquipmentItemInstance* GetFirstInstanceOfType(TSubclassOf<AEquipmentItemInstance> InstanceType);
 
  	/** Returns all equipped instances of a given type, or an empty array if none are found */
  	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<AEquipmentInstance*> GetEquipmentInstancesOfType(TSubclassOf<AEquipmentInstance> InstanceType) const;
+	TArray<AEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const;
 
 	template <typename T>
 	T* GetFirstInstanceOfType()
@@ -129,7 +160,35 @@ public:
 		return (T*)GetFirstInstanceOfType(T::StaticClass());
 	}
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	void AddItemToSlot(int32 SlotIndex, AEquipmentItemInstance* Item);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	AEquipmentItemInstance* RemoveItemFromSlot(int32 SlotIndex);
+
+protected:
+
+	UFUNCTION()
+	void OnRep_Slots();
+
+	UFUNCTION()
+	void OnRep_ActiveSlotIndex();
+
 private:
+	UPROPERTY(ReplicatedUsing=OnRep_Slots)
+	TArray<TObjectPtr<AEquipmentItemInstance>> Slots;
+
+	UPROPERTY(ReplicatedUsing=OnRep_ActiveSlotIndex)
+	int32 ActiveSlotIndex = -1;
+
+	void UnequipItem();
+	void EquipItem();
+
+private:
+
+	// List of all equipped items
 	UPROPERTY(Replicated)
 	FEquipmentList EquipmentList;
+
+	// Need a also have a list of holstered items or drawn items
 };

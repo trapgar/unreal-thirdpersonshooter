@@ -7,7 +7,7 @@
 
 #include "InventoryFragment_EquippableItem.generated.h"
 
-class UEquipmentDefinition;
+class UEquipmentItemDefinition;
 class UObject;
 
 UCLASS()
@@ -19,5 +19,5 @@ public:
 
 	// Equipment item definition
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Equipment)
-	TSubclassOf<UEquipmentDefinition> EquipmentDefinition;
+	TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition;
 };

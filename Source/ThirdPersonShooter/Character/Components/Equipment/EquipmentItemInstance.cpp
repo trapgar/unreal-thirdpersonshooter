@@ -1,33 +1,33 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "EquipmentInstance.h"
+#include "EquipmentItemInstance.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/Character.h"
-#include "EquipmentDefinition.h"
+#include "EquipmentItemDefinition.h"
 #include "Camera/CameraComponent.h"
 #include "GameplayTags.h"
 #include "Net/UnrealNetwork.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(EquipmentInstance)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(EquipmentItemInstance)
 
 class FLifetimeProperty;
 class UClass;
 class USceneComponent;
 
-void AEquipmentInstance::PreInitializeComponents()
+void AEquipmentItemInstance::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
-APawn *AEquipmentInstance::GetPawn() const
+APawn *AEquipmentItemInstance::GetPawn() const
 {
 	return Cast<APawn>(GetOuter());
 }
 
-APawn *AEquipmentInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
+APawn *AEquipmentItemInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
 {
 	APawn *Result = nullptr;
 	if (UClass *ActualPawnType = PawnType)
@@ -40,7 +40,7 @@ APawn *AEquipmentInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
 	return Result;
 }
 
-void AEquipmentInstance::OnEquipped()
+void AEquipmentItemInstance::OnEquipped()
 {
 	// Let others know a reset has occurred
 	// FLyraPlayerResetMessage Message;
@@ -51,7 +51,7 @@ void AEquipmentInstance::OnEquipped()
 	K2_OnEquipped();
 }
 
-void AEquipmentInstance::OnUnequipped()
+void AEquipmentItemInstance::OnUnequipped()
 {
 	K2_OnUnequipped();
 }

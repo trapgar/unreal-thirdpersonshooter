@@ -32,16 +32,17 @@ AInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefin
 	AInventoryItemInstance* Result = nullptr;
 
 	check(ItemDef != nullptr);
- 	check(OwnerComponent);
+	// TODO: Why is this sometimes null???
+ 	check(OwningComponent);
 
-	AActor* OwningActor = OwnerComponent->GetOwner();
+	AActor* OwningActor = OwningComponent->GetOwner();
 	check(OwningActor->HasAuthority());
-	check(OwnerComponent->GetOwner()->HasAuthority());
+	check(OwningComponent->GetOwner()->HasAuthority());
 	
 	TSubclassOf<AInventoryItemInstance> InstanceType = AInventoryItemInstance::StaticClass();
 	
 	FInventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.Instance = NewObject<AInventoryItemInstance>(OwnerComponent->GetOwner());  //@TODO: Using the actor instead of component as the outer due to UE-127172
+	NewEntry.Instance = NewObject<AInventoryItemInstance>(OwningComponent->GetOwner());  //@TODO: Using the actor instead of component as the outer due to UE-127172
 	NewEntry.Instance->SetItemDef(ItemDef);
 
 	for (UInventoryItemFragment* Fragment : GetDefault<UInventoryItemDefinition>(ItemDef)->Fragments)
@@ -99,7 +100,6 @@ UInventoryManagerComponent::UInventoryManagerComponent(const FObjectInitializer&
 	, InventoryList(this)
 {
 	SetIsReplicatedByDefault(true);
-	bWantsInitializeComponent = true;
 }
 
 void UInventoryManagerComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

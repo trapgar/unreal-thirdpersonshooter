@@ -39,4 +39,22 @@ public:
 	UPROPERTY(EditAnywhere, Category="Input", meta=(AssetBundles="Client,Server"))
 	TArray<TSoftObjectPtr<const UGameplayInputConfiguration>> InputConfigs;
 
+private:
+	struct FPerContextData
+	{
+		TArray<TSharedPtr<FComponentRequestHandle>> ExtensionRequestHandles;
+		TArray<TWeakObjectPtr<APawn>> PawnsAddedTo;
+	};
+
+	TMap<FGameFeatureStateChangeContext, FPerContextData> ContextData;
+
+	//~ Begin UGameFeatureAction_WorldActionBase interface
+	virtual void AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) override;
+	//~ End UGameFeatureAction_WorldActionBase interface
+
+	void Reset(FPerContextData& ActiveData);
+	void HandlePawnExtension(AActor* Actor, FName EventName, FGameFeatureStateChangeContext ChangeContext);
+	void AddInputMappingForPlayer(APawn* Pawn, FPerContextData& ActiveData);
+	void RemoveInputMapping(APawn* Pawn, FPerContextData& ActiveData);
+
 };

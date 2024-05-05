@@ -18,29 +18,31 @@ UGameplayInputComponent::UGameplayInputComponent(const FObjectInitializer& Objec
 
 void UGameplayInputComponent::InitializePlayerInput(UInputComponent *PlayerInputComponent)
 {
-	auto Owner = GetOwner();
+	check(PlayerInputComponent);
 
-	if (auto Pawn = Cast<APawn>(Owner))
+	AActor* Owner = GetOwner();
+	APawn* Pawn = Cast<APawn>(Owner);
+
+	if (!Pawn)
 	{
-		UE_LOG(LogInput, Error, TEXT("Owner is a Pawn"));
+		return;
 	}
 	else
 	{
 		UE_LOG(LogInput, Error, TEXT("Owner is NOT a Pawn ([%s])."), *GetNameSafe(Owner));
 	}
-	// auto Pawn = GetOwner<APawn>();
-	// check(Pawn);
 
-	// auto PC = Pawn->GetController<APlayerController>();
-	// check(PC);
+	const APlayerController* PC = Pawn->GetController<APlayerController>();
+	check(PC);
 
-	// auto LP = Cast<ULocalPlayer>(PC->GetLocalPlayer());
-	// check(LP);
+	const ULocalPlayer* LP = Cast<ULocalPlayer>(PC->GetLocalPlayer());
+	check(LP);
 
-	// auto Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-	// check(Subsystem);
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(Subsystem);
 
 	// Subsystem->ClearAllMappings();
+
 
 	// if (const ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
 	// {

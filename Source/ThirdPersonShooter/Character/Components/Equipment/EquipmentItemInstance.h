@@ -5,19 +5,19 @@
 #include "Engine/World.h"
 #include "Common/TaggedActor.h"
 
-#include "EquipmentInstance.generated.h"
+#include "EquipmentItemInstance.generated.h"
 
 class AActor;
 class APawn;
 struct FFrame;
 
 /**
- * UEquipmentInstance
+ * UEquipmentItemInstance
  *
  * A piece of equipment spawned and applied to a pawn
  */
 UCLASS(BlueprintType, Blueprintable)
-class AEquipmentInstance : public ATaggedActor
+class AEquipmentItemInstance : public ATaggedActor
 {
     GENERATED_BODY()
 

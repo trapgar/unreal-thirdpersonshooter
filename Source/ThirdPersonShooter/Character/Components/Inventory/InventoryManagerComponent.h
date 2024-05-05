@@ -33,19 +33,19 @@ private:
 	TObjectPtr<AInventoryItemInstance> Instance = nullptr;
 };
 
-/** List of applied equipment */
+/** List of inventory items */
 USTRUCT(BlueprintType)
 struct FInventoryList
 {
 	GENERATED_BODY()
 
 	FInventoryList()
-		: OwnerComponent(nullptr)
+		: OwningComponent(nullptr)
 	{
 	}
 
-	FInventoryList(UPawnComponent* InOwnerComponent)
-		: OwnerComponent(InOwnerComponent)
+	FInventoryList(UPawnComponent* InOwningComponent)
+		: OwningComponent(InOwningComponent)
 	{
 	}
 
@@ -60,6 +60,7 @@ public:
 	{
 		return false;
 	}
+
 private:
 	friend UInventoryManagerComponent;
 
@@ -70,7 +71,7 @@ private:
 	TArray<FInventoryEntry> Entries;
 
 	UPROPERTY(NotReplicated)
-	TObjectPtr<UPawnComponent> OwnerComponent;
+	TObjectPtr<UPawnComponent> OwningComponent;
 };
 
 template<>
