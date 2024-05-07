@@ -14,15 +14,15 @@ struct FFrame;
 struct FGameplayTag;
 
 /**
- * AInventoryItemInstance
+ * UInventoryItemInstance
  */
 UCLASS(BlueprintType)
-class AInventoryItemInstance : public ATaggedActor
+class UInventoryItemInstance : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	AInventoryItemInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UInventoryItemInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	//~UObject interface
 	virtual bool IsSupportedForNetworking() const override { return true; }

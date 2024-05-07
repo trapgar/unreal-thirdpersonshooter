@@ -2,34 +2,35 @@
 
 #pragma once
 
-#include "EquipmentItemInstance.h"
-#include "EquipmentItemDefinition.h"
-#include "Character/Components/Ability/ModularAbilitySet.h"
-#include "Components/PawnComponent.h"
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 // #include "Net/Serialization/FastArraySerializer.h"
+#include "EquipmentItemDefinition.h"
+#include "EquipmentItemInstance.h"
+#include "Character/Components/Ability/ModularAbilitySet.h"
 
 #include "EquipmentManagerComponent.generated.h"
 
-class UActorComponent;
-class UAbilitySystemComponent;
-class UEquipmentItemDefinition;
 class AEquipmentItemInstance;
-class UEquipmentManagerComponent;
-class UObject;
-struct FFrame;
 struct FEquipmentList;
 
 
 USTRUCT(BlueprintType)
-struct FEquipmentSlotsChangedMessage
+struct FEquipmentChangedMessage
 {
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category=Equipment)
-	TObjectPtr<APawn> Owner = nullptr;
+	TObjectPtr<UActorComponent> EquipmentOwner = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, Category = Equipment)
-	TArray<TObjectPtr<AEquipmentItemInstance>> Slots;
+	UPROPERTY(BlueprintReadOnly, Category=Equipment)
+	TObjectPtr<AEquipmentItemInstance> Instance = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category=Equipment)
+	int32 NewCount = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category=Equipment)
+	int32 Delta = 0;
 };
 
 
@@ -57,18 +58,15 @@ struct FAppliedEquipmentEntry
 {
 	GENERATED_BODY()
 
-	FAppliedEquipmentEntry()
-	{}
+	FAppliedEquipmentEntry() {}
 
 	FString GetDebugString() const;
+
+	bool IsActive() const { return bIsActive; }
 
 private:
 	friend FEquipmentList;
 	friend UEquipmentManagerComponent;
-
-	// The equipment class that got equipped
-	UPROPERTY()
-	TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition;
 
 	UPROPERTY()
 	TObjectPtr<AEquipmentItemInstance> Instance = nullptr;
@@ -76,6 +74,9 @@ private:
 	// Authority-only list of granted handles
 	UPROPERTY(NotReplicated)
 	FModularAbilitySet_GrantedHandles GrantedHandles;
+
+	// Flag indicating if the equipment is active vs holstered
+	bool bIsActive = false;
 };
 
 /** List of applied equipment */
@@ -84,16 +85,22 @@ struct FEquipmentList
 {
 	GENERATED_BODY()
 
+	FEquipmentList()
+		: OwnerComponent(nullptr)
+	{
+	}
+
+	FEquipmentList(UActorComponent* InOwningComponent)
+		: OwnerComponent(InOwningComponent)
+	{
+	}
+
 public:
+	TArray<AEquipmentItemInstance*> GetAllItems() const;
+
 	AEquipmentItemInstance* AddEntry(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition);
+
 	void RemoveEntry(AEquipmentItemInstance* Instance);
-
-	// Replicated list of equipment entries
-	UPROPERTY()
-	TArray<FAppliedEquipmentEntry> Entries;
-
-	UPROPERTY(NotReplicated)
-	TObjectPtr<UActorComponent> OwnerComponent;
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 	{
@@ -102,8 +109,20 @@ public:
 
 private:
 	UAbilitySystemComponent* GetAbilitySystemComponent() const;
-	
+
+private:
+	void BroadcastChangeMessage(AEquipmentItemInstance* Entry, int32 OldCount, int32 NewCount);
+
+private:
 	friend UEquipmentManagerComponent;
+
+private:
+	// Replicated list of equipment entries
+	UPROPERTY()
+	TArray<FAppliedEquipmentEntry> Entries;
+
+	UPROPERTY(NotReplicated)
+	TObjectPtr<UActorComponent> OwnerComponent;
 };
 
 template<>
@@ -121,74 +140,77 @@ struct TStructOpsTypeTraits<FEquipmentList> : public TStructOpsTypeTraitsBase2<F
 /**
  * Manages equipment applied to a pawn
  */
-UCLASS(BlueprintType, Const)
-class UEquipmentManagerComponent : public UPawnComponent
+UCLASS(Blueprintable, BlueprintType)
+class THIRDPERSONSHOOTER_API UEquipmentManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
 	UEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	AEquipmentItemInstance* EquipItem(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
+	AEquipmentItemInstance* AddItem(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	void UnequipItem(AEquipmentItemInstance* ItemInstance);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
+	void RemoveItem(AEquipmentItemInstance* ItemInstance);
 
-	//~UObject interface
-	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
-	//~End of UObject interface
-
-	//~UActorComponent interface
-	//virtual void EndPlay() override;
-	virtual void InitializeComponent() override;
-	virtual void UninitializeComponent() override;
-	virtual void ReadyForReplication() override;
-	//~End of UActorComponent interface
+	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure = false)
+	TArray<AEquipmentItemInstance*> GetAllItems() const;
 
 	/** Returns the first equipped instance of a given type, or nullptr if none are found */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
 	AEquipmentItemInstance* GetFirstInstanceOfType(TSubclassOf<AEquipmentItemInstance> InstanceType);
-
- 	/** Returns all equipped instances of a given type, or an empty array if none are found */
- 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<AEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const;
-
 	template <typename T>
 	T* GetFirstInstanceOfType()
 	{
 		return (T*)GetFirstInstanceOfType(T::StaticClass());
 	}
 
+	/** Returns all equipped instances of a given type, or an empty array if none are found */
+	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
+	TArray<AEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const;
+
+	// Adds an item to the given slot index
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
 	void AddItemToSlot(int32 SlotIndex, AEquipmentItemInstance* Item);
 
+	// Removes an item from the given slot index
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
 	AEquipmentItemInstance* RemoveItemFromSlot(int32 SlotIndex);
 
+	// Draws the item in the given slot index
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
+	AEquipmentItemInstance* DrawItemInSlot(int32 SlotIndex);
+
+	// Holsters the item in the given slot index
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
+	void HolsterItemInSlot(int32 SlotIndex);
+
 protected:
-
-	UFUNCTION()
-	void OnRep_Slots();
-
-	UFUNCTION()
-	void OnRep_ActiveSlotIndex();
+	//~UObject interface
+	virtual void InitializeComponent() override;
+	virtual void UninitializeComponent() override;
+	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+	virtual void ReadyForReplication() override;
+	//~End of UObject interface
 
 private:
-	UPROPERTY(ReplicatedUsing=OnRep_Slots)
+	UPROPERTY()
 	TArray<TObjectPtr<AEquipmentItemInstance>> Slots;
-
-	UPROPERTY(ReplicatedUsing=OnRep_ActiveSlotIndex)
-	int32 ActiveSlotIndex = -1;
-
-	void UnequipItem();
-	void EquipItem();
-
-private:
 
 	// List of all equipped items
 	UPROPERTY(Replicated)
 	FEquipmentList EquipmentList;
 
-	// Need a also have a list of holstered items or drawn items
+};
+
+//@TODO: Make into a subsystem instead?
+UCLASS()
+class UEquipmentFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+	// Returns a flag indicating if the equipment is active or holstered
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static const bool IsActive(FAppliedEquipmentEntry Entry);
 };

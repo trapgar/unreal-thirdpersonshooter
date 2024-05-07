@@ -8,7 +8,7 @@
 
 #include "InventoryFragment_SetStats.generated.h"
 
-class AInventoryItemInstance;
+class UInventoryItemInstance;
 class UObject;
 struct FGameplayTag;
 
@@ -24,7 +24,7 @@ protected:
 	TMap<FGameplayTag, int32> InitialItemStats;
 
 public:
-	virtual void OnInstanceCreated(AInventoryItemInstance* Instance) const override;
+	virtual void OnInstanceCreated(UInventoryItemInstance* Instance) const override;
 
 	int32 GetItemStatByTag(FGameplayTag Tag) const;
 };

@@ -25,11 +25,8 @@ void UGameplayInputComponent::InitializePlayerInput(UInputComponent *PlayerInput
 
 	if (!Pawn)
 	{
+		UE_LOG(LogInput, Error, TEXT("Owner is NOT a Pawn - unable to bind input ([%s])."), *GetNameSafe(Owner));
 		return;
-	}
-	else
-	{
-		UE_LOG(LogInput, Error, TEXT("Owner is NOT a Pawn ([%s])."), *GetNameSafe(Owner));
 	}
 
 	const APlayerController* PC = Pawn->GetController<APlayerController>();

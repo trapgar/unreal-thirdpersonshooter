@@ -1,14 +1,18 @@
 #include "InventoryManagerComponent.h"
 
 #include "Engine/ActorChannel.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 #include "InventoryItemDefinition.h"
 #include "InventoryItemInstance.h"
 #include "Net/UnrealNetwork.h"
+#include "NativeGameplayTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InventoryManagerComponent)
 
 class FLifetimeProperty;
 struct FReplicationFlags;
+
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Inventory_Message_StackChanged, "Inventory.Message.StackChanged");
 
 //////////////////////////////////////////////////////////////////////
 // FInventoryEntry
@@ -27,22 +31,33 @@ FString FInventoryEntry::GetDebugString() const
 //////////////////////////////////////////////////////////////////////
 // FInventoryList
 
-AInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount)
+void FInventoryList::BroadcastChangeMessage(UInventoryItemInstance* Instance, int32 OldCount, int32 NewCount)
 {
-	AInventoryItemInstance* Result = nullptr;
+	FInventoryChangedMessage Message;
+	Message.InventoryOwner = OwnerComponent;
+	Message.Instance = Instance;
+	Message.NewCount = NewCount;
+	Message.Delta = NewCount - OldCount;
+
+	UGameplayMessageSubsystem &MessageSystem = UGameplayMessageSubsystem::Get(OwnerComponent->GetWorld());
+	MessageSystem.BroadcastMessage(TAG_Inventory_Message_StackChanged, Message);
+}
+
+UInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount)
+{
+	UInventoryItemInstance* Result = nullptr;
 
 	check(ItemDef != nullptr);
 	// TODO: Why is this sometimes null???
- 	check(OwningComponent);
+	check(OwnerComponent);
 
-	AActor* OwningActor = OwningComponent->GetOwner();
+	AActor* OwningActor = OwnerComponent->GetOwner();
 	check(OwningActor->HasAuthority());
-	check(OwningComponent->GetOwner()->HasAuthority());
-	
-	TSubclassOf<AInventoryItemInstance> InstanceType = AInventoryItemInstance::StaticClass();
-	
+
+	TSubclassOf<UInventoryItemInstance> InstanceType = UInventoryItemInstance::StaticClass();
+
 	FInventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.Instance = NewObject<AInventoryItemInstance>(OwningComponent->GetOwner());  //@TODO: Using the actor instead of component as the outer due to UE-127172
+	NewEntry.Instance = NewObject<UInventoryItemInstance>(OwnerComponent->GetOwner()); //@TODO: Using the actor instead of component as the outer due to UE-127172
 	NewEntry.Instance->SetItemDef(ItemDef);
 
 	for (UInventoryItemFragment* Fragment : GetDefault<UInventoryItemDefinition>(ItemDef)->Fragments)
@@ -57,27 +72,12 @@ AInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefin
 	Result = NewEntry.Instance;
 
 	// MarkItemDirty(NewEntry);
+	BroadcastChangeMessage(Result, /*OldCount=*/0, /*NewCount=*/StackCount);
 
 	return Result;
 }
 
-TArray<AInventoryItemInstance*> FInventoryList::GetAllItems() const
-{
-	TArray<AInventoryItemInstance*> Results;
-	Results.Reserve(Entries.Num());
-
-	for (const FInventoryEntry& Entry : Entries)
-	{
-		if (Entry.Instance != nullptr) //@TODO: Would prefer to not deal with this here and hide it further?
-		{
-			Results.Add(Entry.Instance);
-		}
-	}
-
-	return Results;
-}
-
-void FInventoryList::RemoveEntry(AInventoryItemInstance *Instance)
+void FInventoryList::RemoveEntry(UInventoryItemInstance *Instance)
 {
 	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
 	{
@@ -92,6 +92,22 @@ void FInventoryList::RemoveEntry(AInventoryItemInstance *Instance)
 	}
 }
 
+TArray<UInventoryItemInstance *> FInventoryList::GetAllItems() const
+{
+	TArray<UInventoryItemInstance *> Results;
+	Results.Reserve(Entries.Num());
+
+	for (const FInventoryEntry &Entry : Entries)
+	{
+		if (Entry.Instance != nullptr) //@TODO: Would prefer to not deal with this here and hide it further?
+		{
+			Results.Add(Entry.Instance);
+		}
+	}
+
+	return Results;
+}
+
 //////////////////////////////////////////////////////////////////////
 // UInventoryManagerComponent
 
@@ -100,18 +116,19 @@ UInventoryManagerComponent::UInventoryManagerComponent(const FObjectInitializer&
 	, InventoryList(this)
 {
 	SetIsReplicatedByDefault(true);
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-void UInventoryManagerComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+void UInventoryManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, InventoryList);
 }
 
-AInventoryItemInstance* UInventoryManagerComponent::AddItem(TSubclassOf<UInventoryItemDefinition> ItemClass, int32 StackCount)
+UInventoryItemInstance* UInventoryManagerComponent::AddItem(TSubclassOf<UInventoryItemDefinition> ItemClass, int32 StackCount)
 {
-	AInventoryItemInstance* Result = nullptr;
+	UInventoryItemInstance* Result = nullptr;
 	if (ItemClass != nullptr)
 	{
 		Result = InventoryList.AddEntry(ItemClass, StackCount);
@@ -126,7 +143,7 @@ AInventoryItemInstance* UInventoryManagerComponent::AddItem(TSubclassOf<UInvento
 	return Result;
 }
 
-void UInventoryManagerComponent::RemoveItem(AInventoryItemInstance* ItemInstance)
+void UInventoryManagerComponent::RemoveItem(UInventoryItemInstance* ItemInstance)
 {
 	if (ItemInstance != nullptr)
 	{
@@ -139,7 +156,7 @@ void UInventoryManagerComponent::RemoveItem(AInventoryItemInstance* ItemInstance
 	}
 }
 
-TArray<AInventoryItemInstance*> UInventoryManagerComponent::GetAllItems() const
+TArray<UInventoryItemInstance*> UInventoryManagerComponent::GetAllItems() const
 {
 	return InventoryList.GetAllItems();
 }
@@ -150,7 +167,7 @@ bool UInventoryManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 
 	for (FInventoryEntry& Entry : InventoryList.Entries)
 	{
-		AInventoryItemInstance* Instance = Entry.Instance;
+		UInventoryItemInstance* Instance = Entry.Instance;
 
 		if (IsValid(Instance))
 		{
@@ -161,27 +178,41 @@ bool UInventoryManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 	return WroteSomething;
 }
 
-void UInventoryManagerComponent::InitializeComponent()
+UInventoryItemInstance* UInventoryManagerComponent::FindFirstItemStackByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const
 {
-	Super::InitializeComponent();
-}
-
-void UInventoryManagerComponent::UninitializeComponent()
-{
-	TArray<AInventoryItemInstance*> AllInventoryInstances;
-
-	// gathering all instances before removal to avoid side effects affecting the item list iterator
 	for (const FInventoryEntry& Entry : InventoryList.Entries)
 	{
-		AllInventoryInstances.Add(Entry.Instance);
+		UInventoryItemInstance* Instance = Entry.Instance;
+
+		if (IsValid(Instance))
+		{
+			if (Instance->GetItemDef() == ItemDef)
+			{
+				return Instance;
+			}
+		}
 	}
 
-	for (AInventoryItemInstance* ItemInstance : AllInventoryInstances)
+	return nullptr;
+}
+
+int32 UInventoryManagerComponent::GetTotalItemCountByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const
+{
+	int32 TotalCount = 0;
+	for (const FInventoryEntry& Entry : InventoryList.Entries)
 	{
-		RemoveItem(ItemInstance);
+		UInventoryItemInstance* Instance = Entry.Instance;
+
+		if (IsValid(Instance))
+		{
+			if (Instance->GetItemDef() == ItemDef)
+			{
+				++TotalCount;
+			}
+		}
 	}
 
-	Super::UninitializeComponent();
+	return TotalCount;
 }
 
 void UInventoryManagerComponent::ReadyForReplication()
@@ -193,7 +224,7 @@ void UInventoryManagerComponent::ReadyForReplication()
 	{
 		for (const FInventoryEntry& Entry : InventoryList.Entries)
 		{
-			AInventoryItemInstance* Instance = Entry.Instance;
+			UInventoryItemInstance* Instance = Entry.Instance;
 
 			if (IsValid(Instance))
 			{

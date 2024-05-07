@@ -29,6 +29,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	TArray<TObjectPtr<const UModularAbilitySet>> AbilitySetsToGrant;
 
+	// Flag that indicates if in order to be given the ability sets of this item, it must be drawn - as opposed to merely equipped
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	bool bIsPassive = false;
+
 	// Socket tag to attach the equipment to when not in active use (holstered)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Spawn Info", Meta = (Categories = "Equipment.Socket"))
 	FGameplayTag AttachSocket;

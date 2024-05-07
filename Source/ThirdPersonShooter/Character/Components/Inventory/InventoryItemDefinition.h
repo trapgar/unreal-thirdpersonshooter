@@ -8,7 +8,7 @@
 
 template <typename T> class TSubclassOf;
 
-class AInventoryItemInstance;
+class UInventoryItemInstance;
 struct FFrame;
 
 //////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ class THIRDPERSONSHOOTER_API UInventoryItemFragment : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void OnInstanceCreated(AInventoryItemInstance* Instance) const {}
+	virtual void OnInstanceCreated(UInventoryItemInstance* Instance) const {}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -61,4 +61,17 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display, Instanced)
 	TArray<TObjectPtr<UInventoryItemFragment>> Fragments;
+
+public:
+	const UInventoryItemFragment* FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const;
+};
+
+//@TODO: Make into a subsystem instead?
+UCLASS()
+class UInventoryFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+	UFUNCTION(BlueprintCallable, meta=(DeterminesOutputType=FragmentClass))
+	static const UInventoryItemFragment* FindItemDefinitionFragment(TSubclassOf<UInventoryItemDefinition> ItemDef, TSubclassOf<UInventoryItemFragment> FragmentClass);
 };

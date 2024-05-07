@@ -8,12 +8,12 @@
 
 class FLifetimeProperty;
 
-AInventoryItemInstance::AInventoryItemInstance(const FObjectInitializer& ObjectInitializer)
+UInventoryItemInstance::UInventoryItemInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
 
-void AInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
@@ -21,7 +21,7 @@ void AInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	DOREPLIFETIME(ThisClass, ItemDef);
 }
 
-void AInventoryItemInstance::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
+void UInventoryItemInstance::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
 {
 	if (StatTags.Contains(Tag))
 	{
@@ -33,7 +33,7 @@ void AInventoryItemInstance::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
 	}
 }
 
-void AInventoryItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCount)
+void UInventoryItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCount)
 {
 	if (StatTags.Contains(Tag) && StatTags[Tag] - StackCount > 0)
 	{
@@ -45,7 +45,7 @@ void AInventoryItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCou
 	}
 }
 
-int32 AInventoryItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
+int32 UInventoryItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
 {
 	if (StatTags.Contains(Tag))
 	{
@@ -57,12 +57,12 @@ int32 AInventoryItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
 	}
 }
 
-bool AInventoryItemInstance::HasStatTag(FGameplayTag Tag) const
+bool UInventoryItemInstance::HasStatTag(FGameplayTag Tag) const
 {
 	return StatTags.Contains(Tag);
 }
 
-void AInventoryItemInstance::SetItemDef(TSubclassOf<UInventoryItemDefinition> InDef)
+void UInventoryItemInstance::SetItemDef(TSubclassOf<UInventoryItemDefinition> InDef)
 {
 	ItemDef = InDef;
 }

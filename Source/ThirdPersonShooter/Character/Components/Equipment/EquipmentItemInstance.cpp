@@ -22,6 +22,12 @@ void AEquipmentItemInstance::PreInitializeComponents()
 	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
+void AEquipmentItemInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
+	Super::EndPlay(EndPlayReason);
+}
+
 APawn *AEquipmentItemInstance::GetPawn() const
 {
 	return Cast<APawn>(GetOuter());
@@ -42,16 +48,56 @@ APawn *AEquipmentItemInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
 
 void AEquipmentItemInstance::OnEquipped()
 {
-	// Let others know a reset has occurred
-	// FLyraPlayerResetMessage Message;
-	// Message.OwnerPlayerState = CurrentActorInfo->OwnerActor.Get();
-	// UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
-	// MessageSystem.BroadcastMessage(LyraGameplayTags::GameplayEvent_Reset, Message);
-
 	K2_OnEquipped();
 }
 
 void AEquipmentItemInstance::OnUnequipped()
 {
 	K2_OnUnequipped();
+}
+
+void AEquipmentItemInstance::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
+{
+	if (StatTags.Contains(Tag))
+	{
+		StatTags.Add(Tag, StatTags[Tag] + StackCount);
+	}
+	else
+	{
+		StatTags.Add(Tag, StackCount);
+	}
+}
+
+void AEquipmentItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCount)
+{
+	if (StatTags.Contains(Tag) && StatTags[Tag] - StackCount > 0)
+	{
+		StatTags.Add(Tag, StatTags[Tag] - StackCount);
+	}
+	else
+	{
+		StatTags.Remove(Tag);
+	}
+}
+
+int32 AEquipmentItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
+{
+	if (StatTags.Contains(Tag))
+	{
+		return StatTags[Tag];
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+bool AEquipmentItemInstance::HasStatTag(FGameplayTag Tag) const
+{
+	return StatTags.Contains(Tag);
+}
+
+void AEquipmentItemInstance::SetItemDef(TSubclassOf<UEquipmentItemDefinition> InDef)
+{
+	ItemDef = InDef;
 }

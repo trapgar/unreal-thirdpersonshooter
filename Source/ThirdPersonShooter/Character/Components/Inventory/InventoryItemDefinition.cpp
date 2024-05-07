@@ -14,3 +14,31 @@ UInventoryItemDefinition::UInventoryItemDefinition(const FObjectInitializer& Obj
 	: Super(ObjectInitializer)
 {
 }
+
+const UInventoryItemFragment* UInventoryItemDefinition::FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const
+{
+	if (FragmentClass != nullptr)
+	{
+		for (UInventoryItemFragment* Fragment : Fragments)
+		{
+			if (Fragment && Fragment->IsA(FragmentClass))
+			{
+				return Fragment;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////
+// UInventoryItemDefinition
+
+const UInventoryItemFragment* UInventoryFunctionLibrary::FindItemDefinitionFragment(TSubclassOf<UInventoryItemDefinition> ItemDef, TSubclassOf<UInventoryItemFragment> FragmentClass)
+{
+	if ((ItemDef != nullptr) && (FragmentClass != nullptr))
+	{
+		return GetDefault<UInventoryItemDefinition>(ItemDef)->FindFragmentByClass(FragmentClass);
+	}
+	return nullptr;
+}

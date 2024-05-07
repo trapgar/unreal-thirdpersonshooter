@@ -14,7 +14,7 @@ struct FFrame;
 /**
  * FEquipmentConfigurationEntry
  *
- *	Struct used to map a gameplay socket tag to a Skeletal socket name.
+ *	Struct used to map a Gameplay Tag to a Skeletal socket name.
  */
 USTRUCT(BlueprintType)
 struct FEquipmentConfigurationEntry
@@ -23,9 +23,11 @@ struct FEquipmentConfigurationEntry
 
 public:
 
+	// The Gameplay Tag of the socket
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "Equipment.Socket"))
 	FGameplayTag SocketTag;
 
+	// The name of the socket on the skeleton.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName SocketName;
 };

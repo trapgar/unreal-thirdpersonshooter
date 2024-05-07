@@ -1,23 +1,43 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/PawnComponent.h"
+#include "Components/ActorComponent.h"
 // #include "Net/Serialization/FastArraySerializer.h"
 #include "InventoryItemDefinition.h"
 #include "InventoryItemInstance.h"
 
 #include "InventoryManagerComponent.generated.h"
 
-class AInventoryItemInstance;
+class UInventoryItemInstance;
+struct FInventoryList;
 
-/** A single piece of applied equipment */
+/** A message when an item is added to the inventory */
+USTRUCT(BlueprintType)
+struct FInventoryChangedMessage
+{
+	GENERATED_BODY()
+
+	//@TODO: Tag based names+owning actors for inventories instead of directly exposing the component?
+	UPROPERTY(BlueprintReadOnly, Category = Inventory)
+	TObjectPtr<UActorComponent> InventoryOwner = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category = Inventory)
+	TObjectPtr<UInventoryItemInstance> Instance = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category = Inventory)
+	int32 NewCount = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Inventory)
+	int32 Delta = 0;
+};
+
+/** A single inventory stack */
 USTRUCT(BlueprintType)
 struct FInventoryEntry
 {
 	GENERATED_BODY()
 
-	FInventoryEntry()
-	{}
+	FInventoryEntry() {}
 
 	FString GetDebugString() const;
 
@@ -30,7 +50,7 @@ private:
 	int32 StackCount = 0;
 
 	UPROPERTY()
-	TObjectPtr<AInventoryItemInstance> Instance = nullptr;
+	TObjectPtr<UInventoryItemInstance> Instance = nullptr;
 };
 
 /** List of inventory items */
@@ -40,38 +60,39 @@ struct FInventoryList
 	GENERATED_BODY()
 
 	FInventoryList()
-		: OwningComponent(nullptr)
+		: OwnerComponent(nullptr)
 	{
 	}
 
-	FInventoryList(UPawnComponent* InOwningComponent)
-		: OwningComponent(InOwningComponent)
+	FInventoryList(UActorComponent *InOwningComponent)
+		: OwnerComponent(InOwningComponent)
 	{
 	}
 
 public:
+	TArray<UInventoryItemInstance *> GetAllItems() const;
 
-	TArray<AInventoryItemInstance*> GetAllItems() const;
+	UInventoryItemInstance *AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount);
+	void RemoveEntry(UInventoryItemInstance *Instance);
 
-	AInventoryItemInstance* AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount);
-	void RemoveEntry(AInventoryItemInstance* Instance);
-
-	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
+	bool NetDeltaSerialize(FNetDeltaSerializeInfo &DeltaParms)
 	{
 		return false;
 	}
 
 private:
+	void BroadcastChangeMessage(UInventoryItemInstance *Entry, int32 OldCount, int32 NewCount);
+
+private:
 	friend UInventoryManagerComponent;
 
 private:
-
 	// Replicated list of equipment entries
 	UPROPERTY()
 	TArray<FInventoryEntry> Entries;
 
 	UPROPERTY(NotReplicated)
-	TObjectPtr<UPawnComponent> OwningComponent;
+	TObjectPtr<UActorComponent> OwnerComponent;
 };
 
 template<>
@@ -80,8 +101,9 @@ struct TStructOpsTypeTraits<FInventoryList> : public TStructOpsTypeTraitsBase2<F
 	enum { WithNetDeltaSerializer = true };
 };
 
-UCLASS(BlueprintType, Const)
-class THIRDPERSONSHOOTER_API UInventoryManagerComponent : public UPawnComponent
+// Manages inventory held by a pawn
+UCLASS(Blueprintable, BlueprintType)
+class THIRDPERSONSHOOTER_API UInventoryManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -90,24 +112,24 @@ public:
 	UInventoryManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
-	AInventoryItemInstance* AddItem(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount = 1);
+	UInventoryItemInstance* AddItem(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount = 1);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
-	void RemoveItem(AInventoryItemInstance* ItemInstance);
+	void RemoveItem(UInventoryItemInstance* ItemInstance);
 
 	UFUNCTION(BlueprintCallable, Category=Inventory, BlueprintPure=false)
-	TArray<AInventoryItemInstance*> GetAllItems() const;
+	TArray<UInventoryItemInstance*> GetAllItems() const;
 
+	UFUNCTION(BlueprintCallable, Category=Inventory, BlueprintPure)
+	UInventoryItemInstance* FindFirstItemStackByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
+
+	int32 GetTotalItemCountByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
+
+protected:
 	//~UObject interface
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
-	//~End of UObject interface
-
-	//~UActorComponent interface
-	//virtual void EndPlay() override;
-	virtual void InitializeComponent() override;
-	virtual void UninitializeComponent() override;
 	virtual void ReadyForReplication() override;
-	//~End of UActorComponent interface
+	//~End of UObject interface
 
 private:
 	// Array to store the inventory items

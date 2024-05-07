@@ -5,19 +5,20 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Engine/ActorChannel.h"
-// #include "EquipmentItemDefinition.h"
-// #include "EquipmentItemInstance.h"
+#include "EquipmentItemDefinition.h"
+#include "EquipmentItemInstance.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
-#include "Character/Components/Inventory/InventoryFragment_EquippableItem.h"
 #include "NativeGameplayTags.h"
 #include "Net/UnrealNetwork.h"
+#include "CustomLogChannels.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EquipmentManagerComponent)
 
 class FLifetimeProperty;
 struct FReplicationFlags;
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_SlotsChanged, "Equipment.Message.SlotsChanged");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
 
 //////////////////////////////////////////////////////////////////////
@@ -25,11 +26,23 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipme
 
 FString FAppliedEquipmentEntry::GetDebugString() const
 {
-	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(EquipmentDefinition.Get()));
+	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(Instance->GetItemDef()));
 }
 
 //////////////////////////////////////////////////////////////////////
 // FEquipmentList
+
+void FEquipmentList::BroadcastChangeMessage(AEquipmentItemInstance* Instance, int32 OldCount, int32 NewCount)
+{
+	FEquipmentChangedMessage Message;
+	Message.EquipmentOwner = OwnerComponent;
+	Message.Instance = Instance;
+	Message.NewCount = NewCount;
+	Message.Delta = NewCount - OldCount;
+
+	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(OwnerComponent->GetWorld());
+	MessageSystem.BroadcastMessage(TAG_Equipment_Message_StackChanged, Message);
+}
 
 UAbilitySystemComponent* FEquipmentList::GetAbilitySystemComponent() const
 {
@@ -43,32 +56,80 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	AEquipmentItemInstance* Result = nullptr;
 
 	check(EquipmentDefinition != nullptr);
- 	check(OwnerComponent);
-	check(OwnerComponent->GetOwner()->HasAuthority());
-	
+	check(OwnerComponent);
+	AActor* Owner = OwnerComponent->GetOwner();
+	check(Owner->HasAuthority());
+	UWorld* World = Owner->GetWorld();
+	check(World);
+
 	const UEquipmentItemDefinition* EquipmentCDO = GetDefault<UEquipmentItemDefinition>(EquipmentDefinition);
 
+	// If for some reason the equipment class isn't set, use the default (NOTE: I think this is abstract so idk if this will break?)
 	TSubclassOf<AEquipmentItemInstance> InstanceType = EquipmentCDO->InstanceType;
 	if (InstanceType == nullptr)
 	{
 		InstanceType = AEquipmentItemInstance::StaticClass();
 	}
-	
-	FAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.EquipmentDefinition = EquipmentDefinition;
-	NewEntry.Instance = NewObject<AEquipmentItemInstance>(OwnerComponent->GetOwner(), InstanceType);  //@TODO: Using the actor instead of component as the outer due to UE-127172
-	Result = NewEntry.Instance;
 
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	FTransform SpawnTransform = Owner->GetActorTransform();
+	USceneComponent* Attachee = Owner->GetRootComponent();
+	FName SocketName = "weapon_back_shoulder_l";
+
+	// Find the skeletal mesh to attach to
+	// NOTE: Unreal recommends not attaching directly to the SKM, but instead with it's own animations
+	if (USkeletalMeshComponent* Skele = Owner->GetComponentByClass<USkeletalMeshComponent>())
 	{
-		for (auto AbilitySet : EquipmentCDO->AbilitySetsToGrant)
+		Attachee = Skele;
+		FTransform SkeleTransform = Skele->GetComponentTransform();
+
+		if (EquipmentCDO->AttachTransform.IsValid())
 		{
-			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &NewEntry.GrantedHandles, Result);
+			// TODO: Get the socket name from a lookup table
+			FTransform SocketTransform = Skele->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_Actor);
+			SpawnTransform = EquipmentCDO->AttachTransform.GetRelativeTransform(SocketTransform);
+		}
+		else
+		{
+			SpawnTransform = SkeleTransform;
 		}
 	}
-	else
+	
+	FActorSpawnParameters SpawnInfo;
+
+	if (APawn* Instigator = Cast<APawn>(Owner))
 	{
-		//@TODO: Warning logging?
+		SpawnInfo.Instigator = Instigator;
+	}
+
+	FAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
+	NewEntry.Instance = World->SpawnActor<AEquipmentItemInstance>(InstanceType, SpawnTransform, SpawnInfo); //@TODO: Using the actor instead of component as the outer due to UE-127172
+	NewEntry.Instance->SetItemDef(EquipmentDefinition);
+	Result = NewEntry.Instance;
+
+	// Attach to the appropriate socket if valid
+	if (EquipmentCDO->AttachSocket.IsValid())
+	{
+		// TODO: Get the socket name from a lookup table
+		if (NewEntry.Instance->AttachToComponent(Attachee, FAttachmentTransformRules::KeepRelativeTransform, SocketName))
+		{
+			NewEntry.Instance->SetActorHiddenInGame(false);
+		}
+		else
+		{
+			UE_LOG(LogEquipment, Warning, TEXT("Failed to attach equipment %s to %s - most likely SKM was not found."), *EquipmentCDO->GetName(), *Attachee->GetName());
+		}
+	}
+
+	// Only passive items give their abilities on equip
+	if (EquipmentCDO->bIsPassive)
+	{
+		if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+		{
+			for (auto AbilitySet : EquipmentCDO->AbilitySetsToGrant)
+			{
+				AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &NewEntry.GrantedHandles, Result);
+			}
+		}
 	}
 
 	// MarkItemDirty(NewEntry);
@@ -96,24 +157,41 @@ void FEquipmentList::RemoveEntry(AEquipmentItemInstance* Instance)
 	}
 }
 
+TArray<AEquipmentItemInstance*> FEquipmentList::GetAllItems() const
+{
+	TArray<AEquipmentItemInstance*> Results;
+	Results.Reserve(Entries.Num());
+
+	for (const FAppliedEquipmentEntry& Entry : Entries)
+	{
+		if (Entry.Instance != nullptr) //@TODO: Would prefer to not deal with this here and hide it further?
+		{
+			Results.Add(Entry.Instance);
+		}
+	}
+
+	return Results;
+}
+
 //////////////////////////////////////////////////////////////////////
 // UEquipmentManagerComponent
 
 UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
+	, EquipmentList(this)
 {
 	SetIsReplicatedByDefault(true);
-	bWantsInitializeComponent = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-void UEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+void UEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, EquipmentList);
 }
 
-AEquipmentItemInstance* UEquipmentManagerComponent::EquipItem(TSubclassOf<UEquipmentItemDefinition> EquipmentClass)
+AEquipmentItemInstance* UEquipmentManagerComponent::AddItem(TSubclassOf<UEquipmentItemDefinition> EquipmentClass)
 {
 	AEquipmentItemInstance* Result = nullptr;
 	if (EquipmentClass != nullptr)
@@ -132,7 +210,7 @@ AEquipmentItemInstance* UEquipmentManagerComponent::EquipItem(TSubclassOf<UEquip
 	return Result;
 }
 
-void UEquipmentManagerComponent::UnequipItem(AEquipmentItemInstance* ItemInstance)
+void UEquipmentManagerComponent::RemoveItem(AEquipmentItemInstance* ItemInstance)
 {
 	if (ItemInstance != nullptr)
 	{
@@ -144,6 +222,11 @@ void UEquipmentManagerComponent::UnequipItem(AEquipmentItemInstance* ItemInstanc
 		ItemInstance->OnUnequipped();
 		EquipmentList.RemoveEntry(ItemInstance);
 	}
+}
+
+TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetAllItems() const
+{
+	return EquipmentList.GetAllItems();
 }
 
 bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -164,7 +247,7 @@ bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 }
 
 void UEquipmentManagerComponent::InitializeComponent()
-{
+{	
 	Super::InitializeComponent();
 }
 
@@ -178,9 +261,9 @@ void UEquipmentManagerComponent::UninitializeComponent()
 		AllEquipmentInstances.Add(Entry.Instance);
 	}
 
-	for (AEquipmentItemInstance* EquipInstance : AllEquipmentInstances)
+	for (AEquipmentItemInstance* ItemInstance : AllEquipmentInstances)
 	{
-		UnequipItem(EquipInstance);
+		RemoveItem(ItemInstance);
 	}
 
 	Super::UninitializeComponent();
@@ -244,7 +327,6 @@ void UEquipmentManagerComponent::AddItemToSlot(int32 SlotIndex, AEquipmentItemIn
 		if (Slots[SlotIndex] == nullptr)
 		{
 			Slots[SlotIndex] = Item;
-			OnRep_Slots();
 		}
 	}
 }
@@ -253,12 +335,6 @@ AEquipmentItemInstance* UEquipmentManagerComponent::RemoveItemFromSlot(int32 Slo
 {
 	AEquipmentItemInstance* Result = nullptr;
 
-	if (ActiveSlotIndex == SlotIndex)
-	{
-		UnequipItem();
-		ActiveSlotIndex = -1;
-	}
-
 	if (Slots.IsValidIndex(SlotIndex))
 	{
 		Result = Slots[SlotIndex];
@@ -266,59 +342,35 @@ AEquipmentItemInstance* UEquipmentManagerComponent::RemoveItemFromSlot(int32 Slo
 		if (Result != nullptr)
 		{
 			Slots[SlotIndex] = nullptr;
-			OnRep_Slots();
 		}
 	}
 
 	return Result;
 }
 
-void UEquipmentManagerComponent::OnRep_Slots()
+AEquipmentItemInstance* UEquipmentManagerComponent::DrawItemInSlot(int32 SlotIndex)
 {
-	FEquipmentSlotsChangedMessage Message;
-	Message.Owner = GetOwner<APawn>();
-	Message.Slots = Slots;
+	if (Slots.IsValidIndex(SlotIndex))
+	{
+		AEquipmentItemInstance* Result = Slots[SlotIndex];
 
-	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
-	MessageSystem.BroadcastMessage(TAG_Equipment_Message_SlotsChanged, Message);
+		// TODO
+
+		return Result;
+	}
+
+	return nullptr;
 }
 
-void UEquipmentManagerComponent::OnRep_ActiveSlotIndex()
+void UEquipmentManagerComponent::HolsterItemInSlot(int32 SlotIndex)
 {
-	FEquipmentActiveIndexChangedMessage Message;
-	Message.Owner = GetOwner<APawn>();
-	Message.ActiveIndex = ActiveSlotIndex;
-
-	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
-	MessageSystem.BroadcastMessage(TAG_Equipment_Message_ActiveIndexChanged, Message);
+	if (Slots.IsValidIndex(SlotIndex))
+	{
+		// TODO
+	}
 }
 
-void UEquipmentManagerComponent::EquipItem()
+const bool UEquipmentFunctionLibrary::IsActive(FAppliedEquipmentEntry Entry)
 {
-	// check(Slots.IsValidIndex(ActiveSlotIndex));
-	// check(EquippedItem == nullptr);
-
-	// if (ULyraInventoryItemInstance* SlotItem = Slots[ActiveSlotIndex])
-	// {
-	// 	if (const UInventoryFragment_EquippableItem* EquipInfo = SlotItem->FindFragmentByClass<UInventoryFragment_EquippableItem>())
-	// 	{
-	// 		TSubclassOf<ULyraEquipmentDefinition> EquipDef = EquipInfo->EquipmentDefinition;
-	// 		if (EquipDef != nullptr)
-	// 		{
-	// 			if (ULyraEquipmentManagerComponent* EquipmentManager = FindEquipmentManager())
-	// 			{
-	// 				EquippedItem = EquipmentManager->EquipItem(EquipDef);
-	// 				if (EquippedItem != nullptr)
-	// 				{
-	// 					EquippedItem->SetInstigator(SlotItem);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-}
-
-void UEquipmentManagerComponent::UnequipItem()
-{
-	
+	return Entry.IsActive();
 }
