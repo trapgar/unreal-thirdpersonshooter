@@ -3,7 +3,6 @@
 #include "EquipmentManagerComponent.h"
 
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
 #include "Engine/ActorChannel.h"
 #include "EquipmentItemDefinition.h"
 #include "EquipmentItemInstance.h"
@@ -22,15 +21,45 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_StackChanged, "Equipment.Mes
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
 
 //////////////////////////////////////////////////////////////////////
-// FAppliedEquipmentEntry
+// FEquipmentEntry
 
-FString FAppliedEquipmentEntry::GetDebugString() const
+FString FEquipmentEntry::GetDebugString() const
 {
 	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(Instance->GetItemDef()));
 }
+void FEquipmentEntry::Apply()
+{
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		const UEquipmentItemDefinition* EquipmentCDO = GetDefault<UEquipmentItemDefinition>(Instance->GetItemDef());
+		for (auto AbilitySet : EquipmentCDO->AbilitySetsToGrant)
+		{
+			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &GrantedHandles, Instance);
+		}
+	}
+	else
+	{
+		UE_LOG(LogEquipment, Warning, TEXT("Cannot grant abilities from %s when the UAbilitySystemComponent is missing."), *GetNameSafe(Instance));
+	}
 
-//////////////////////////////////////////////////////////////////////
-// FEquipmentList
+	bIsApplied = true;
+	Instance->OnEquipped();
+}
+
+void FEquipmentEntry::Unapply()
+{
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		GrantedHandles.TakeFromAbilitySystem(ASC);
+	}
+	else
+	{
+		UE_LOG(LogEquipment, Warning, TEXT("Cannot remove abilities from %s when the UAbilitySystemComponent is missing."), *GetNameSafe(Instance));
+	}
+
+	bIsApplied = false;
+	Instance->OnUnequipped();
+}
 
 void FEquipmentList::BroadcastChangeMessage(AEquipmentItemInstance* Instance, int32 OldCount, int32 NewCount)
 {
@@ -42,13 +71,6 @@ void FEquipmentList::BroadcastChangeMessage(AEquipmentItemInstance* Instance, in
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(OwnerComponent->GetWorld());
 	MessageSystem.BroadcastMessage(TAG_Equipment_Message_StackChanged, Message);
-}
-
-UAbilitySystemComponent* FEquipmentList::GetAbilitySystemComponent() const
-{
-	check(OwnerComponent);
-	AActor* OwningActor = OwnerComponent->GetOwner();
-	return Cast<UAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningActor));
 }
 
 AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition)
@@ -95,13 +117,14 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	}
 	
 	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Owner = Owner;
 
 	if (APawn* Instigator = Cast<APawn>(Owner))
 	{
 		SpawnInfo.Instigator = Instigator;
 	}
 
-	FAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
+	FEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
 	NewEntry.Instance = World->SpawnActor<AEquipmentItemInstance>(InstanceType, SpawnTransform, SpawnInfo); //@TODO: Using the actor instead of component as the outer due to UE-127172
 	NewEntry.Instance->SetItemDef(EquipmentDefinition);
 	Result = NewEntry.Instance;
@@ -123,13 +146,7 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	// Only passive items give their abilities on equip
 	if (EquipmentCDO->bIsPassive)
 	{
-		if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-		{
-			for (auto AbilitySet : EquipmentCDO->AbilitySetsToGrant)
-			{
-				AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &NewEntry.GrantedHandles, Result);
-			}
-		}
+		NewEntry.Apply();
 	}
 
 	// MarkItemDirty(NewEntry);
@@ -141,18 +158,43 @@ void FEquipmentList::RemoveEntry(AEquipmentItemInstance* Instance)
 {
 	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
 	{
-		FAppliedEquipmentEntry& Entry = *EntryIt;
+		FEquipmentEntry& Entry = *EntryIt;
 		if (Entry.Instance == Instance)
 		{
-			if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-			{
-				Entry.GrantedHandles.TakeFromAbilitySystem(ASC);
-			}
-
+			Entry.Unapply();
 			Instance->Destroy();
-
 			EntryIt.RemoveCurrent();
 			// MarkArrayDirty();
+		}
+	}
+}
+
+bool FEquipmentList::ApplyEntry(AEquipmentItemInstance* Instance)
+{
+	bool bApplied = false;
+
+	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
+	{
+		FEquipmentEntry& Entry = *EntryIt;
+		if (Entry.Instance == Instance && !Entry.IsApplied())
+		{
+			Entry.Apply();
+			bApplied = true;
+			return bApplied;
+		}
+	}
+
+	return bApplied;
+}
+
+void FEquipmentList::UnapplyEntry(AEquipmentItemInstance* Instance)
+{
+	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
+	{
+		FEquipmentEntry& Entry = *EntryIt;
+		if (Entry.Instance == Instance && Entry.IsApplied())
+		{
+			Entry.Unapply();
 		}
 	}
 }
@@ -162,7 +204,7 @@ TArray<AEquipmentItemInstance*> FEquipmentList::GetAllItems() const
 	TArray<AEquipmentItemInstance*> Results;
 	Results.Reserve(Entries.Num());
 
-	for (const FAppliedEquipmentEntry& Entry : Entries)
+	for (const FEquipmentEntry& Entry : Entries)
 	{
 		if (Entry.Instance != nullptr) //@TODO: Would prefer to not deal with this here and hide it further?
 		{
@@ -182,6 +224,12 @@ UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer&
 {
 	SetIsReplicatedByDefault(true);
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+
+	// Make sure to initialize the slots array
+	if (Slots.Num() < NumSlots)
+	{
+		Slots.AddDefaulted(NumSlots - Slots.Num());
+	}
 }
 
 void UEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -194,19 +242,19 @@ void UEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 AEquipmentItemInstance* UEquipmentManagerComponent::AddItem(TSubclassOf<UEquipmentItemDefinition> EquipmentClass)
 {
 	AEquipmentItemInstance* Result = nullptr;
+
 	if (EquipmentClass != nullptr)
 	{
 		Result = EquipmentList.AddEntry(EquipmentClass);
 		if (Result != nullptr)
 		{
-			Result->OnEquipped();
-
 			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
 			{
 				AddReplicatedSubObject(Result);
 			}
 		}
 	}
+
 	return Result;
 }
 
@@ -219,7 +267,6 @@ void UEquipmentManagerComponent::RemoveItem(AEquipmentItemInstance* ItemInstance
 			RemoveReplicatedSubObject(ItemInstance);
 		}
 
-		ItemInstance->OnUnequipped();
 		EquipmentList.RemoveEntry(ItemInstance);
 	}
 }
@@ -233,7 +280,7 @@ bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 {
 	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 
-	for (FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+	for (FEquipmentEntry& Entry : EquipmentList.Entries)
 	{
 		AEquipmentItemInstance* Instance = Entry.Instance;
 
@@ -247,7 +294,7 @@ bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 }
 
 void UEquipmentManagerComponent::InitializeComponent()
-{	
+{
 	Super::InitializeComponent();
 }
 
@@ -256,7 +303,7 @@ void UEquipmentManagerComponent::UninitializeComponent()
 	TArray<AEquipmentItemInstance*> AllEquipmentInstances;
 
 	// gathering all instances before removal to avoid side effects affecting the equipment list iterator	
-	for (const FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+	for (const FEquipmentEntry& Entry : EquipmentList.Entries)
 	{
 		AllEquipmentInstances.Add(Entry.Instance);
 	}
@@ -276,7 +323,7 @@ void UEquipmentManagerComponent::ReadyForReplication()
 	// Register existing EquipmentInstances
 	if (IsUsingRegisteredSubObjectList())
 	{
-		for (const FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+		for (const FEquipmentEntry& Entry : EquipmentList.Entries)
 		{
 			AEquipmentItemInstance* Instance = Entry.Instance;
 
@@ -290,7 +337,7 @@ void UEquipmentManagerComponent::ReadyForReplication()
 
 AEquipmentItemInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubclassOf<AEquipmentItemInstance> InstanceType)
 {
-	for (FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+	for (FEquipmentEntry& Entry : EquipmentList.Entries)
 	{
 		if (AEquipmentItemInstance* Instance = Entry.Instance)
 		{
@@ -307,7 +354,8 @@ AEquipmentItemInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubc
 TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const
 {
 	TArray<AEquipmentItemInstance*> Results;
-	for (const FAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+
+	for (const FEquipmentEntry& Entry : EquipmentList.Entries)
 	{
 		if (AEquipmentItemInstance* Instance = Entry.Instance)
 		{
@@ -317,7 +365,20 @@ TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetEquipmentInstance
 			}
 		}
 	}
+
 	return Results;
+}
+
+AEquipmentItemInstance *UEquipmentManagerComponent::GetItemInSlot(int32 SlotIndex)
+{
+	AEquipmentItemInstance* Result = nullptr;
+
+	if (Slots.IsValidIndex(SlotIndex))
+	{
+		Result = Slots[SlotIndex];
+	}
+
+	return Result;
 }
 
 void UEquipmentManagerComponent::AddItemToSlot(int32 SlotIndex, AEquipmentItemInstance* Item)
@@ -352,11 +413,12 @@ AEquipmentItemInstance* UEquipmentManagerComponent::DrawItemInSlot(int32 SlotInd
 {
 	if (Slots.IsValidIndex(SlotIndex))
 	{
-		AEquipmentItemInstance* Result = Slots[SlotIndex];
+		if (AEquipmentItemInstance* Result = Slots[SlotIndex])
+		{
+			EquipmentList.ApplyEntry(Result);
 
-		// TODO
-
-		return Result;
+			return Result;
+		}
 	}
 
 	return nullptr;
@@ -366,11 +428,9 @@ void UEquipmentManagerComponent::HolsterItemInSlot(int32 SlotIndex)
 {
 	if (Slots.IsValidIndex(SlotIndex))
 	{
-		// TODO
+		if (AEquipmentItemInstance* Result = Slots[SlotIndex])
+		{
+			EquipmentList.UnapplyEntry(Result);
+		}
 	}
-}
-
-const bool UEquipmentFunctionLibrary::IsActive(FAppliedEquipmentEntry Entry)
-{
-	return Entry.IsActive();
 }

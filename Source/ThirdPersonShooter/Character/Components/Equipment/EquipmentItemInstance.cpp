@@ -30,7 +30,7 @@ void AEquipmentItemInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 APawn *AEquipmentItemInstance::GetPawn() const
 {
-	return Cast<APawn>(GetOuter());
+	return Cast<APawn>(GetInstigator());
 }
 
 APawn *AEquipmentItemInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
@@ -38,9 +38,9 @@ APawn *AEquipmentItemInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
 	APawn *Result = nullptr;
 	if (UClass *ActualPawnType = PawnType)
 	{
-		if (GetOuter()->IsA(ActualPawnType))
+		if (GetInstigator()->IsA(ActualPawnType))
 		{
-			Result = Cast<APawn>(GetOuter());
+			Result = Cast<APawn>(GetInstigator());
 		}
 	}
 	return Result;

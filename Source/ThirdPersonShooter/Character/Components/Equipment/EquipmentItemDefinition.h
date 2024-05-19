@@ -29,7 +29,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	TArray<TObjectPtr<const UModularAbilitySet>> AbilitySetsToGrant;
 
-	// Flag that indicates if in order to be given the ability sets of this item, it must be drawn - as opposed to merely equipped
+	// Flag that indicates if the ability sets of this item are applied on equip, or on draw
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	bool bIsPassive = false;
 

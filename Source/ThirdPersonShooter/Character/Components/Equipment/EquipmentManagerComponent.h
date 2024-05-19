@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 // #include "Net/Serialization/FastArraySerializer.h"
 #include "EquipmentItemDefinition.h"
 #include "EquipmentItemInstance.h"
@@ -54,15 +56,19 @@ struct FEquipmentActiveIndexChangedMessage
 
 /** A single piece of applied equipment */
 USTRUCT(BlueprintType)
-struct FAppliedEquipmentEntry
+struct FEquipmentEntry
 {
 	GENERATED_BODY()
 
-	FAppliedEquipmentEntry() {}
+	FEquipmentEntry() {}
 
 	FString GetDebugString() const;
 
-	bool IsActive() const { return bIsActive; }
+	bool IsApplied() const { return bIsApplied; }
+	void Apply();
+	void Unapply();
+
+	UAbilitySystemComponent* GetAbilitySystemComponent() const { return Cast<UAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Instance->GetOwner())); }
 
 private:
 	friend FEquipmentList;
@@ -75,8 +81,8 @@ private:
 	UPROPERTY(NotReplicated)
 	FModularAbilitySet_GrantedHandles GrantedHandles;
 
-	// Flag indicating if the equipment is active vs holstered
-	bool bIsActive = false;
+	// Flag indicating if the equipment is 'applied' (e.g.: active vs holstered)
+	bool bIsApplied = false;
 };
 
 /** List of applied equipment */
@@ -102,13 +108,15 @@ public:
 
 	void RemoveEntry(AEquipmentItemInstance* Instance);
 
+	// Returns true if the entry was previously unapplied, false otherwise
+	bool ApplyEntry(AEquipmentItemInstance* Instance);
+
+	void UnapplyEntry(AEquipmentItemInstance* Instance);
+
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 	{
 		return false;
 	}
-
-private:
-	UAbilitySystemComponent* GetAbilitySystemComponent() const;
 
 private:
 	void BroadcastChangeMessage(AEquipmentItemInstance* Entry, int32 OldCount, int32 NewCount);
@@ -119,7 +127,7 @@ private:
 private:
 	// Replicated list of equipment entries
 	UPROPERTY()
-	TArray<FAppliedEquipmentEntry> Entries;
+	TArray<FEquipmentEntry> Entries;
 
 	UPROPERTY(NotReplicated)
 	TObjectPtr<UActorComponent> OwnerComponent;
@@ -170,23 +178,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
 	TArray<AEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const;
 
+	// Gets the item in the given slot index
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category=Equipment)
+	AEquipmentItemInstance* GetItemInSlot(int32 SlotIndex);
+
 	// Adds an item to the given slot index
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	UFUNCTION(BlueprintCallable, Category=Equipment)
 	void AddItemToSlot(int32 SlotIndex, AEquipmentItemInstance* Item);
 
 	// Removes an item from the given slot index
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	UFUNCTION(BlueprintCallable, Category=Equipment)
 	AEquipmentItemInstance* RemoveItemFromSlot(int32 SlotIndex);
 
 	// Draws the item in the given slot index
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
+	UFUNCTION(BlueprintCallable, Category=Equipment)
 	AEquipmentItemInstance* DrawItemInSlot(int32 SlotIndex);
 
 	// Holsters the item in the given slot index
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
+	UFUNCTION(BlueprintCallable, Category=Equipment)
 	void HolsterItemInSlot(int32 SlotIndex);
 
 protected:
+	// Number that controls the max number of quickslots we have (e.g.: IA_QuickbarSlot 1-5 will try to draw an item)
+	UPROPERTY()
+	int32 NumSlots = 5;
+
 	//~UObject interface
 	virtual void InitializeComponent() override;
 	virtual void UninitializeComponent() override;
@@ -204,13 +220,3 @@ private:
 
 };
 
-//@TODO: Make into a subsystem instead?
-UCLASS()
-class UEquipmentFunctionLibrary : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-
-	// Returns a flag indicating if the equipment is active or holstered
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static const bool IsActive(FAppliedEquipmentEntry Entry);
-};

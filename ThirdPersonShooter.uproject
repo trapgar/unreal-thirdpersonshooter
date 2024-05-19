@@ -58,6 +58,10 @@
 		{
 			"Name": "InventoryAndEquipment",
 			"Enabled": true
+		},
+		{
+			"Name": "Chooser",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
