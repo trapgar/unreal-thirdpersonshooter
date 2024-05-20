@@ -8,6 +8,20 @@
 
 #include "EquipmentItemDefinition.generated.h"
 
+//////////////////////////////////////////////////////////////////////
+
+// Represents a fragment of an item definition
+UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
+class THIRDPERSONSHOOTER_API UEquipmentItemFragment : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual void OnInstanceCreated(AEquipmentItemInstance* Instance) const {}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /**
  * UEquipmentItemDefinition
  *
@@ -33,12 +47,31 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	bool bIsPassive = false;
 
-	// Socket tag to attach the equipment to when not in active use (holstered)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Spawn Info", Meta = (Categories = "Equipment.Socket"))
-	FGameplayTag AttachSocket;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Attributes, Instanced)
+	TArray<TObjectPtr<UEquipmentItemFragment>> Fragments;
 
-	// Transform to apply to the equipment when attached to the socket
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Spawn Info")
-	FTransform AttachTransform;
+public:
+	const UEquipmentItemFragment* FindFragmentByClass(TSubclassOf<UEquipmentItemFragment> FragmentClass) const;
 
+	template<class T>
+	T* FindFragmentByClass() const
+	{
+		for (UEquipmentItemFragment* Fragment : Fragments)
+		{
+			if (T* Result = Cast<T>(Fragment))
+			{
+				return Result;
+			}
+		}
+		return nullptr;
+	}
+};
+
+UCLASS()
+class UEquipmentFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+	UFUNCTION(BlueprintCallable, meta=(DeterminesOutputType=FragmentClass))
+	static const UEquipmentItemFragment* FindItemDefinitionFragment(TSubclassOf<UEquipmentItemDefinition> ItemDef, TSubclassOf<UEquipmentItemFragment> FragmentClass);
 };

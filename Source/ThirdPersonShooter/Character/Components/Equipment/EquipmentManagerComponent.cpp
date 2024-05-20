@@ -6,6 +6,7 @@
 #include "Engine/ActorChannel.h"
 #include "EquipmentItemDefinition.h"
 #include "EquipmentItemInstance.h"
+#include "EquipmentFragment_AttachmentInfo.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "NativeGameplayTags.h"
@@ -95,7 +96,7 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 
 	FTransform SpawnTransform = Owner->GetActorTransform();
 	USceneComponent* Attachee = Owner->GetRootComponent();
-	FName SocketName = "weapon_back_shoulder_l";
+	FName SocketName = "";
 
 	// Find the skeletal mesh to attach to
 	// NOTE: Unreal recommends not attaching directly to the SKM, but instead with it's own animations
@@ -104,11 +105,13 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 		Attachee = Skele;
 		FTransform SkeleTransform = Skele->GetComponentTransform();
 
-		if (EquipmentCDO->AttachTransform.IsValid())
+		if (UEquipmentFragment_AttachmentInfo* AttachmentInfo = EquipmentCDO->FindFragmentByClass<UEquipmentFragment_AttachmentInfo>())
 		{
 			// TODO: Get the socket name from a lookup table
+			// SocketName = AttachmentInfo->SocketName;
+			SocketName = "weapon_back_shoulder_l";
 			FTransform SocketTransform = Skele->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_Actor);
-			SpawnTransform = EquipmentCDO->AttachTransform.GetRelativeTransform(SocketTransform);
+			SpawnTransform = AttachmentInfo->Transform.GetRelativeTransform(SocketTransform);
 		}
 		else
 		{
@@ -130,18 +133,19 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	Result = NewEntry.Instance;
 
 	// Attach to the appropriate socket if valid
-	if (EquipmentCDO->AttachSocket.IsValid())
+	if (SocketName.IsValid())
 	{
-		// TODO: Get the socket name from a lookup table
-		if (NewEntry.Instance->AttachToComponent(Attachee, FAttachmentTransformRules::KeepRelativeTransform, SocketName))
+		if (Result->AttachToComponent(Attachee, FAttachmentTransformRules::KeepRelativeTransform, SocketName))
 		{
-			NewEntry.Instance->SetActorHiddenInGame(false);
+			Result->SetActorHiddenInGame(false);
 		}
 		else
 		{
 			UE_LOG(LogEquipment, Warning, TEXT("Failed to attach equipment %s to %s - most likely SKM was not found."), *EquipmentCDO->GetName(), *Attachee->GetName());
 		}
 	}
+
+	Result->OnReady();
 
 	// Only passive items give their abilities on equip
 	if (EquipmentCDO->bIsPassive)

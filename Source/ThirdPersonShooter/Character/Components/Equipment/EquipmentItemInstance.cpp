@@ -46,6 +46,11 @@ APawn *AEquipmentItemInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
 	return Result;
 }
 
+void AEquipmentItemInstance::OnReady()
+{
+	K2_OnReady();
+}
+
 void AEquipmentItemInstance::OnEquipped()
 {
 	K2_OnEquipped();

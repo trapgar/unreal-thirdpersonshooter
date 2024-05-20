@@ -33,6 +33,7 @@ public:
 	UFUNCTION(BlueprintPure, Category=Equipment, meta=(DeterminesOutputType=PawnType))
 	APawn* GetTypedPawn(TSubclassOf<APawn> PawnType) const;
 
+	virtual void OnReady();
 	virtual void OnEquipped();
 	virtual void OnUnequipped();
 
@@ -63,6 +64,9 @@ public:
 protected:
 	virtual void PreInitializeComponents() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnReady"))
+	void K2_OnReady();
 
 	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipped"))
 	void K2_OnEquipped();

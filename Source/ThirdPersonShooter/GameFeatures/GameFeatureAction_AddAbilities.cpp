@@ -45,8 +45,6 @@ EDataValidationResult UGameFeatureAction_AddAbilities::IsDataValid(FDataValidati
 	}
 
 	return Result;
-
-	return EDataValidationResult::NotValidated;
 }
 #endif
 
