@@ -31,6 +31,10 @@ struct FInventoryChangedMessage
 	int32 Delta = 0;
 };
 
+
+// --------------------------------------------------------
+
+
 /** A single inventory stack */
 USTRUCT(BlueprintType)
 struct FInventoryEntry
@@ -53,6 +57,10 @@ private:
 	TObjectPtr<UInventoryItemInstance> Instance = nullptr;
 };
 
+
+// --------------------------------------------------------
+
+
 /** List of inventory items */
 USTRUCT(BlueprintType)
 struct FInventoryList
@@ -72,7 +80,8 @@ struct FInventoryList
 public:
 	TArray<UInventoryItemInstance *> GetAllItems() const;
 
-	UInventoryItemInstance *AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount);
+	UInventoryItemInstance* AddEntry(UInventoryItemDefinition* ItemDef, int32 StackCount);
+	// UInventoryItemInstance* AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount);
 	void RemoveEntry(UInventoryItemInstance *Instance);
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo &DeltaParms)
@@ -95,6 +104,10 @@ private:
 	TObjectPtr<UActorComponent> OwnerComponent;
 };
 
+
+// --------------------------------------------------------
+
+
 template<>
 struct TStructOpsTypeTraits<FInventoryList> : public TStructOpsTypeTraitsBase2<FInventoryList>
 {
@@ -112,7 +125,10 @@ public:
 	UInventoryManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
-	UInventoryItemInstance* AddItem(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount = 1);
+	UInventoryItemInstance* AddItem(UInventoryItemDefinition* ItemDefinition, int32 StackCount = 1);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
+	UInventoryItemInstance* AddItemByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount = 1);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
 	void RemoveItem(UInventoryItemInstance* ItemInstance);

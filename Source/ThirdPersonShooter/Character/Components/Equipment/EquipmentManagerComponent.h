@@ -36,6 +36,9 @@ struct FEquipmentChangedMessage
 };
 
 
+// --------------------------------------------------------
+
+
 USTRUCT(BlueprintType)
 struct FEquipmentActiveIndexChangedMessage
 {
@@ -49,9 +52,7 @@ struct FEquipmentActiveIndexChangedMessage
 };
 
 
-
 // --------------------------------------------------------
-
 
 
 /** A single piece of applied equipment */
@@ -84,6 +85,10 @@ private:
 	// Flag indicating if the equipment is 'applied' (e.g.: active vs holstered)
 	bool bIsApplied = false;
 };
+
+
+// --------------------------------------------------------
+
 
 /** List of applied equipment */
 USTRUCT(BlueprintType)
@@ -140,9 +145,7 @@ struct TStructOpsTypeTraits<FEquipmentList> : public TStructOpsTypeTraitsBase2<F
 };
 
 
-
 // --------------------------------------------------------
-
 
 
 /**

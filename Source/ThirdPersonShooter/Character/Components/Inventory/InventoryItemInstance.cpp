@@ -62,7 +62,7 @@ bool UInventoryItemInstance::HasStatTag(FGameplayTag Tag) const
 	return StatTags.Contains(Tag);
 }
 
-void UInventoryItemInstance::SetItemDef(TSubclassOf<UInventoryItemDefinition> InDef)
+void UInventoryItemInstance::SetItemDef(UInventoryItemDefinition* InDef)
 {
 	ItemDef = InDef;
 }

@@ -11,7 +11,9 @@ template <typename T> class TSubclassOf;
 class UInventoryItemInstance;
 struct FFrame;
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 // Represents a fragment of an item definition
 UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
@@ -23,7 +25,9 @@ public:
 	virtual void OnInstanceCreated(UInventoryItemInstance* Instance) const {}
 };
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 /**
  * UInventoryItemDefinition
@@ -45,10 +49,14 @@ public:
 	TArray<TObjectPtr<UInventoryItemFragment>> Fragments;
 };
 
+
+// --------------------------------------------------------
+
+
 /**
  * UInventoryItemDefinition
  */
-UCLASS(Blueprintable, Const, Abstract)
+UCLASS(Blueprintable, DefaultToInstanced, EditInlineNew, Const, Abstract)
 class UInventoryItemDefinition : public UObject
 {
 	GENERATED_BODY()
@@ -66,6 +74,10 @@ public:
 	const UInventoryItemFragment* FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const;
 };
 
+
+// --------------------------------------------------------
+
+
 //@TODO: Make into a subsystem instead?
 UCLASS()
 class UInventoryFunctionLibrary : public UBlueprintFunctionLibrary
@@ -73,5 +85,5 @@ class UInventoryFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintCallable, meta=(DeterminesOutputType=FragmentClass))
-	static const UInventoryItemFragment* FindItemDefinitionFragment(TSubclassOf<UInventoryItemDefinition> ItemDef, TSubclassOf<UInventoryItemFragment> FragmentClass);
+	static const UInventoryItemFragment* FindItemDefinitionFragment(UInventoryItemDefinition* ItemDef, TSubclassOf<UInventoryItemFragment> FragmentClass);
 };

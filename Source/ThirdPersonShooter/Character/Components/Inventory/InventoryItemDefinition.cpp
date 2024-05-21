@@ -7,8 +7,10 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InventoryItemDefinition)
 
-//////////////////////////////////////////////////////////////////////
-// UInventoryItemDefinition
+
+
+// --------------------------------------------------------
+
 
 UInventoryItemDefinition::UInventoryItemDefinition(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -31,14 +33,15 @@ const UInventoryItemFragment* UInventoryItemDefinition::FindFragmentByClass(TSub
 	return nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////
-// UInventoryItemDefinition
 
-const UInventoryItemFragment* UInventoryFunctionLibrary::FindItemDefinitionFragment(TSubclassOf<UInventoryItemDefinition> ItemDef, TSubclassOf<UInventoryItemFragment> FragmentClass)
+// --------------------------------------------------------
+
+
+const UInventoryItemFragment *UInventoryFunctionLibrary::FindItemDefinitionFragment(UInventoryItemDefinition *ItemDef, TSubclassOf<UInventoryItemFragment> FragmentClass)
 {
 	if ((ItemDef != nullptr) && (FragmentClass != nullptr))
 	{
-		return GetDefault<UInventoryItemDefinition>(ItemDef)->FindFragmentByClass(FragmentClass);
+		return ItemDef->FindFragmentByClass(FragmentClass);
 	}
 	return nullptr;
 }

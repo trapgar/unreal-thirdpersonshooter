@@ -19,7 +19,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Inventory_Message_StackChanged, "Inventory.Mes
 
 FString FInventoryEntry::GetDebugString() const
 {
-	TSubclassOf<UInventoryItemDefinition> ItemDef;
+	UInventoryItemDefinition* ItemDef = nullptr;
 	if (Instance != nullptr)
 	{
 		ItemDef = Instance->GetItemDef();
@@ -43,7 +43,7 @@ void FInventoryList::BroadcastChangeMessage(UInventoryItemInstance* Instance, in
 	MessageSystem.BroadcastMessage(TAG_Inventory_Message_StackChanged, Message);
 }
 
-UInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount)
+UInventoryItemInstance *FInventoryList::AddEntry(UInventoryItemDefinition* ItemDef, int32 StackCount)
 {
 	UInventoryItemInstance* Result = nullptr;
 
@@ -60,7 +60,7 @@ UInventoryItemInstance* FInventoryList::AddEntry(TSubclassOf<UInventoryItemDefin
 	NewEntry.Instance = NewObject<UInventoryItemInstance>(OwnerComponent->GetOwner()); //@TODO: Using the actor instead of component as the outer due to UE-127172
 	NewEntry.Instance->SetItemDef(ItemDef);
 
-	for (UInventoryItemFragment* Fragment : GetDefault<UInventoryItemDefinition>(ItemDef)->Fragments)
+	for (UInventoryItemFragment* Fragment : ItemDef->Fragments)
 	{
 		if (Fragment != nullptr)
 		{
@@ -126,12 +126,12 @@ void UInventoryManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 	DOREPLIFETIME(ThisClass, InventoryList);
 }
 
-UInventoryItemInstance* UInventoryManagerComponent::AddItem(TSubclassOf<UInventoryItemDefinition> ItemClass, int32 StackCount)
+UInventoryItemInstance* UInventoryManagerComponent::AddItem(UInventoryItemDefinition* ItemDefinition, int32 StackCount)
 {
 	UInventoryItemInstance* Result = nullptr;
-	if (ItemClass != nullptr)
+	if (ItemDefinition != nullptr)
 	{
-		Result = InventoryList.AddEntry(ItemClass, StackCount);
+		Result = InventoryList.AddEntry(ItemDefinition, StackCount);
 		if (Result != nullptr)
 		{
 			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
@@ -141,6 +141,18 @@ UInventoryItemInstance* UInventoryManagerComponent::AddItem(TSubclassOf<UInvento
 		}
 	}
 	return Result;
+}
+
+UInventoryItemInstance* UInventoryManagerComponent::AddItemByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount)
+{
+	if (ItemDefinition != nullptr)
+	{
+		return AddItem(ItemDefinition->GetDefaultObject<UInventoryItemDefinition>(), StackCount);
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 void UInventoryManagerComponent::RemoveItem(UInventoryItemInstance* ItemInstance)
@@ -186,7 +198,7 @@ UInventoryItemInstance* UInventoryManagerComponent::FindFirstItemStackByDefiniti
 
 		if (IsValid(Instance))
 		{
-			if (Instance->GetItemDef() == ItemDef)
+			if (Instance->GetItemDef()->IsA(ItemDef))
 			{
 				return Instance;
 			}
@@ -205,7 +217,7 @@ int32 UInventoryManagerComponent::GetTotalItemCountByDefinition(TSubclassOf<UInv
 
 		if (IsValid(Instance))
 		{
-			if (Instance->GetItemDef() == ItemDef)
+			if (Instance->GetItemDef()->IsA(ItemDef))
 			{
 				++TotalCount;
 			}

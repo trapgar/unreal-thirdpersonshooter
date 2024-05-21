@@ -45,12 +45,12 @@ public:
 	bool HasStatTag(FGameplayTag Tag) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category = "Inventory")
-	TSubclassOf<UInventoryItemDefinition> GetItemDef() const
+	UInventoryItemDefinition* GetItemDef() const
 	{
 		return ItemDef;
 	}
 
-	void SetItemDef(TSubclassOf<UInventoryItemDefinition> InDef);
+	void SetItemDef(UInventoryItemDefinition* InDef);
 
 	friend struct FInventoryList;
 
@@ -60,5 +60,5 @@ private:
 
 	// The item definition
 	UPROPERTY(Replicated)
-	TSubclassOf<UInventoryItemDefinition> ItemDef;
+	UInventoryItemDefinition* ItemDef;
 };
