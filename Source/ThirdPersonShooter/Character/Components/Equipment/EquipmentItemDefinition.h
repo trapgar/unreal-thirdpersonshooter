@@ -8,7 +8,7 @@
 
 #include "EquipmentItemDefinition.generated.h"
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 
 // Represents a fragment of an item definition
 UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
@@ -20,7 +20,9 @@ public:
 	virtual void OnInstanceCreated(AEquipmentItemInstance* Instance) const {}
 };
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 /**
  * UEquipmentItemDefinition
@@ -66,6 +68,10 @@ public:
 		return nullptr;
 	}
 };
+
+
+// --------------------------------------------------------
+
 
 UCLASS()
 class UEquipmentFunctionLibrary : public UBlueprintFunctionLibrary

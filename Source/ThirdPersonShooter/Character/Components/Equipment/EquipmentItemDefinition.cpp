@@ -21,7 +21,8 @@ const UEquipmentItemFragment* UEquipmentItemDefinition::FindFragmentByClass(TSub
 	return nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
+
 // UEquipmentItemDefinition
 
 const UEquipmentItemFragment* UEquipmentFunctionLibrary::FindItemDefinitionFragment(TSubclassOf<UEquipmentItemDefinition> ItemDef, TSubclassOf<UEquipmentItemFragment> FragmentClass)

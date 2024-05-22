@@ -16,10 +16,18 @@ class UEquipmentFragment_AttachmentInfo : public UEquipmentItemFragment
 public:
 
 	// Socket tag to attach the equipment to when not in active use (holstered)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Spawn Info", Meta = (Categories = "Equipment.Socket"))
-	FGameplayTag SocketName;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attach Info")
+	FName HolsteredSocketName;
 
-	// Transform to apply to the equipment when attached to the socket
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Spawn Info")
-	FTransform Transform;
+	// Transform to apply to the equipment when attached to the holstered socket
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attach Info")
+	FTransform HolsteredTransform;
+
+	// Socket tag to attach the equipment to when in active use (drawn)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attach Info")
+	FName DrawnSocketName;
+
+	// Transform to apply to the equipment when attached to the drawn socket
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attach Info")
+	FTransform DrawnTransform;
 };

@@ -81,13 +81,6 @@ void AModularCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-// Called to bind functionality to input
-void AModularCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	GameplayInputComponent->InitializePlayerInput(PlayerInputComponent);
-}
-
 void AModularCharacter::InitializeAbility(TSubclassOf<UGameplayAbility> AbilityToGet, int32 AbilityLevel)
 {
 	if (AbilitySystemComponent)
@@ -100,12 +93,12 @@ void AModularCharacter::InitializeAbility(TSubclassOf<UGameplayAbility> AbilityT
 	}
 }
 
-UAbilitySystemComponent *AModularCharacter::GetAbilitySystemComponent() const
+UAbilitySystemComponent* AModularCharacter::GetAbilitySystemComponent() const
 {
     return AbilitySystemComponent;
 }
 
-void AModularCharacter::GetOwnedGameplayTags(FGameplayTagContainer &TagContainer) const
+void AModularCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
 {
 	if (auto ASC = GetAbilitySystemComponent())
 	{

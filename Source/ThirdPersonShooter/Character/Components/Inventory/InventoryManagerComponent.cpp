@@ -14,7 +14,7 @@ struct FReplicationFlags;
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Inventory_Message_StackChanged, "Inventory.Message.StackChanged");
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // FInventoryEntry
 
 FString FInventoryEntry::GetDebugString() const
@@ -28,7 +28,7 @@ FString FInventoryEntry::GetDebugString() const
 	return FString::Printf(TEXT("%s (%d x %s)"), *GetNameSafe(Instance), StackCount, *GetNameSafe(ItemDef));
 }
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // FInventoryList
 
 void FInventoryList::BroadcastChangeMessage(UInventoryItemInstance* Instance, int32 OldCount, int32 NewCount)
@@ -108,7 +108,7 @@ TArray<UInventoryItemInstance *> FInventoryList::GetAllItems() const
 	return Results;
 }
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // UInventoryManagerComponent
 
 UInventoryManagerComponent::UInventoryManagerComponent(const FObjectInitializer& ObjectInitializer)

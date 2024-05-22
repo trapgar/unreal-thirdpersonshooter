@@ -20,7 +20,7 @@
 
 #define LOCTEXT_NAMESPACE "GameFeatures"
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // UGameFeatureAction_AddInputContextMapping
 
 void UGameFeatureAction_AddInputContextMapping::OnGameFeatureRegistering()
@@ -254,11 +254,14 @@ void UGameFeatureAction_AddInputContextMapping::AddInputMappingForPlayer(UPlayer
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
+			FModifyContextOptions Options = {};
+			Options.bIgnoreAllPressedKeysUntilRelease = false;
+
 			for (const FInputMappingContextAndPriority& Entry : InputMappings)
 			{
 				if (const UInputMappingContext* IMC = Entry.InputMapping.Get())
 				{
-					InputSystem->AddMappingContext(IMC, Entry.Priority);
+					InputSystem->AddMappingContext(IMC, Entry.Priority, Options);
 				}
 			}
 		}

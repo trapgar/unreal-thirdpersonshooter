@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameFramework/GameModeBase.h"
+#include "GameFeatureAction.h"
 
 #include "ModularGameMode.generated.h"
 
@@ -21,6 +22,9 @@ public:
 	// List of game features to automatically activate on GM startup
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Features Dependencies")
 	TArray<FString> GameFeaturesToEnable;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Actions, Instanced)
+	TArray<TObjectPtr<UGameFeatureAction>> Actions;
 
 private:
 

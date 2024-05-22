@@ -21,19 +21,26 @@ struct FReplicationFlags;
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // FEquipmentEntry
 
 FString FEquipmentEntry::GetDebugString() const
 {
 	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(Instance->GetItemDef()));
 }
+
 void FEquipmentEntry::Apply()
 {
+	if (bIsApplied)
+	{
+		return;
+	}
+
+	const UEquipmentItemDefinition* EquipmentDefinition = GetDefault<UEquipmentItemDefinition>(Instance->GetItemDef());
+
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
 	{
-		const UEquipmentItemDefinition* EquipmentCDO = GetDefault<UEquipmentItemDefinition>(Instance->GetItemDef());
-		for (auto AbilitySet : EquipmentCDO->AbilitySetsToGrant)
+		for (auto AbilitySet : EquipmentDefinition->AbilitySetsToGrant)
 		{
 			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &GrantedHandles, Instance);
 		}
@@ -94,12 +101,12 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 		InstanceType = AEquipmentItemInstance::StaticClass();
 	}
 
-	FTransform SpawnTransform = Owner->GetActorTransform();
+	FTransform SpawnTransform = FTransform(FQuat::Identity, FVector::ZeroVector, FVector(1.0f, 1.0f, 1.0f));
 	USceneComponent* Attachee = Owner->GetRootComponent();
 	FName SocketName = "";
 
 	// Find the skeletal mesh to attach to
-	// NOTE: Unreal recommends not attaching directly to the SKM, but instead with it's own animations
+	// NOTE: Unreal recommends not attaching directly to the SKM, but instead with it's own animations (I think?)
 	if (USkeletalMeshComponent* Skele = Owner->GetComponentByClass<USkeletalMeshComponent>())
 	{
 		Attachee = Skele;
@@ -107,15 +114,9 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 
 		if (UEquipmentFragment_AttachmentInfo* AttachmentInfo = EquipmentCDO->FindFragmentByClass<UEquipmentFragment_AttachmentInfo>())
 		{
-			// TODO: Get the socket name from a lookup table
-			// SocketName = AttachmentInfo->SocketName;
-			SocketName = "weapon_back_shoulder_l";
+			SocketName = AttachmentInfo->HolsteredSocketName;
 			FTransform SocketTransform = Skele->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_Actor);
-			SpawnTransform = AttachmentInfo->Transform.GetRelativeTransform(SocketTransform);
-		}
-		else
-		{
-			SpawnTransform = SkeleTransform;
+			SpawnTransform = AttachmentInfo->HolsteredTransform;
 		}
 	}
 	

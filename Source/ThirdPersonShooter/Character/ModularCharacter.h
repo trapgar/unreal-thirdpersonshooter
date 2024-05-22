@@ -6,20 +6,14 @@
 #include "GameplayTagAssetInterface.h"
 #include "GameFramework/Character.h"
 #include "Abilities/GameplayAbility.h"
-// #include "Components/Ability/ModularAbilitySystemComponent.h"
 #include "Components/Input/GameplayInputComponent.h"
 #include "Components/Inventory/InventoryManagerComponent.h"
 
 #include "ModularCharacter.generated.h"
 
-// class AActor;
 class AController;
-// class FLifetimeProperty;
-// class IRepChangedPropertyTracker;
 class UAbilitySystemComponent;
 class UInputComponent;
-// class UObject;
-// struct FFrame;
 struct FGameplayTag;
 struct FGameplayTagContainer;
 
@@ -34,9 +28,6 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//~IAbilitySystemInterface interface
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Character|Abilities")

@@ -10,6 +10,16 @@ AModularGameMode::AModularGameMode(const FObjectInitializer &ObjectInitializer)
 
 void AModularGameMode::BeginPlay()
 {
+	if (Actions.Num() > 0)
+	{
+		FGameFeatureActivatingContext Context = FGameFeatureActivatingContext();
+		for (UGameFeatureAction* Action : Actions)
+		{
+			Action->OnGameFeatureRegistering();
+			Action->OnGameFeatureActivating(Context);
+		}
+	}
+
 	NumGameFeaturePluginsLoading = GameFeaturesToEnable.Num();
 
 	for (const FString &PluginName : GameFeaturesToEnable)

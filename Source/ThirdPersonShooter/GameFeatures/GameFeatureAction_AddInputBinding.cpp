@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFeatures/GameFeatureAction_WorldActionBase.h"
+#include "../Character/Components/Input/GameplayInputComponent.h"
 
 
 #if WITH_EDITOR
@@ -111,14 +112,17 @@ void UGameFeatureAction_AddInputBinding::AddInputMappingForPlayer(APawn* Pawn, F
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
-			for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
+			if (UGameplayInputComponent* GameplayInputComponent = Pawn->FindComponentByClass<UGameplayInputComponent>())
 			{
-				if (const UGameplayInputConfiguration* BindSet = Entry.Get())
+				for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
 				{
-					// TODO: implement
-					// HeroComponent->AddAdditionalInputConfig(BindSet);
+					if (const UGameplayInputConfiguration* BindSet = Entry.Get())
+					{
+						GameplayInputComponent->AddAdditionalInputConfig(BindSet);
+					}
 				}
 			}
+
 			ActiveData.PawnsAddedTo.AddUnique(Pawn);
 		}
 		else
@@ -136,12 +140,14 @@ void UGameFeatureAction_AddInputBinding::RemoveInputMapping(APawn* Pawn, FPerCon
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
-			for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
+			if (UGameplayInputComponent* GameplayInputComponent = Pawn->FindComponentByClass<UGameplayInputComponent>())
 			{
-				if (const UGameplayInputConfiguration* InputConfig = Entry.Get())
+				for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
 				{
-					// TODO: implement
-					// HeroComponent->RemoveAdditionalInputConfig(InputConfig);
+					if (const UGameplayInputConfiguration* InputConfig = Entry.Get())
+					{
+						GameplayInputComponent->RemoveAdditionalInputConfig(InputConfig);
+					}
 				}
 			}
 		}
