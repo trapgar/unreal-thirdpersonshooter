@@ -264,14 +264,17 @@ void UGameFeatureAction_AddInputContextMapping::AddInputMappingForPlayer(APlayer
 					InputSystem->AddMappingContext(IMC, Entry.Priority, Options);
 				}
 			}
+
+			if (InputMappings.Num() > 0)
+			{
+				ActiveData.ControllersAddedTo.Add(PlayerController);
+			}
 		}
 		else
 		{
 			UE_LOG(LogGameFeatures, Error, TEXT("Failed to find `UEnhancedInputLocalPlayerSubsystem` for local player. Input mappings will not be added. Make sure you're set to use the EnhancedInput system via config file."));
 		}
 	}
-
-	ActiveData.ControllersAddedTo.Add(PlayerController);
 }
 
 void UGameFeatureAction_AddInputContextMapping::RemoveInputMapping(APlayerController* PlayerController, FPerContextData& ActiveData)
