@@ -30,9 +30,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	//~IAbilitySystemInterface interface
+	// what is this used for?
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Character|Abilities")
 	UAbilitySystemComponent* AbilitySystemComponent;
 
+	// what is this used for?
 	UFUNCTION(BlueprintCallable, Category = "Character|Abilities")
 	void InitializeAbility(TSubclassOf<UGameplayAbility> AbilityToGet, int32 AbilityLevel = 1);
 
