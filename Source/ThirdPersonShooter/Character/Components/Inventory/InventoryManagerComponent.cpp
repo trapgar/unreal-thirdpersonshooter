@@ -138,21 +138,25 @@ UInventoryItemInstance* UInventoryManagerComponent::AddItem(UInventoryItemDefini
 			{
 				AddReplicatedSubObject(Result);
 			}
+
+			K2_OnItemAdded(Result);
 		}
 	}
+
 	return Result;
 }
 
 UInventoryItemInstance* UInventoryManagerComponent::AddItemByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount)
 {
+	UInventoryItemInstance* ItemInstance = nullptr;
+	
 	if (ItemDefinition != nullptr)
 	{
-		return AddItem(ItemDefinition->GetDefaultObject<UInventoryItemDefinition>(), StackCount);
+		ItemInstance = AddItem(ItemDefinition->GetDefaultObject<UInventoryItemDefinition>(), StackCount);
+		K2_OnItemAdded(ItemInstance);
 	}
-	else
-	{
-		return nullptr;
-	}
+
+	return ItemInstance;
 }
 
 void UInventoryManagerComponent::RemoveItem(UInventoryItemInstance* ItemInstance)
@@ -165,6 +169,7 @@ void UInventoryManagerComponent::RemoveItem(UInventoryItemInstance* ItemInstance
 		}
 
 		InventoryList.RemoveEntry(ItemInstance);
+		K2_OnItemRemoved(ItemInstance);
 	}
 }
 

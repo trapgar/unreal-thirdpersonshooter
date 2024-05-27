@@ -2,9 +2,8 @@
 
 #pragma once
 
-// #include "Templates/SubclassOf.h"
 #include "Common/TaggedActor.h"
-#include "GameplayTagContainer.h"
+#include "Common/GameplayTagStack.h"
 
 #include "InventoryItemInstance.generated.h"
 
@@ -50,13 +49,20 @@ public:
 		return ItemDef;
 	}
 
+	UFUNCTION(BlueprintCallable, BlueprintPure=false, meta=(DeterminesOutputType=FragmentClass))
+	const UInventoryItemFragment* FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const
+	{
+		// return ItemDef ? ItemDef->FindFragmentByClass(FragmentClass) : nullptr;
+		return nullptr;
+	}
+
 	void SetItemDef(UInventoryItemDefinition* InDef);
 
 	friend struct FInventoryList;
 
 private:
 	UPROPERTY()
-	TMap<FGameplayTag, int32> StatTags;
+	FGameplayTagStackContainer StatTags;
 
 	// The item definition
 	UPROPERTY(Replicated)

@@ -18,7 +18,7 @@ class UEquipmentFragment_RangedWeaponStats : public UEquipmentItemFragment
 
 public:
 
-	// Number of bullets to fire in a single cartridge (typically 1, but may be more for shotguns)
+	// Initial muzzle velocity of the bullet
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="cm/s"))
 	float MuzzleVelocity = 250000.0f;
 
@@ -32,6 +32,7 @@ public:
 	float BulletTraceSweepRadius = 0.0f;
 
 	// The maximum distance at which this weapon can deal damage
+	// TODO: May not need this prop as it is already in DistanceDamageFalloff?
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits=cm))
 	float MaxDamageRange = 25000.0f;
 
@@ -39,19 +40,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ballistics")
 	TSubclassOf<AActor> ProjectileToSpawn;
 
-	// Points of damage to apply to a on projectile hit
+	// Applied damage type
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TSubclassOf<UGameplayEffect> DamageType;
+
+	// Base amount of damage to apply to a on projectile hit
+	// This is pre-multipliers (e.g. damage falloff, headshot, etc.)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
 	float SingleBulletDamage;
 
-	// Points of damage to apply to a on projectile hit
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects", meta=(Categories="Gameplay.Zone"))
+	// List of special tags that affect how damage is dealt
+	// These tags will be compared to tags in the physical material of the thing being hit
+	// If more than one tag is present, the multipliers will be combined multiplicatively
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects", meta=(Categories="Gameplay.Zone", ForceUnits=x))
 	TMap<FGameplayTag, float> DamageZoneMultipliers;
 
 	// Max rate of fire in rounds per minute
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Handling", meta=(ForceUnits="rpm"))
 	float RoundsPerMinute = 0.0f;
 
-	// List of available fire modes the player can cycle through (e.g. semi-auto, full-auto, etc.)
+	// List of available fire modes the player can cycle through (e.g. single, semi-auto, full-auto, etc.)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Handling", meta=(Categories="Equipment.Weapon.Mode"))
 	FGameplayTagContainer FireModes;
 

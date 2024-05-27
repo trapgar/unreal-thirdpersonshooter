@@ -256,16 +256,23 @@ void UGameFeatureAction_AddInputContextMapping::AddInputMappingForPlayer(APlayer
 		{
 			FModifyContextOptions Options = {};
 			Options.bIgnoreAllPressedKeysUntilRelease = false;
+			bool bAdded = false;
 
 			for (const FInputMappingContextAndPriority& Entry : InputMappings)
 			{
+				// IMC_Character::Get() will return null if it's not loaded
 				if (const UInputMappingContext* IMC = Entry.InputMapping.Get())
 				{
 					InputSystem->AddMappingContext(IMC, Entry.Priority, Options);
+					bAdded = true;
+				}
+				else
+				{
+					UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `UInputMappingContext` for IMC. Input mappings will not be added."));
 				}
 			}
 
-			if (InputMappings.Num() > 0)
+			if (bAdded)
 			{
 				ActiveData.ControllersAddedTo.Add(PlayerController);
 			}

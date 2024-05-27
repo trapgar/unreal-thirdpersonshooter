@@ -4,6 +4,7 @@
 
 #include "Engine/World.h"
 #include "Common/TaggedActor.h"
+#include "Common/GameplayTagStack.h"
 #include "GameplayTagContainer.h"
 
 #include "EquipmentItemInstance.generated.h"
@@ -76,7 +77,7 @@ protected:
 
 private:
 
-	TMap<FGameplayTag, int32> StatTags;
+	FGameplayTagStackContainer StatTags;
 
 	// The item definition
 	TSubclassOf<UEquipmentItemDefinition> ItemDef;

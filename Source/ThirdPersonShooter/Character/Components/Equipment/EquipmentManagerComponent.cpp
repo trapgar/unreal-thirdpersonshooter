@@ -7,6 +7,7 @@
 #include "EquipmentItemDefinition.h"
 #include "EquipmentItemInstance.h"
 #include "EquipmentFragment_AttachmentInfo.h"
+#include "Character/Components/Inventory/InventoryFragment_EquippableItem.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "NativeGameplayTags.h"
@@ -18,6 +19,7 @@
 class FLifetimeProperty;
 struct FReplicationFlags;
 
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Inventory_Message_StackChanged, "Inventory.Message.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
 
@@ -220,7 +222,7 @@ TArray<AEquipmentItemInstance*> FEquipmentList::GetAllItems() const
 	return Results;
 }
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // UEquipmentManagerComponent
 
 UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer)
@@ -237,65 +239,12 @@ UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer&
 	}
 }
 
-void UEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UEquipmentManagerComponent::BeginPlay()
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	ListenerHandle = MessageSubsystem.RegisterListener(TAG_Inventory_Message_StackChanged, this, &ThisClass::OnInventoryStackChanged);
 
-	DOREPLIFETIME(ThisClass, EquipmentList);
-}
-
-AEquipmentItemInstance* UEquipmentManagerComponent::AddItem(TSubclassOf<UEquipmentItemDefinition> EquipmentClass)
-{
-	AEquipmentItemInstance* Result = nullptr;
-
-	if (EquipmentClass != nullptr)
-	{
-		Result = EquipmentList.AddEntry(EquipmentClass);
-		if (Result != nullptr)
-		{
-			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
-			{
-				AddReplicatedSubObject(Result);
-			}
-		}
-	}
-
-	return Result;
-}
-
-void UEquipmentManagerComponent::RemoveItem(AEquipmentItemInstance* ItemInstance)
-{
-	if (ItemInstance != nullptr)
-	{
-		if (IsUsingRegisteredSubObjectList())
-		{
-			RemoveReplicatedSubObject(ItemInstance);
-		}
-
-		EquipmentList.RemoveEntry(ItemInstance);
-	}
-}
-
-TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetAllItems() const
-{
-	return EquipmentList.GetAllItems();
-}
-
-bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags)
-{
-	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
-
-	for (FEquipmentEntry& Entry : EquipmentList.Entries)
-	{
-		AEquipmentItemInstance* Instance = Entry.Instance;
-
-		if (IsValid(Instance))
-		{
-			WroteSomething |= Channel->ReplicateSubobject(Instance, *Bunch, *RepFlags);
-		}
-	}
-
-	return WroteSomething;
+	Super::BeginPlay();
 }
 
 void UEquipmentManagerComponent::InitializeComponent()
@@ -318,7 +267,34 @@ void UEquipmentManagerComponent::UninitializeComponent()
 		RemoveItem(ItemInstance);
 	}
 
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	MessageSubsystem.UnregisterListener(ListenerHandle);
+
 	Super::UninitializeComponent();
+}
+
+void UEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, EquipmentList);
+}
+
+bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+	for (FEquipmentEntry& Entry : EquipmentList.Entries)
+	{
+		AEquipmentItemInstance* Instance = Entry.Instance;
+
+		if (IsValid(Instance))
+		{
+			WroteSomething |= Channel->ReplicateSubobject(Instance, *Bunch, *RepFlags);
+		}
+	}
+
+	return WroteSomething;
 }
 
 void UEquipmentManagerComponent::ReadyForReplication()
@@ -335,6 +311,60 @@ void UEquipmentManagerComponent::ReadyForReplication()
 			if (IsValid(Instance))
 			{
 				AddReplicatedSubObject(Instance);
+			}
+		}
+	}
+}
+
+AEquipmentItemInstance* UEquipmentManagerComponent::AddItem(TSubclassOf<UEquipmentItemDefinition> EquipmentClass)
+{
+	AEquipmentItemInstance* Result = nullptr;
+
+	if (EquipmentClass != nullptr)
+	{
+		Result = EquipmentList.AddEntry(EquipmentClass);
+		if (Result != nullptr)
+		{
+			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
+			{
+				AddReplicatedSubObject(Result);
+			}
+
+			K2_OnEquipmentItemAdded(Result);
+		}
+	}
+
+	return Result;
+}
+
+void UEquipmentManagerComponent::RemoveItem(AEquipmentItemInstance* ItemInstance)
+{
+	if (ItemInstance != nullptr)
+	{
+		if (IsUsingRegisteredSubObjectList())
+		{
+			RemoveReplicatedSubObject(ItemInstance);
+		}
+
+		EquipmentList.RemoveEntry(ItemInstance);
+		K2_OnEquipmentItemRemoved(ItemInstance);
+	}
+}
+
+TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetAllItems() const
+{
+	return EquipmentList.GetAllItems();
+}
+
+void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, const FInventoryChangedMessage& Notification)
+{
+	if (Notification.NewCount > 0)
+	{
+		if (const UInventoryItemDefinition* ItemDefinition = Notification.Instance->GetItemDef())
+		{
+			if (const UInventoryFragment_EquippableItem* Fragment = ItemDefinition->FindFragmentByClass<UInventoryFragment_EquippableItem>())
+			{
+				AddItem(Fragment->EquipmentDefinition);
 			}
 		}
 	}

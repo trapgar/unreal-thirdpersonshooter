@@ -23,43 +23,22 @@ void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 void UInventoryItemInstance::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
 {
-	if (StatTags.Contains(Tag))
-	{
-		StatTags.Add(Tag, StatTags[Tag] + StackCount);
-	}
-	else
-	{
-		StatTags.Add(Tag, StackCount);
-	}
+	StatTags.AddStack(Tag, StackCount);
 }
 
 void UInventoryItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCount)
 {
-	if (StatTags.Contains(Tag) && StatTags[Tag] - StackCount > 0)
-	{
-		StatTags.Add(Tag, StatTags[Tag] - StackCount);
-	}
-	else
-	{
-		StatTags.Remove(Tag);
-	}
+	StatTags.RemoveStack(Tag, StackCount);
 }
 
 int32 UInventoryItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
 {
-	if (StatTags.Contains(Tag))
-	{
-		return StatTags[Tag];
-	}
-	else
-	{
-		return 0;
-	}
+	return StatTags.GetStackCount(Tag);
 }
 
 bool UInventoryItemInstance::HasStatTag(FGameplayTag Tag) const
 {
-	return StatTags.Contains(Tag);
+	return StatTags.ContainsTag(Tag);
 }
 
 void UInventoryItemInstance::SetItemDef(UInventoryItemDefinition* InDef)

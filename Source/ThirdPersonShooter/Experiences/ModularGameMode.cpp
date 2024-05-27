@@ -16,6 +16,7 @@ void AModularGameMode::BeginPlay()
 		for (UGameFeatureAction* Action : Actions)
 		{
 			Action->OnGameFeatureRegistering();
+			Action->OnGameFeatureLoading();
 			Action->OnGameFeatureActivating(Context);
 		}
 	}

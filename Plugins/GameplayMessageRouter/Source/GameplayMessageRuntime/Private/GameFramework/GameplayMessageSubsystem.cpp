@@ -22,7 +22,7 @@ namespace UE
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // FGameplayMessageListenerHandle
 
 void FGameplayMessageListenerHandle::Unregister()
@@ -36,7 +36,7 @@ void FGameplayMessageListenerHandle::Unregister()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // UGameplayMessageSubsystem
 
 UGameplayMessageSubsystem& UGameplayMessageSubsystem::Get(const UObject* WorldContextObject)

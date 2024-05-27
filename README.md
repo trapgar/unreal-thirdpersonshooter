@@ -1,3 +1,9 @@
+# thirdpersonshooter
+Attempt to create a version of my previous Lyra-based game (Pegasus), but without all the Lyra bloat as I've often no idea
+what that template is doing.
+
+Also trying to use C++ over blueprints to make source compare easier.
+
 ## Backlog
 - figure out how to attach components at runtime based on Game Mode or something...
     - AbilitySystemComponent w/ default ability set for the character

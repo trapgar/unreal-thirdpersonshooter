@@ -45,8 +45,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	TArray<TObjectPtr<const UModularAbilitySet>> AbilitySetsToGrant;
 
-	// Flag that indicates if the ability sets of this item are applied on equip, or on draw
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	// Flag indicating if the ability sets of this item are applied on equip, or on draw
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects", meta=(DisplayName="Is Passive?"))
 	bool bIsPassive = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Attributes, Instanced)

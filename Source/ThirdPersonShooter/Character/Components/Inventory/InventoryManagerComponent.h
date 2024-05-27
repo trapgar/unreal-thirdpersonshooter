@@ -147,6 +147,12 @@ protected:
 	virtual void ReadyForReplication() override;
 	//~End of UObject interface
 
+	UFUNCTION(BlueprintImplementableEvent, Category=Inventory, meta=(DisplayName="OnItemAdded"))
+	void K2_OnItemAdded(UInventoryItemInstance* ItemInstance);
+
+	UFUNCTION(BlueprintImplementableEvent, Category=Inventory, meta=(DisplayName="OnItemRemoved"))
+	void K2_OnItemRemoved(UInventoryItemInstance* ItemInstance);
+
 private:
 	// Array to store the inventory items
 	UPROPERTY(Replicated)

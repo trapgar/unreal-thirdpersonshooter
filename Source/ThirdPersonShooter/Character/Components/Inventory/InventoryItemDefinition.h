@@ -54,7 +54,7 @@ public:
 
 
 /**
- * UInventoryItemDefinition
+ * Definition type of an inventory item
  */
 UCLASS(Blueprintable, DefaultToInstanced, EditInlineNew, Const, Abstract)
 class UInventoryItemDefinition : public UObject
@@ -72,6 +72,14 @@ public:
 
 public:
 	const UInventoryItemFragment* FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const;
+
+	template<class T>
+	const T* FindFragmentByClass() const
+	{
+		static_assert(std::is_base_of<UInventoryItemFragment, T>::value, "T must be a subclass of UInventoryItemFragment");
+		return (T*)FindFragmentByClass(T::StaticClass());
+	}
+
 };
 
 

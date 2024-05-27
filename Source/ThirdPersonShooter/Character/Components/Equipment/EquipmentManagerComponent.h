@@ -10,6 +10,8 @@
 #include "EquipmentItemDefinition.h"
 #include "EquipmentItemInstance.h"
 #include "Character/Components/Ability/ModularAbilitySet.h"
+#include "Character/Components/Inventory/InventoryManagerComponent.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 
 #include "EquipmentManagerComponent.generated.h"
 
@@ -206,12 +208,20 @@ protected:
 	UPROPERTY()
 	int32 NumSlots = 5;
 
+	virtual void BeginPlay() override;
+
 	//~UObject interface
 	virtual void InitializeComponent() override;
 	virtual void UninitializeComponent() override;
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 	virtual void ReadyForReplication() override;
 	//~End of UObject interface
+
+	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipmentItemAdded"))
+	void K2_OnEquipmentItemAdded(AEquipmentItemInstance* EquipmentItemInstance);
+
+	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipmentItemRemoved"))
+	void K2_OnEquipmentItemRemoved(AEquipmentItemInstance* EquipmentItemInstance);
 
 private:
 	UPROPERTY()
@@ -220,6 +230,10 @@ private:
 	// List of all equipped items
 	UPROPERTY(Replicated)
 	FEquipmentList EquipmentList;
+
+	FGameplayMessageListenerHandle ListenerHandle;
+
+	void OnInventoryStackChanged(FGameplayTag Channel, const FInventoryChangedMessage& Notification);
 
 };
 

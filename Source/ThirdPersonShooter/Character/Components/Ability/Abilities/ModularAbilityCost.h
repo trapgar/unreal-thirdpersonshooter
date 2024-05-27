@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameplayAbilitySpec.h"
 #include "Abilities/GameplayAbility.h"
-
 #include "ModularAbilityCost.generated.h"
 
 class UModularGameplayAbility;
@@ -15,8 +14,8 @@ class UModularGameplayAbility;
  *
  * Base class for costs that a ModularGameplayAbility has (e.g., ammo or charges)
  */
-UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
-class THIRDPERSONSHOOTER_API UModularAbilityCost : public UObject
+UCLASS(DefaultToInstanced, EditInlineNew, Abstract, HideCategories = (Status, Duration, GameplayEffect, GameplayCues, Stacking))
+class UModularAbilityCost : public UGameplayEffect
 {
 	GENERATED_BODY()
 
@@ -50,12 +49,4 @@ public:
 	virtual void ApplyCost(const UModularGameplayAbility* Ability, const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 	{
 	}
-
-	/** If true, this cost should only be applied if this ability hits successfully */
-	bool ShouldOnlyApplyCostOnHit() const { return bOnlyApplyCostOnHit; }
-
-protected:
-	/** If true, this cost should only be applied if this ability hits successfully */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Costs)
-	bool bOnlyApplyCostOnHit = false;
 };

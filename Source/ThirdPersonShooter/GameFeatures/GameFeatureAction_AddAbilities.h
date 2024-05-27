@@ -65,7 +65,7 @@ struct FGameFeatureAbilitiesEntry
 	TArray<TSoftObjectPtr<const UModularAbilitySet>> GrantedAbilitySets;
 };
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 // UGameFeatureAction_AddAbilities
 
 /**
