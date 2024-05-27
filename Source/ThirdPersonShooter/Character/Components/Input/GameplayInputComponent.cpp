@@ -84,6 +84,8 @@ void UGameplayInputComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag
 				{
 					if (AbilitySpec.Ability && (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)))
 					{
+						// FGameplayAbilitySpec NonConstAbilitySpec = AbilitySpec;
+						// ASC->AbilitySpecInputPressed(NonConstAbilitySpec);
 						ASC->TryActivateAbility(AbilitySpec.Handle);
 					}
 				}
@@ -99,6 +101,17 @@ void UGameplayInputComponent::Input_AbilityInputTagReleased(FGameplayTag InputTa
 		if (UAbilitySystemComponent* ASC = Pawn->GetAbilitySystemComponent())
 		{
 			// ASC->AbilityInputTagReleased(InputTag);
+			if (InputTag.IsValid())
+			{
+				for (const FGameplayAbilitySpec& AbilitySpec : ASC->GetActivatableAbilities())
+				{
+					if (AbilitySpec.Ability && (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)))
+					{
+						// FGameplayAbilitySpec NonConstAbilitySpec = AbilitySpec;
+						// ASC->AbilitySpecInputReleased(NonConstAbilitySpec);
+					}
+				}
+			}
 		}
 	}
 }

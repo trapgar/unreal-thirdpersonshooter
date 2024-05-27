@@ -3,6 +3,7 @@
 #include "ModularAbilitySet.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "Abilities/ModularGameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "CustomLogChannels.h"
 

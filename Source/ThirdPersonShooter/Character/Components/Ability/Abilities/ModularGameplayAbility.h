@@ -102,6 +102,9 @@ public:
 		// ScriptOnAbilityFailedToActivate(FailedReason);
 	}
 
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+
 protected:
 
 	//~UGameplayAbility interface
@@ -131,4 +134,10 @@ protected:
 	// Additional costs that must be paid to activate this ability
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = Costs, meta=(DisplayName="Additional Costs"))
 	TArray<TObjectPtr<UModularAbilityCost>> AdditionalCosts;
+
+	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnAbilityAdded"))
+	void K2_OnAbilityAdded();
+
+	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnAbilityRemoved"))
+	void K2_OnAbilityRemoved();
 };

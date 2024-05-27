@@ -46,6 +46,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Animation")
 	UAnimMontage* MeleeMontage;
 
+	// Animation Montage to play when item fails to activate (e.g. on cooldown, or not enough ammo)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Animation")
+	UAnimMontage* AbilityFailedMontage;
+
 	// List of animation layers to apply to the pawn on equip
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Animation")
 	TArray<FAnimationLayerRule> LayerRules;

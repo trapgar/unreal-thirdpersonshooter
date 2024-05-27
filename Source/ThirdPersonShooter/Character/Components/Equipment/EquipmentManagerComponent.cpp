@@ -19,7 +19,6 @@
 class FLifetimeProperty;
 struct FReplicationFlags;
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Inventory_Message_StackChanged, "Inventory.Message.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
 
@@ -242,6 +241,7 @@ UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer&
 void UEquipmentManagerComponent::BeginPlay()
 {
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	FGameplayTag TAG_Inventory_Message_StackChanged = FGameplayTag::RequestGameplayTag(FName("Inventory.Message.StackChanged"));
 	ListenerHandle = MessageSubsystem.RegisterListener(TAG_Inventory_Message_StackChanged, this, &ThisClass::OnInventoryStackChanged);
 
 	Super::BeginPlay();

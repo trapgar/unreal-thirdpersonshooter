@@ -10,3 +10,17 @@ UModularGameplayAbility::UModularGameplayAbility(const FObjectInitializer &Objec
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	NetSecurityPolicy = EGameplayAbilityNetSecurityPolicy::ClientOrServer;
 }
+
+void UModularGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	Super::OnGiveAbility(ActorInfo, Spec);
+
+	K2_OnAbilityAdded();
+}
+
+void UModularGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	K2_OnAbilityRemoved();
+
+	Super::OnRemoveAbility(ActorInfo, Spec);
+}

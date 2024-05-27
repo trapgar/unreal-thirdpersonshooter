@@ -30,6 +30,31 @@ void UGameFeatureAction_AddInputContextMapping::OnGameFeatureRegistering()
 	RegisterInputMappingContexts();
 }
 
+void UGameFeatureAction_AddInputContextMapping::OnGameFeatureLoading()
+{
+	Super::OnGameFeatureLoading();
+
+	// TODO: fix this
+	// Assets referenced by the ModularGameMode need to be loaded synchronously;
+	// otherwise they will be null on AddInputMappingForPlayer(...)
+	// Probably because ModularGameMode isn't a normal GameFeature.
+	for (const FInputMappingContextAndPriority& Entry : InputMappings)
+	{
+		const FSoftObjectPath& AssetPath = Entry.InputMapping.ToSoftObjectPath();
+		if (AssetPath.IsValid())
+		{
+			if (!Entry.InputMapping.IsValid())
+			{
+				Entry.InputMapping.LoadSynchronous();
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `UInputMappingContext` for IMC. Input mappings will not be added."));
+		}
+	}
+}
+
 void UGameFeatureAction_AddInputContextMapping::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
 	FPerContextData& ActiveData = ContextData.FindOrAdd(Context);

@@ -46,6 +46,7 @@ class UGameFeatureAction_AddInputContextMapping final : public UGameFeatureActio
 public:
 	//~UGameFeatureAction interface
 	virtual void OnGameFeatureRegistering() override;
+	virtual void OnGameFeatureLoading() override;
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 	virtual void OnGameFeatureUnregistering() override;
