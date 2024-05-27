@@ -56,3 +56,22 @@ Here's a step-by-step guide on how to use Gameplay Abilities:
 
 By following these steps, you'll be able to create complex gameplay abilities for your characters in Unreal Engine 5. Happy coding!
 ```
+
+## Developer Notes
+- Should the ModularAbilitySet replace the InputTag with a ref to the IA?
+- How would this affect abstract abilities like GA_Weapon_Fire_Auto?
+- Need to figure out how to keep track of inventory items that can vs can't stack
+- create an asset manager for the UEquipmentConfiguration UDataAsset
+
+---
+
+- Add a PawnCosmeticComponent to AModularPawn & have equipment attach to scene elements in that
+    - probably fine for this to just be a part of the EquipmentComponent?
+    - only case where it's not would be for truly cosmetic only things like character customization
+        - look to the SKM_MannyInvis
+- Figure out how to use AssetManager w/cosmetics etc. (Data registries?)
+- Add the NotifyName for post `Activate Anim Layer and Play Paired Montage` to listen for animation notify event
+- GA_Weapon_Fire works, but I need to look at `ULyraAbilitySystemComponent` & ProcessAbilityInput for WhileInputActive, etc
+- GameplayAbility has a field for 'Ability Triggers' where you can reference GameplayTags??
+- IMC isn't being added by the GM
+- input-based GA_ isn't working either
