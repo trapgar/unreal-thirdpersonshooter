@@ -21,6 +21,7 @@ struct FReplicationFlags;
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Weapon_Ammunition, "Equipment.Weapon.Ammunition");
 
 // --------------------------------------------------------
 // FEquipmentEntry
@@ -356,6 +357,7 @@ TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetAllItems() const
 	return EquipmentList.GetAllItems();
 }
 
+// TODO: implies that every equippable item in the inventory will be automatically equipped... probably not the case
 void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, const FInventoryChangedMessage& Notification)
 {
 	if (Notification.NewCount > 0)
@@ -364,7 +366,12 @@ void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, c
 		{
 			if (const UInventoryFragment_EquippableItem* Fragment = ItemDefinition->FindFragmentByClass<UInventoryFragment_EquippableItem>())
 			{
-				AddItem(Fragment->EquipmentDefinition);
+				AEquipmentItemInstance* EquipmentItem = AddItem(Fragment->EquipmentDefinition);
+
+				// Transfer any equipped weapon ammunition to the new item
+				int32 StackCount = Notification.Instance->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition);
+				EquipmentItem->AddStatTagStack(TAG_Equipment_Weapon_Ammunition, StackCount);
+				Notification.Instance->RemoveStatTagStack(TAG_Equipment_Weapon_Ammunition, StackCount);
 			}
 		}
 	}
