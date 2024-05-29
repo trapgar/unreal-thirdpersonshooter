@@ -369,9 +369,9 @@ void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, c
 				AEquipmentItemInstance* EquipmentItem = AddItem(Fragment->EquipmentDefinition);
 
 				// Transfer any equipped weapon ammunition to the new item
-				int32 StackCount = Notification.Instance->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition);
-				EquipmentItem->AddStatTagStack(TAG_Equipment_Weapon_Ammunition, StackCount);
-				Notification.Instance->RemoveStatTagStack(TAG_Equipment_Weapon_Ammunition, StackCount);
+				int32 Ammunition = Notification.Instance->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition);
+				EquipmentItem->AddStatTagStack(TAG_Equipment_Weapon_Ammunition, Ammunition);
+				Notification.Instance->RemoveStatTagStack(TAG_Equipment_Weapon_Ammunition, Ammunition);
 			}
 		}
 	}
