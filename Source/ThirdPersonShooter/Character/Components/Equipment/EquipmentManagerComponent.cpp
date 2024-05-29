@@ -360,6 +360,7 @@ TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetAllItems() const
 // TODO: implies that every equippable item in the inventory will be automatically equipped... probably not the case
 void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, const FInventoryChangedMessage& Notification)
 {
+	// Item added
 	if (Notification.NewCount > 0)
 	{
 		if (const UInventoryItemDefinition* ItemDefinition = Notification.Instance->GetItemDef())
@@ -374,6 +375,11 @@ void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, c
 				Notification.Instance->RemoveStatTagStack(TAG_Equipment_Weapon_Ammunition, Ammunition);
 			}
 		}
+	}
+	// Item removed
+	else
+	{
+		// TODO: find & unequip the matching item
 	}
 }
 
