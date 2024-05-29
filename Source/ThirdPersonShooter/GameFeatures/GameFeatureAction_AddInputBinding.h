@@ -26,6 +26,7 @@ class UGameFeatureAction_AddInputBinding final : public UGameFeatureAction_World
 
 public:
 	//~ Begin UGameFeatureAction interface
+	virtual void OnGameFeatureLoading() override;
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 	//~ End UGameFeatureAction interface
@@ -54,7 +55,7 @@ private:
 
 	void Reset(FPerContextData& ActiveData);
 	void HandlePawnExtension(AActor* Actor, FName EventName, FGameFeatureStateChangeContext ChangeContext);
-	void AddInputMappingForPlayer(APawn* Pawn, FPerContextData& ActiveData);
-	void RemoveInputMapping(APawn* Pawn, FPerContextData& ActiveData);
+	void AddInputBindingsForPlayer(APawn* Pawn, FPerContextData& ActiveData);
+	void RemoveInputBindingsFromPlayer(APawn* Pawn, FPerContextData& ActiveData);
 
 };

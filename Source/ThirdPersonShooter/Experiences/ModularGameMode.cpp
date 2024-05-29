@@ -1,4 +1,6 @@
 #include "ModularGameMode.h"
+#include "Character/ModularPlayerController.h"
+#include "Character/ModularCharacter.h"
 #include "GameFeaturesSubsystem.h"
 
 #include "CustomLogChannels.h"
@@ -6,6 +8,8 @@
 AModularGameMode::AModularGameMode(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	PlayerControllerClass = AModularPlayerController::StaticClass();
+	DefaultPawnClass = AModularCharacter::StaticClass();
 }
 
 void AModularGameMode::BeginPlay()

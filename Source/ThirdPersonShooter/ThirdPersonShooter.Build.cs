@@ -26,6 +26,7 @@ public class ThirdPersonShooter : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"GameplayTags",
+			"GameplayTasks",
 			"GameplayAbilities",
 			"GameplayMessageRuntime",
 			"GameplayMessageNodes",

@@ -44,9 +44,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Input")
 	UGameplayInputComponent* GameplayInputComponent;
 
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Inventory")
-	// UInventoryManagerComponent* InventoryManagerComponent;
-
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
 	virtual bool HasMatchingGameplayTag(FGameplayTag TagToCheck) const override;
 	virtual bool HasAllMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
@@ -56,8 +53,6 @@ protected:
 	virtual void PreInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void OnAbilitySystemInitialized();
-	virtual void OnAbilitySystemUninitialized();
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void UnPossessed() override;

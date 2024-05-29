@@ -1,6 +1,6 @@
 #include "ModularCharacter.h"
 #include "Components/GameFrameworkComponentManager.h"
-// #include "Components/Ability/ModularAbilitySystemComponent.h"
+#include "Components/Ability/ModularAbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
 
@@ -11,10 +11,9 @@ class UEnhancedInputLocalPlayerSubsystem;
 
 AModularCharacter::AModularCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-	// InventoryManagerComponent = CreateDefaultSubobject<UInventoryManagerComponent>(TEXT("InventoryManagerComponent"));
+	AbilitySystemComponent = CreateDefaultSubobject<UModularAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	GameplayInputComponent = CreateDefaultSubobject<UGameplayInputComponent>(TEXT("GameplayInputComponent"));
 }
 
@@ -35,14 +34,6 @@ void AModularCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
 	Super::EndPlay(EndPlayReason);
-}
-
-void AModularCharacter::OnAbilitySystemInitialized()
-{
-}
-
-void AModularCharacter::OnAbilitySystemUninitialized()
-{
 }
 
 void AModularCharacter::PossessedBy(AController *NewController)
@@ -89,6 +80,7 @@ void AModularCharacter::InitializeAbility(TSubclassOf<UGameplayAbility> AbilityT
 		{
 			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityToGet, AbilityLevel, 0));
 		}
+
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	}
 }
@@ -100,6 +92,8 @@ UAbilitySystemComponent* AModularCharacter::GetAbilitySystemComponent() const
 
 void AModularCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
 {
+	// TODO: Why are the gameplay tags all on the ASC instead of the Character?
+	// the Character supports tags...
 	if (auto ASC = GetAbilitySystemComponent())
 	{
 		ASC->GetOwnedGameplayTags(TagContainer);

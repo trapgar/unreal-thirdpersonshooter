@@ -85,7 +85,9 @@ public:
  * UModularGameplayAbility
  *
  * The base gameplay ability class used by this project.
- * Category `Triggers` is hidden because it's not flexible enough to be useful, so is replaced by `ActivationPolicy`.
+ * 
+ * Using a custom override of the `UGameplayAbility` class because the default implementation doesn't support `EModularAbilityActivationPolicy::WhileInputActive` ActivationPolicy.
+ * So we're hiding the default `Triggers` category & replacing it with `ActivationPolicy` / `ActivationGroup`.
  */
 UCLASS(Abstract, HideCategories = (Triggers), Meta = (ShortTooltip = "The base gameplay ability class used by this project."))
 class THIRDPERSONSHOOTER_API UModularGameplayAbility : public UGameplayAbility
@@ -104,6 +106,9 @@ public:
 
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+
+	EModularAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
+	EModularAbilityActivationGroup GetActivationGroup() const { return ActivationGroup; }
 
 protected:
 

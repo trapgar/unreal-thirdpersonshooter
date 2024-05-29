@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "GameFeatureAction_AddInputBinding.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/GameInstance.h"
@@ -9,7 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFeatures/GameFeatureAction_WorldActionBase.h"
-#include "../Character/Components/Input/GameplayInputComponent.h"
+#include "Character/Components/Input/GameplayInputComponent.h"
 
 
 #if WITH_EDITOR
@@ -19,6 +17,31 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddInputBinding)
 
 #define LOCTEXT_NAMESPACE "GameFeatures"
+
+void UGameFeatureAction_AddInputBinding::OnGameFeatureLoading()
+{
+	Super::OnGameFeatureLoading();
+
+	// TODO: fix this
+	// Assets referenced by the ModularGameMode need to be loaded synchronously;
+	// otherwise they will be null on AddInputBindingsForPlayer(...)
+	// Probably because ModularGameMode isn't a normal GameFeature.
+	for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
+	{
+		const FSoftObjectPath& AssetPath = Entry.ToSoftObjectPath();
+		if (AssetPath.IsValid())
+		{
+			if (!Entry.IsValid())
+			{
+				Entry.LoadSynchronous();
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `UGameplayInputConfiguration` '%s'. Input mappings will not be added."), *AssetPath.ToString());
+		}
+	}
+}
 
 void UGameFeatureAction_AddInputBinding::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -80,7 +103,7 @@ void UGameFeatureAction_AddInputBinding::Reset(FPerContextData& ActiveData)
 		TWeakObjectPtr<APawn> PawnPtr = ActiveData.PawnsAddedTo.Top();
 		if (PawnPtr.IsValid())
 		{
-			RemoveInputMapping(PawnPtr.Get(), ActiveData);
+			RemoveInputBindingsFromPlayer(PawnPtr.Get(), ActiveData);
 		}
 		else
 		{
@@ -96,15 +119,15 @@ void UGameFeatureAction_AddInputBinding::HandlePawnExtension(AActor* Actor, FNam
 
 	if ((EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved) || (EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved))
 	{
-		RemoveInputMapping(AsPawn, ActiveData);
+		RemoveInputBindingsFromPlayer(AsPawn, ActiveData);
 	}
 	else if ((EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded) || (EventName == UGameFrameworkComponentManager::NAME_ReceiverAdded))
 	{
-		AddInputMappingForPlayer(AsPawn, ActiveData);
+		AddInputBindingsForPlayer(AsPawn, ActiveData);
 	}
 }
 
-void UGameFeatureAction_AddInputBinding::AddInputMappingForPlayer(APawn* Pawn, FPerContextData& ActiveData)
+void UGameFeatureAction_AddInputBinding::AddInputBindingsForPlayer(APawn* Pawn, FPerContextData& ActiveData)
 {
 	APlayerController* PlayerController = Cast<APlayerController>(Pawn->GetController());
 
@@ -118,7 +141,7 @@ void UGameFeatureAction_AddInputBinding::AddInputMappingForPlayer(APawn* Pawn, F
 				{
 					if (const UGameplayInputConfiguration* BindSet = Entry.Get())
 					{
-						GameplayInputComponent->AddAdditionalInputConfig(BindSet);
+						GameplayInputComponent->AddAdditionalInputBindings(BindSet);
 					}
 				}
 			}
@@ -132,7 +155,7 @@ void UGameFeatureAction_AddInputBinding::AddInputMappingForPlayer(APawn* Pawn, F
 	}
 }
 
-void UGameFeatureAction_AddInputBinding::RemoveInputMapping(APawn* Pawn, FPerContextData& ActiveData)
+void UGameFeatureAction_AddInputBinding::RemoveInputBindingsFromPlayer(APawn* Pawn, FPerContextData& ActiveData)
 {
 	APlayerController* PlayerController = Cast<APlayerController>(Pawn->GetController());
 
@@ -146,7 +169,7 @@ void UGameFeatureAction_AddInputBinding::RemoveInputMapping(APawn* Pawn, FPerCon
 				{
 					if (const UGameplayInputConfiguration* InputConfig = Entry.Get())
 					{
-						GameplayInputComponent->RemoveAdditionalInputConfig(InputConfig);
+						GameplayInputComponent->RemoveAdditionalInputBindings(InputConfig);
 					}
 				}
 			}

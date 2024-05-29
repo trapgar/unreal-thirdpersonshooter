@@ -9,6 +9,9 @@ UModularGameplayAbility::UModularGameplayAbility(const FObjectInitializer &Objec
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	NetSecurityPolicy = EGameplayAbilityNetSecurityPolicy::ClientOrServer;
+
+	ActivationPolicy = EModularAbilityActivationPolicy::OnInputTriggered;
+	ActivationGroup = EModularAbilityActivationGroup::Independent;
 }
 
 void UModularGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)

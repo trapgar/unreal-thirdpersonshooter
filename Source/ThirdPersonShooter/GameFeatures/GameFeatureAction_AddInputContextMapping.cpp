@@ -86,9 +86,12 @@ void UGameFeatureAction_AddInputContextMapping::OnGameFeatureUnregistering()
 
 void UGameFeatureAction_AddInputContextMapping::RegisterInputMappingContexts()
 {
-	RegisterInputContextMappingsForGameInstanceHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_AddInputContextMapping::RegisterInputContextMappingsForGameInstance);
+	RegisterInputContextMappingsForGameInstanceHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this,
+		&UGameFeatureAction_AddInputContextMapping::RegisterInputContextMappingsForGameInstance
+	);
 
 	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
+
 	for (TIndirectArray<FWorldContext>::TConstIterator WorldContextIterator = WorldContexts.CreateConstIterator(); WorldContextIterator; ++WorldContextIterator)
 	{
 		RegisterInputContextMappingsForGameInstance(WorldContextIterator->OwningGameInstance);

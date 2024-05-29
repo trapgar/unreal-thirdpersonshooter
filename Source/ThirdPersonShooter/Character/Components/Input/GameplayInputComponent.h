@@ -26,8 +26,8 @@ public:
 
 	UGameplayInputComponent(const FObjectInitializer& ObjectInitializer);
 
-	void AddAdditionalInputConfig(const UGameplayInputConfiguration* InputConfig);
-	void RemoveAdditionalInputConfig(const UGameplayInputConfiguration* InputConfig);
+	void AddAdditionalInputBindings(const UGameplayInputConfiguration* InputConfig);
+	void RemoveAdditionalInputBindings(const UGameplayInputConfiguration* InputConfig);
 
 	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 	void BindAbilityActions(const UGameplayInputConfiguration* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);

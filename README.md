@@ -71,7 +71,4 @@ By following these steps, you'll be able to create complex gameplay abilities fo
         - look to the SKM_MannyInvis
 - Figure out how to use AssetManager w/cosmetics etc. (Data registries?)
 - Add the NotifyName for post `Activate Anim Layer and Play Paired Montage` to listen for animation notify event
-- GA_Weapon_Fire works, but I need to look at `ULyraAbilitySystemComponent` & ProcessAbilityInput for WhileInputActive, etc
-- GameplayAbility has a field for 'Ability Triggers' where you can reference GameplayTags??
-- IMC isn't being added by the GM
-- input-based GA_ isn't working either
+- Lyra has the AbilitySystemComponent off the PlayerState, not the Pawn, where is the best location?

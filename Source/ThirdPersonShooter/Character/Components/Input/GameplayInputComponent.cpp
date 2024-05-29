@@ -3,6 +3,7 @@
 #include "GameplayInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "Character/Components/Ability/ModularAbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayInputComponent)
 
@@ -13,7 +14,7 @@ UGameplayInputComponent::UGameplayInputComponent(const FObjectInitializer& Objec
 {
 }
 
-void UGameplayInputComponent::AddAdditionalInputConfig(const UGameplayInputConfiguration *InputConfig)
+void UGameplayInputComponent::AddAdditionalInputBindings(const UGameplayInputConfiguration *InputConfig)
 {
 	check(InputConfig);
 
@@ -38,10 +39,10 @@ void UGameplayInputComponent::AddAdditionalInputConfig(const UGameplayInputConfi
 	// This is where we actually bind and input action to a gameplay tag, which means that Gameplay Ability Blueprints will
 	// be triggered directly by these input actions Triggered events. 
 	TArray<uint32> BindHandles;
-	BindAbilityActions(InputConfig, this, &UGameplayInputComponent::Input_AbilityInputTagPressed, &UGameplayInputComponent::Input_AbilityInputTagReleased, /*out*/ BindHandles);
+	BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
 }
 
-void UGameplayInputComponent::RemoveAdditionalInputConfig(const UGameplayInputConfiguration* InputConfig)
+void UGameplayInputComponent::RemoveAdditionalInputBindings(const UGameplayInputConfiguration* InputConfig)
 {
 	// TODO: Not even implemented in Lyra
 }
@@ -77,18 +78,9 @@ void UGameplayInputComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag
 	{
 		if (UAbilitySystemComponent* ASC = Pawn->GetAbilitySystemComponent())
 		{
-			// ASC->AbilityInputTagPressed(InputTag);
-			if (InputTag.IsValid())
+			if (UModularAbilitySystemComponent* MASC = Cast<UModularAbilitySystemComponent>(ASC))
 			{
-				for (const FGameplayAbilitySpec& AbilitySpec : ASC->GetActivatableAbilities())
-				{
-					if (AbilitySpec.Ability && (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)))
-					{
-						// FGameplayAbilitySpec NonConstAbilitySpec = AbilitySpec;
-						// ASC->AbilitySpecInputPressed(NonConstAbilitySpec);
-						ASC->TryActivateAbility(AbilitySpec.Handle);
-					}
-				}
+				MASC->AbilityInputTagPressed(InputTag);
 			}
 		}
 	}
@@ -100,17 +92,9 @@ void UGameplayInputComponent::Input_AbilityInputTagReleased(FGameplayTag InputTa
 	{
 		if (UAbilitySystemComponent* ASC = Pawn->GetAbilitySystemComponent())
 		{
-			// ASC->AbilityInputTagReleased(InputTag);
-			if (InputTag.IsValid())
+			if (UModularAbilitySystemComponent* MASC = Cast<UModularAbilitySystemComponent>(ASC))
 			{
-				for (const FGameplayAbilitySpec& AbilitySpec : ASC->GetActivatableAbilities())
-				{
-					if (AbilitySpec.Ability && (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)))
-					{
-						// FGameplayAbilitySpec NonConstAbilitySpec = AbilitySpec;
-						// ASC->AbilitySpecInputReleased(NonConstAbilitySpec);
-					}
-				}
+				MASC->AbilityInputTagReleased(InputTag);
 			}
 		}
 	}
