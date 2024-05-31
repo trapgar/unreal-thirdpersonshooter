@@ -85,11 +85,6 @@ void AModularCharacter::InitializeAbility(TSubclassOf<UGameplayAbility> AbilityT
 	}
 }
 
-UAbilitySystemComponent* AModularCharacter::GetAbilitySystemComponent() const
-{
-    return AbilitySystemComponent;
-}
-
 void AModularCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
 {
 	// TODO: Why are the gameplay tags all on the ASC instead of the Character?

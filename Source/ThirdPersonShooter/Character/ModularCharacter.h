@@ -31,14 +31,17 @@ public:
 
 	//~IAbilitySystemInterface interface
 	// what is this used for?
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Character|Abilities")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Abilities")
 	UAbilitySystemComponent* AbilitySystemComponent;
 
 	// what is this used for?
 	UFUNCTION(BlueprintCallable, Category = "Character|Abilities")
 	void InitializeAbility(TSubclassOf<UGameplayAbility> AbilityToGet, int32 AbilityLevel = 1);
 
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
+	{
+		return AbilitySystemComponent;
+	}
 	//~End of IAbilitySystemInterface interface
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Input")
