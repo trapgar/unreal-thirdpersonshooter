@@ -370,6 +370,7 @@ void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, c
 				AEquipmentItemInstance* EquipmentItem = AddItem(Fragment->EquipmentDefinition);
 
 				// Transfer any equipped weapon ammunition to the new item
+				Notification.Instance->AddSpawnedActor(EquipmentItem);
 				int32 Ammunition = Notification.Instance->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition);
 				EquipmentItem->AddStatTagStack(TAG_Equipment_Weapon_Ammunition, Ammunition);
 				Notification.Instance->RemoveStatTagStack(TAG_Equipment_Weapon_Ammunition, Ammunition);
@@ -379,7 +380,13 @@ void UEquipmentManagerComponent::OnInventoryStackChanged(FGameplayTag Channel, c
 	// Item removed
 	else
 	{
-		// TODO: find & unequip the matching item
+		for (AActor* Actor : Notification.Instance->GetSpawnedActors())
+		{
+			if (AEquipmentItemInstance* EquipmentItem = Cast<AEquipmentItemInstance>(Actor))
+			{
+				RemoveItem(EquipmentItem);
+			}
+		}
 	}
 }
 

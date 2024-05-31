@@ -58,6 +58,10 @@ public:
 
 	void SetItemDef(UInventoryItemDefinition* InDef);
 
+	void AddSpawnedActor(AActor* Actor) { SpawnedActors.Emplace(Actor); }
+
+	TArray<AActor*>& GetSpawnedActors() { return SpawnedActors; }
+
 	friend struct FInventoryList;
 
 private:
@@ -67,4 +71,6 @@ private:
 	// The item definition
 	UPROPERTY(Replicated)
 	UInventoryItemDefinition* ItemDef;
+
+	TArray<AActor*> SpawnedActors;
 };
