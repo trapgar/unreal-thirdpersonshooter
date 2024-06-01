@@ -61,7 +61,15 @@
 			"Enabled": true
 		},
 		{
+			"Name": "VehiclesAndNavigation",
+			"Enabled": true
+		},
+		{
 			"Name": "Chooser",
+			"Enabled": true
+		},
+		{
+			"Name": "Cargo",
 			"Enabled": true
 		}
 	],

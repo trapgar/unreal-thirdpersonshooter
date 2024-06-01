@@ -72,3 +72,5 @@ By following these steps, you'll be able to create complex gameplay abilities fo
 - Figure out how to use AssetManager w/cosmetics etc. (Data registries?)
 - Add the NotifyName for post `Activate Anim Layer and Play Paired Montage` to listen for animation notify event
 - Lyra has the `AbilitySystemComponent` off the PlayerState, not the Pawn, where is the best location?
+- `ADrivableSpaceVehicle` doesn't hear input events (IA or otherwise)
+    - Lyra uses `GA_Collectable` which grants an Interaction Ability

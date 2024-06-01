@@ -16,6 +16,7 @@ void AModularGameMode::BeginPlay()
 {
 	if (Actions.Num() > 0)
 	{
+		// TODO: properly mock the context so that all the assets are actually loaded
 		FGameFeatureActivatingContext Context = FGameFeatureActivatingContext();
 		for (UGameFeatureAction* Action : Actions)
 		{
@@ -55,7 +56,7 @@ void AModularGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 		else
 		{
-			ensureMsgf(false, TEXT("OnExperienceLoadComplete failed to find plugin URL from PluginName %s for game mode %s - fix data, ignoring for this run"), *PluginName, *this->GetPrimaryAssetId().ToString());
+			ensureMsgf(false, TEXT("OnEndPlay failed to find plugin URL from PluginName %s for game mode %s - fix data, ignoring for this run"), *PluginName, *this->GetPrimaryAssetId().ToString());
 		}
 	}
 }
