@@ -1,6 +1,6 @@
 #include "ModularCharacter.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Components/Ability/ModularAbilitySystemComponent.h"
+#include "Ability/ModularAbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
 

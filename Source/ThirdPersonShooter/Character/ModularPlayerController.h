@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
-#include "Components/Ability/ModularAbilitySystemComponent.h"
+#include "Ability/ModularAbilitySystemComponent.h"
 #include "AbilitySystemComponent.h"
 
 #include "ModularPlayerController.generated.h"

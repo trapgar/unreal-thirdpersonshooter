@@ -4,7 +4,7 @@
 
 #include "GameFeatureAction_WorldActionBase.h"
 #include "UObject/SoftObjectPtr.h"
-#include "Character/Components/Input/GameplayInputConfiguration.h"
+#include "Input/GameplayInputConfiguration.h"
 
 #include "GameFeatureAction_AddInputBinding.generated.h"
 

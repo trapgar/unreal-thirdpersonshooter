@@ -50,7 +50,7 @@ EDataValidationResult UGameFeatureAction_AddLevelInstance::IsDataValid(FDataVali
 
 	for (const FGameFeatureLevelInstanceEntry& Entry : LevelInstanceList)
 	{
-		if (!Entry.LevelInstance.Get())
+		if (Entry.LevelInstance.IsNull())
 		{
 			Result = EDataValidationResult::Invalid;
 			Context.AddError(FText::Format(LOCTEXT("LevelEntryNull", "Null level reference at index {0} in LevelInstanceList"), FText::AsNumber(EntryIndex)));

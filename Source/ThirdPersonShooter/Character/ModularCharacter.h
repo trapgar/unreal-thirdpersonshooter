@@ -6,8 +6,7 @@
 #include "GameplayTagAssetInterface.h"
 #include "GameFramework/Character.h"
 #include "Abilities/GameplayAbility.h"
-#include "Components/Input/GameplayInputComponent.h"
-#include "Components/Inventory/InventoryManagerComponent.h"
+#include "Input/GameplayInputComponent.h"
 
 #include "ModularCharacter.generated.h"
 

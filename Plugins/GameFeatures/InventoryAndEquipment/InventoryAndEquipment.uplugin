@@ -22,5 +22,19 @@
 			"LoadingPhase": "Default"
 		}
 	],
-	"BuiltInInitialFeatureState": "Registered"
+	"BuiltInInitialFeatureState": "Registered",
+	"Plugins": [
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayMessageRouter",
+			"Enabled": true
+		},
+		{
+			"Name": "ModularGameplay",
+			"Enabled": true
+		}
+	]
 }

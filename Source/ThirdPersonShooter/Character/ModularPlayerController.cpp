@@ -1,5 +1,5 @@
 #include "ModularPlayerController.h"
-#include "Components/Ability/ModularAbilitySystemComponent.h"
+#include "Ability/ModularAbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularPlayerController)
 

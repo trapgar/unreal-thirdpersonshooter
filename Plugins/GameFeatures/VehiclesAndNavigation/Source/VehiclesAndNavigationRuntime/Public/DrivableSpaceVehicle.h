@@ -10,7 +10,7 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "ThirdPersonShooter/Character/Components/Input/GameplayInputComponent.h"
+#include "ThirdPersonShooter/Input/GameplayInputComponent.h"
 
 #include "DrivableSpaceVehicle.generated.h"
 

@@ -7,7 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFeatures/GameFeatureAction_WorldActionBase.h"
-#include "Character/Components/Input/GameplayInputComponent.h"
+#include "Input/GameplayInputComponent.h"
 
 
 #if WITH_EDITOR

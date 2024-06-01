@@ -4,7 +4,7 @@
 
 #include "GameFeatureAction_WorldActionBase.h"
 #include "Abilities/GameplayAbility.h"
-#include "Character/Components/Ability/ModularAbilitySet.h"
+#include "Ability/ModularAbilitySet.h"
 
 #include "GameFeatureAction_AddAbilities.generated.h"
 

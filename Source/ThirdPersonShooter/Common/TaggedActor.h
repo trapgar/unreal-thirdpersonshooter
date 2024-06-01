@@ -10,7 +10,7 @@
 
 // An actor that implements the gameplay tag asset interface
 UCLASS()
-class ATaggedActor : public AActor, public IGameplayTagAssetInterface
+class THIRDPERSONSHOOTER_API ATaggedActor : public AActor, public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
