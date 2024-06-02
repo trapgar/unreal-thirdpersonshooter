@@ -12,16 +12,17 @@
 #include "Camera/CameraComponent.h"
 #include "ThirdPersonShooter/Input/GameplayInputComponent.h"
 
-#include "DrivableSpaceVehicle.generated.h"
+#include "DrivableAircraft.generated.h"
 
+// A Pawn players can control that has vertical and horizontal movement
 UCLASS(Blueprintable, BlueprintType)
-class VEHICLESANDNAVIGATIONRUNTIME_API ADrivableSpaceVehicle : public APawn, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
+class VEHICLESANDNAVIGATIONRUNTIME_API ADrivableAircraft : public APawn, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this pawn's properties
-	ADrivableSpaceVehicle();
+	ADrivableAircraft();
 
 public:
 	// Called every frame
