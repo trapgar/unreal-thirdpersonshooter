@@ -43,7 +43,6 @@ void ADrivableAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ADrivableAircraft::PossessedBy(AController *NewController)
 {
 	Super::PossessedBy(NewController);
-	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_BindInputsNow);
 }
 
 void ADrivableAircraft::UnPossessed()

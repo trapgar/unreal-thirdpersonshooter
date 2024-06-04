@@ -63,6 +63,10 @@ By following these steps, you'll be able to create complex gameplay abilities fo
 - Need to figure out how to keep track of inventory items that can vs can't stack
 - create an asset manager for the UEquipmentConfiguration UDataAsset
 
+## Open Questions
+- What is the difference between a `GameplayCue`, and a `GameplayEvent` in terms of GameplayTags?
+    - assume `GameplayCue` 'Hey, you're supposed to do X now', and `GameplayEvent` is 'Y just happened'
+
 ---
 
 - Add a PawnCosmeticComponent to `AModularPawn` & have equipment attach to scene elements in that
