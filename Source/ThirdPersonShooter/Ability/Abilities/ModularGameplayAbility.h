@@ -110,6 +110,12 @@ public:
 	EModularAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 	EModularAbilityActivationGroup GetActivationGroup() const { return ActivationGroup; }
 
+	UFUNCTION(BlueprintCallable, Category = "Ability|Controller")
+	AController* GetControllerFromActorInfo() const
+	{
+		return (CurrentActorInfo ? CurrentActorInfo->PlayerController.Get() : nullptr);
+	}
+
 	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
 
 protected:
