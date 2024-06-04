@@ -175,3 +175,8 @@ void UModularAbilitySystemComponent::ClearAbilityInput()
 	InputReleasedSpecHandles.Reset();
 	InputHeldSpecHandles.Reset();
 }
+
+void UModularAbilitySystemComponent::HandleControllerChanged()
+{
+	RefreshAbilityActorInfo();
+}

@@ -7,13 +7,18 @@
 #include "InteractionQuery.generated.h"
 
 
-/**  */
+/**
+ * FInteractionQuery
+ * 
+ * Data used for performing interaction (line-trace) queries.
+ */
 USTRUCT(BlueprintType)
-struct FInteractionQuery
+struct THIRDPERSONSHOOTER_API FInteractionQuery
 {
 	GENERATED_BODY()
 
 public:
+
 	/** The requesting pawn. */
 	UPROPERTY(BlueprintReadWrite)
 	TWeakObjectPtr<AActor> RequestingAvatar;

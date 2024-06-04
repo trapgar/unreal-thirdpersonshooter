@@ -16,7 +16,7 @@ void AModularGameMode::BeginPlay()
 {
 	if (Actions.Num() > 0)
 	{
-		// TODO: properly mock the context so that all the assets are actually loaded
+		// TODO: properly mock the context so that all the SoftPtr assets are actually loaded
 		FGameFeatureActivatingContext Context = FGameFeatureActivatingContext();
 		for (UGameFeatureAction* Action : Actions)
 		{

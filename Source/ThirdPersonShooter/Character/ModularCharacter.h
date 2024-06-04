@@ -16,6 +16,11 @@ class UInputComponent;
 struct FGameplayTag;
 struct FGameplayTagContainer;
 
+/**
+ * AModularCharacter
+ * 
+ * Base class for characters that make use of the Modular ASC, etc.
+ */
 UCLASS(Config = Game, Meta = (ShortTooltip = "The base character pawn class used by this project."))
 class THIRDPERSONSHOOTER_API AModularCharacter : public ACharacter, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {
@@ -33,14 +38,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Abilities")
 	UAbilitySystemComponent* AbilitySystemComponent;
 
-	// what is this used for?
-	UFUNCTION(BlueprintCallable, Category = "Character|Abilities")
-	void InitializeAbility(TSubclassOf<UGameplayAbility> AbilityToGet, int32 AbilityLevel = 1);
-
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
-	{
-		return AbilitySystemComponent;
-	}
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
+	template<class T>
+	T* GetAbilitySystemComponent() const { return Cast<T>(AbilitySystemComponent); }
 	//~End of IAbilitySystemInterface interface
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Input")

@@ -7,14 +7,14 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayInputComponent)
 
-class UGameplayInputConfiguration;
+class UInputActionToGameplayTagBindings;
 
 UGameplayInputComponent::UGameplayInputComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
 
-void UGameplayInputComponent::AddAdditionalInputBindings(const UGameplayInputConfiguration *InputConfig)
+void UGameplayInputComponent::AddAdditionalInputBindings(const UInputActionToGameplayTagBindings *InputConfig)
 {
 	check(InputConfig);
 
@@ -42,7 +42,7 @@ void UGameplayInputComponent::AddAdditionalInputBindings(const UGameplayInputCon
 	BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
 }
 
-void UGameplayInputComponent::RemoveAdditionalInputBindings(const UGameplayInputConfiguration* InputConfig)
+void UGameplayInputComponent::RemoveAdditionalInputBindings(const UInputActionToGameplayTagBindings* InputConfig)
 {
 	// TODO: Not even implemented in Lyra
 }
@@ -58,11 +58,11 @@ void UGameplayInputComponent::RemoveBinds(TArray<uint32>& BindHandles)
 }
 
 template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
-void UGameplayInputComponent::BindAbilityActions(const UGameplayInputConfiguration* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles)
+void UGameplayInputComponent::BindAbilityActions(const UInputActionToGameplayTagBindings* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles)
 {
 	check(InputConfig);
 
-	for (const FRuntimeInputAction& Action : InputConfig->AbilityInputActions)
+	for (const FInputTagActionBinding& Action : InputConfig->AbilityInputActions)
 	{
 		if (Action.InputAction && Action.InputTag.IsValid())
 		{

@@ -37,7 +37,7 @@ struct FModularAbilityTagRelationship
 };
 
 
-/** Mapping of how ability tags block or cancel other abilities */
+/** Mapping of how ability tags block, cancel, or rely on other abilities */
 UCLASS()
 class UModularAbilityTagRelationshipMapping : public UDataAsset
 {

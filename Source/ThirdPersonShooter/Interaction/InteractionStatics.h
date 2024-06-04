@@ -15,7 +15,11 @@ struct FFrame;
 struct FHitResult;
 struct FOverlapResult;
 
-/**  */
+/**
+ * UInteractionStatics
+ * 
+ * Helper functions for working with interactable targets.
+ */
 UCLASS()
 class UInteractionStatics : public UBlueprintFunctionLibrary
 {

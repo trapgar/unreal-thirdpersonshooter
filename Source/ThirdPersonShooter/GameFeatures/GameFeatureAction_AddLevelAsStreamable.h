@@ -47,7 +47,14 @@ struct FGameFeatureLevelAsStreamableEntry
 // UGameFeatureAction_AddLevelAsStreamable
 
 /**
+ * UGameFeatureAction_AddLevelAsStreamable
+ * 
  * Loads specified level instances at runtime.
+ * 
+ * TODO: Pulled from the Unreal sample project ValleyoftheAncient. They called it `AddLevelInstance`, but it actually required a UWorld instead of an ALevelInstance.
+ * So I changed it renamed it to `AddLevelAsStreamable` so I could use the same name for a GFA that actually loads level instances.
+ * 
+ * However, I don't think the AddLevelInstance uses streaming, which I may want to investigate.
  */
 UCLASS(MinimalAPI, meta = (DisplayName = "Add Level As Streamable"))
 class UGameFeatureAction_AddLevelAsStreamable final : public UGameFeatureAction_WorldActionBase

@@ -4,7 +4,7 @@
 
 #include "GameFeatureAction_WorldActionBase.h"
 #include "UObject/SoftObjectPtr.h"
-#include "Input/GameplayInputConfiguration.h"
+#include "Input/InputActionToGameplayTagBindings.h"
 
 #include "GameFeatureAction_AddInputBinding.generated.h"
 
@@ -13,11 +13,12 @@ class UInputMappingContext;
 class UPlayer;
 class APlayerController;
 struct FComponentRequestHandle;
-class UGameplayInputConfiguration;
+class UInputActionToGameplayTagBindings;
 
 /**
- * Adds InputMappingContext to local players' EnhancedInput system. 
- * Expects that local players are set up to use the EnhancedInput system.
+ * UGameFeatureAction_AddInputBinding
+ * 
+ * Adds the relationship between an input action and Input Gameplay Tag to the `UGameplayInputComponent`.
  */
 UCLASS(MinimalAPI, meta = (DisplayName = "Add Input Binding"))
 class UGameFeatureAction_AddInputBinding final : public UGameFeatureAction_WorldActionBase
@@ -37,8 +38,9 @@ public:
 #endif
 	//~ End UObject interface
 
-	UPROPERTY(EditAnywhere, Category="Input", meta=(AssetBundles="Client,Server"))
-	TArray<TSoftObjectPtr<const UGameplayInputConfiguration>> InputConfigs;
+	// List of Gameplay input actions to bind
+	UPROPERTY(EditAnywhere, Category="Input", meta=(AssetBundles="Client,Server"), meta=(DisplayName="Input Bindings"))
+	TArray<TSoftObjectPtr<const UInputActionToGameplayTagBindings>> InputConfigs;
 
 private:
 	struct FPerContextData

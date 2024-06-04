@@ -16,7 +16,9 @@ struct FGameplayAbilityTargetDataHandle;
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_AbilityInputBlocked);
 
 /**
+ * Modular Ability System Component that extends the ability system component for tying Abilities to Input Gameplay Tags.
  * 
+ * Also supports more flexible activation policies, like `WhileInputActive`.
  */
 UCLASS()
 class THIRDPERSONSHOOTER_API UModularAbilitySystemComponent : public UAbilitySystemComponent
@@ -31,6 +33,9 @@ public:
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
 	void ProcessAbilityInput(float DeltaTime, bool bGamePaused);
 	void ClearAbilityInput();
+
+	/** Should be called by the owning pawn when the pawn's controller changes. */
+	void HandleControllerChanged();
 
 protected:
 

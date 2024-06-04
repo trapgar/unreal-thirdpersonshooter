@@ -8,7 +8,11 @@
 
 #include "TaggedActor.generated.h"
 
-// An actor that implements the gameplay tag asset interface
+/**
+ * ATaggedActor
+ * 
+ * An Actor that has gameplay-related tags.
+ */
 UCLASS()
 class THIRDPERSONSHOOTER_API ATaggedActor : public AActor, public IGameplayTagAssetInterface
 {

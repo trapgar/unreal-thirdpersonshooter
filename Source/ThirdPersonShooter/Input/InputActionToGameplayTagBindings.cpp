@@ -1,17 +1,17 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GameplayInputConfiguration.h"
+#include "InputActionToGameplayTagBindings.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayInputConfiguration)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(InputActionToGameplayTagBindings)
 
 
-UGameplayInputConfiguration::UGameplayInputConfiguration(const FObjectInitializer& ObjectInitializer)
+UInputActionToGameplayTagBindings::UInputActionToGameplayTagBindings(const FObjectInitializer& ObjectInitializer)
 {
 }
 
-const UInputAction* UGameplayInputConfiguration::FindNativeInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFound) const
+const UInputAction* UInputActionToGameplayTagBindings::FindNativeInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFound) const
 {
-	for (const FRuntimeInputAction& Action : NativeInputActions)
+	for (const FInputTagActionBinding& Action : NativeInputActions)
 	{
 		if (Action.InputAction && (Action.InputTag == InputTag))
 		{
@@ -27,9 +27,9 @@ const UInputAction* UGameplayInputConfiguration::FindNativeInputActionForTag(con
 	return nullptr;
 }
 
-const UInputAction* UGameplayInputConfiguration::FindAbilityInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFound) const
+const UInputAction* UInputActionToGameplayTagBindings::FindAbilityInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFound) const
 {
-	for (const FRuntimeInputAction& Action : AbilityInputActions)
+	for (const FInputTagActionBinding& Action : AbilityInputActions)
 	{
 		if (Action.InputAction && (Action.InputTag == InputTag))
 		{

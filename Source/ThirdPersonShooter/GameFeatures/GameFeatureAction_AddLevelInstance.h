@@ -48,7 +48,7 @@ struct FGameFeatureLevelInstanceEntry
 // UGameFeatureAction_AddLevelInstance
 
 /**
- * Loads specified level instances at runtime.
+ * Loads the specified level instances at runtime to the linked UWorld.
  */
 UCLASS(MinimalAPI, meta = (DisplayName = "Add Level Instances"))
 class UGameFeatureAction_AddLevelInstance final : public UGameFeatureAction_WorldActionBase
@@ -68,7 +68,7 @@ public:
 	//~ End UObject interface
 
 	/** List of levels to dynamically load when this game feature is enabled */
-	UPROPERTY(EditAnywhere, Category="Level Instances", meta=(TitleProperty="Level", ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, Category="Level Instances", meta=(TitleProperty="LevelInstance", ShowOnlyInnerProperties))
 	TArray<FGameFeatureLevelInstanceEntry> LevelInstanceList;
 
 private:

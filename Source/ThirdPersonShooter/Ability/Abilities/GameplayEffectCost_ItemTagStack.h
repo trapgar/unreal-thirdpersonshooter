@@ -14,6 +14,8 @@ class UObject;
 struct FGameplayAbilityActorInfo;
 
 /**
+ * UGameplayEffectCost_ItemTagStack
+ * 
  * Represents a cost that requires expending a quantity of a tag stack on the associated item instance
  */
 UCLASS(Blueprintable, DefaultToInstanced, EditInlineNew, Const, meta=(DisplayName="Item Tag Stack"))

@@ -18,6 +18,64 @@
 // --------------------------------------------------------
 // UGameFeatureAction_AddAbilities
 
+void UGameFeatureAction_AddAbilities::OnGameFeatureLoading()
+{
+	Super::OnGameFeatureLoading();
+
+	// TODO: fix this
+	// Assets referenced by the ModularGameMode need to be loaded synchronously;
+	// otherwise they will be null on load
+	// Probably because ModularGameMode isn't a normal GameFeature.
+	for (const FGameFeatureAbilitiesEntry& Entry : AbilitiesList)
+	{
+		for (auto Set : Entry.GrantedAbilities)
+		{
+			const FSoftObjectPath& AssetPath = Set.AbilityType.ToSoftObjectPath();
+			if (AssetPath.IsValid())
+			{
+				if (!Set.AbilityType.IsValid())
+				{
+					Set.AbilityType.LoadSynchronous();
+				}
+			}
+			else
+			{
+				UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.GrantedAbilities` for AddAbilities. Abilities will not be added."));
+			}
+		}
+		for (auto Set : Entry.GrantedAttributes)
+		{
+			const FSoftObjectPath& AssetPath = Set.AttributeSetType.ToSoftObjectPath();
+			if (AssetPath.IsValid())
+			{
+				if (!Set.AttributeSetType.IsValid())
+				{
+					Set.AttributeSetType.LoadSynchronous();
+				}
+			}
+			else
+			{
+				UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.GrantedAttributes` for AddAbilities. Abilities will not be added."));
+			}
+		}
+		for (auto Set : Entry.GrantedAbilitySets)
+		{
+			const FSoftObjectPath& AssetPath = Set.ToSoftObjectPath();
+			if (AssetPath.IsValid())
+			{
+				if (!Set.IsValid())
+				{
+					Set.LoadSynchronous();
+				}
+			}
+			else
+			{
+				UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.GrantedAbilitySets` for AddAbilities. Abilities will not be added."));
+			}
+		}
+	}
+}
+
 void UGameFeatureAction_AddAbilities::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
 	Super::OnGameFeatureActivating(Context);

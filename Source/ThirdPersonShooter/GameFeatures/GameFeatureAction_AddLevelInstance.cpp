@@ -26,7 +26,6 @@
 
 struct FGameFeatureDeactivatingContext;
 
-DEFINE_LOG_CATEGORY_STATIC(GameFeatures, Log, All);
 #define LOCTEXT_NAMESPACE "GameFeatures"
 
 // --------------------------------------------------------

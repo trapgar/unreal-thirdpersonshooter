@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Abilities/GameplayAbility.h"
+#include "AbilitySystemComponent.h"
 
 #include "ModularGameplayAbility.generated.h"
 
@@ -35,6 +36,7 @@ enum class EModularAbilityActivationPolicy : uint8
 	OnInputTriggered,
 
 	// Continually try to activate the ability while the input is active.
+	// Note that the `InputAction` must NOT have a trigger, or the GameplayAbility will finish immediately after activating.
 	WhileInputActive,
 
 	// Try to activate the ability when an avatar is assigned.
@@ -87,9 +89,10 @@ public:
  * The base gameplay ability class used by this project.
  * 
  * Using a custom override of the `UGameplayAbility` class because the default implementation doesn't support `EModularAbilityActivationPolicy::WhileInputActive` ActivationPolicy.
- * So we're hiding the default `Triggers` category & replacing it with `ActivationPolicy` / `ActivationGroup`.
+ * 
+ * The default `Triggers` category is still used when the trigger is a GameplayEvent (triggered programmatically).
  */
-UCLASS(Abstract, HideCategories = (Triggers), Meta = (ShortTooltip = "The base gameplay ability class used by this project."))
+UCLASS(Abstract, Meta = (ShortTooltip = "The base gameplay ability class used by this project."))
 class THIRDPERSONSHOOTER_API UModularGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
@@ -104,19 +107,18 @@ public:
 		// ScriptOnAbilityFailedToActivate(FailedReason);
 	}
 
-	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-
 	EModularAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 	EModularAbilityActivationGroup GetActivationGroup() const { return ActivationGroup; }
+
+	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
 
 protected:
 
 	//~UGameplayAbility interface
 	// virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
 	// virtual void SetCanBeCanceled(bool bCanBeCanceled) override;
-	// virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	// virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	// virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	// virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 	// virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;

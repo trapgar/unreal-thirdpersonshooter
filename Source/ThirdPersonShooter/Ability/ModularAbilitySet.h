@@ -117,7 +117,7 @@ protected:
 /**
  * UModularAbilitySet
  *
- *	Non-mutable data asset used to grant gameplay abilities and gameplay effects.
+ *	Non-mutable data asset used to grant gameplay abilities, attributes, effects.
  */
 UCLASS(BlueprintType, Const)
 class THIRDPERSONSHOOTER_API UModularAbilitySet : public UPrimaryDataAsset

@@ -7,7 +7,11 @@
 
 namespace UE::GameFeatures { struct FResult; }
 
-/** Please add a class description */
+/**
+ * AModularGameMode
+ * 
+ * Game mode that dynamically loads game features on startup.
+ */
 UCLASS(Blueprintable, BlueprintType, Config = Game, HideCategories = ("Actor Tick", "Game", "Game Mode", "Physics", "Events", "Level Instance", "Cooking"), Meta = (ShortTooltip = "The base game mode class used by this project."))
 class AModularGameMode : public AGameModeBase
 {

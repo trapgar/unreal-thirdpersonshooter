@@ -6,6 +6,7 @@
 DEFINE_LOG_CATEGORY(LogExperience);
 DEFINE_LOG_CATEGORY(LogAbilities);
 DEFINE_LOG_CATEGORY(LogEquipment);
+DEFINE_LOG_CATEGORY(GameFeatures);
 
 FString GetClientServerContextString(UObject* ContextObject)
 {

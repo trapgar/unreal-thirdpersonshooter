@@ -39,11 +39,21 @@ void AModularCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AModularCharacter::PossessedBy(AController *NewController)
 {
 	Super::PossessedBy(NewController);
+
+	if (UModularAbilitySystemComponent* MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
+	{
+		MASC->HandleControllerChanged();
+	}
 }
 
 void AModularCharacter::UnPossessed()
 {
 	Super::UnPossessed();
+
+	if (UModularAbilitySystemComponent* MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
+	{
+		MASC->HandleControllerChanged();
+	}
 }
 
 void AModularCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
@@ -70,19 +80,6 @@ void AModularCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeig
 void AModularCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
-
-void AModularCharacter::InitializeAbility(TSubclassOf<UGameplayAbility> AbilityToGet, int32 AbilityLevel)
-{
-	if (AbilitySystemComponent)
-	{
-		if (HasAuthority() && AbilityToGet)
-		{
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityToGet, AbilityLevel, 0));
-		}
-
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-	}
 }
 
 void AModularCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const

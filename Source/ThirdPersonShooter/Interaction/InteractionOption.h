@@ -9,7 +9,12 @@
 class IInteractableTarget;
 class UUserWidget;
 
-/**  */
+/**
+ * FInteractionOption
+ * 
+ * Contains data that describes how an interaction should be presented to the user.
+ * TODO: Terrible name for what this does
+ */
 USTRUCT(BlueprintType)
 struct THIRDPERSONSHOOTER_API FInteractionOption
 {
@@ -20,11 +25,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TScriptInterface<IInteractableTarget> InteractableTarget;
 
-	/** Simple text the interaction might return */
+	/** Simple text the interaction might return (e.g. "Pick up") */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Text;
 
-	/** Simple sub-text the interaction might return */
+	/** More descriptive sub-text the interaction might return (e.g. "???") */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText SubText;
 

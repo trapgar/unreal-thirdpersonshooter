@@ -16,7 +16,7 @@ struct FGameFeatureStateChangeContext;
 struct FWorldContext;
 
 /**
- * Base class for GameFeatureActions that wish to do something world specific.
+ * Base class for GameFeatureActions that wish to do something world specific (e.g. spawn actors, etc).
  */
 UCLASS(Abstract)
 class UGameFeatureAction_WorldActionBase : public UGameFeatureAction

@@ -20,7 +20,7 @@ struct FFrame;
  *
  * The base player controller class used by this project.
  * 
- * <i>Overridden so we get tell the ASC to process input on tick (PostProcessInput), so it can handle 'while input active' if need be.</i>
+ * <i>Overridden so we get tell the ASC to process input on tick (`PostProcessInput`), so it can handle 'while input active' if need be.</i>
  */
 UCLASS(Config = Game, Meta = (ShortTooltip = "The base player controller class used by this project."))
 class THIRDPERSONSHOOTER_API AModularPlayerController : public APlayerController

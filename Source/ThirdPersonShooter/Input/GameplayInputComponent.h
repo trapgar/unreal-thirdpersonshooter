@@ -2,7 +2,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemComponent.h"
-#include "GameplayInputConfiguration.h"
+#include "InputActionToGameplayTagBindings.h"
 #include "AbilitySystemInterface.h"
 
 #include "GameplayInputComponent.generated.h"
@@ -15,7 +15,7 @@ class UObject;
 /**
  * UGameplayInputComponent
  *
- *	Component used to manage input mappings and bindings using an input config data asset.
+ * UEnhancedInputComponent used to manage input mappings and bindings using by the `InputActionToGameplayTagBindings` data assets.
  */
 UCLASS(Config = Input)
 class THIRDPERSONSHOOTER_API UGameplayInputComponent : public UEnhancedInputComponent
@@ -26,11 +26,11 @@ public:
 
 	UGameplayInputComponent(const FObjectInitializer& ObjectInitializer);
 
-	void AddAdditionalInputBindings(const UGameplayInputConfiguration* InputConfig);
-	void RemoveAdditionalInputBindings(const UGameplayInputConfiguration* InputConfig);
+	void AddAdditionalInputBindings(const UInputActionToGameplayTagBindings* InputConfig);
+	void RemoveAdditionalInputBindings(const UInputActionToGameplayTagBindings* InputConfig);
 
 	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
-	void BindAbilityActions(const UGameplayInputConfiguration* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);
+	void BindAbilityActions(const UInputActionToGameplayTagBindings* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);
 
 	void RemoveBinds(TArray<uint32>& BindHandles);
 

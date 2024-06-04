@@ -9,8 +9,8 @@
 
 struct FInteractionQuery;
 
-/**  */
-class FInteractionOptionBuilder
+/** Interaction option builder */
+class THIRDPERSONSHOOTER_API FInteractionOptionBuilder
 {
 public:
 	FInteractionOptionBuilder(TScriptInterface<IInteractableTarget> InterfaceTargetScope, TArray<FInteractionOption>& InteractOptions)
@@ -37,8 +37,11 @@ class UInteractableTarget : public UInterface
 	GENERATED_BODY()
 };
 
-/**  */
-class IInteractableTarget
+/** IInteractableTarget
+ * 
+ * Interface for interactable targets.
+ */
+class THIRDPERSONSHOOTER_API IInteractableTarget
 {
 	GENERATED_BODY()
 

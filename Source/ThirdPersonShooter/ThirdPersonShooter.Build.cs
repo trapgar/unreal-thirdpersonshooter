@@ -23,7 +23,7 @@ public class ThirdPersonShooter : ModuleRules
 			"Core",
 			"CoreUObject",
 			"Engine",
-			"InputCore",
+			"PhysicsCore",
 			"EnhancedInput",
 			"GameplayTags",
 			"GameplayTasks",
@@ -35,6 +35,7 @@ public class ThirdPersonShooter : ModuleRules
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
+			"InputCore",
 			"UMG",
 		});
 

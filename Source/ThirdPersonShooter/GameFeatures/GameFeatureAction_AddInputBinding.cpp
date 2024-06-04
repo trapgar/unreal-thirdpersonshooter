@@ -26,7 +26,7 @@ void UGameFeatureAction_AddInputBinding::OnGameFeatureLoading()
 	// Assets referenced by the ModularGameMode need to be loaded synchronously;
 	// otherwise they will be null on AddInputBindingsForPlayer(...)
 	// Probably because ModularGameMode isn't a normal GameFeature.
-	for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
+	for (const TSoftObjectPtr<const UInputActionToGameplayTagBindings>& Entry : InputConfigs)
 	{
 		const FSoftObjectPath& AssetPath = Entry.ToSoftObjectPath();
 		if (AssetPath.IsValid())
@@ -38,7 +38,7 @@ void UGameFeatureAction_AddInputBinding::OnGameFeatureLoading()
 		}
 		else
 		{
-			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `UGameplayInputConfiguration` '%s'. Input mappings will not be added."), *AssetPath.ToString());
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `UInputActionToGameplayTagBindings` '%s'. Input mappings will not be added."), *AssetPath.ToString());
 		}
 	}
 }
@@ -60,7 +60,7 @@ EDataValidationResult UGameFeatureAction_AddInputBinding::IsDataValid(FDataValid
 
 	int32 Index = 0;
 
-	for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
+	for (const TSoftObjectPtr<const UInputActionToGameplayTagBindings>& Entry : InputConfigs)
 	{
 		if (Entry.IsNull())
 		{
@@ -137,9 +137,9 @@ void UGameFeatureAction_AddInputBinding::AddInputBindingsForPlayer(APawn* Pawn, 
 		{
 			if (UGameplayInputComponent* GameplayInputComponent = Pawn->FindComponentByClass<UGameplayInputComponent>())
 			{
-				for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
+				for (const TSoftObjectPtr<const UInputActionToGameplayTagBindings>& Entry : InputConfigs)
 				{
-					if (const UGameplayInputConfiguration* BindSet = Entry.Get())
+					if (const UInputActionToGameplayTagBindings* BindSet = Entry.Get())
 					{
 						GameplayInputComponent->AddAdditionalInputBindings(BindSet);
 					}
@@ -165,9 +165,9 @@ void UGameFeatureAction_AddInputBinding::RemoveInputBindingsFromPlayer(APawn* Pa
 		{
 			if (UGameplayInputComponent* GameplayInputComponent = Pawn->FindComponentByClass<UGameplayInputComponent>())
 			{
-				for (const TSoftObjectPtr<const UGameplayInputConfiguration>& Entry : InputConfigs)
+				for (const TSoftObjectPtr<const UInputActionToGameplayTagBindings>& Entry : InputConfigs)
 				{
-					if (const UGameplayInputConfiguration* InputConfig = Entry.Get())
+					if (const UInputActionToGameplayTagBindings* InputConfig = Entry.Get())
 					{
 						GameplayInputComponent->RemoveAdditionalInputBindings(InputConfig);
 					}

@@ -69,6 +69,8 @@ struct FGameFeatureAbilitiesEntry
 // UGameFeatureAction_AddAbilities
 
 /**
+ * UGameFeatureAction_AddAbilities
+ * 
  * GameFeatureAction responsible for granting abilities (and attributes) to actors of a specified type.
  */
 UCLASS(MinimalAPI, meta = (DisplayName = "Add Abilities"))
@@ -78,6 +80,7 @@ class UGameFeatureAction_AddAbilities final : public UGameFeatureAction_WorldAct
 
 public:
 	//~ Begin UGameFeatureAction interface
+	virtual void OnGameFeatureLoading() override;
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 	//~ End UGameFeatureAction interface
@@ -88,6 +91,7 @@ public:
 #endif
 	//~ End UObject interface
 
+	// List of abilities to grant
 	UPROPERTY(EditAnywhere, Category="Abilities", meta=(TitleProperty="ActorClass", ShowOnlyInnerProperties))
 	TArray<FGameFeatureAbilitiesEntry> AbilitiesList;
 
@@ -105,7 +109,7 @@ private:
 		TArray<TSharedPtr<FComponentRequestHandle>> ComponentRequests;
 	};
 	
-	TMap<FGameFeatureStateChangeContext, FPerContextData> ContextData;	
+	TMap<FGameFeatureStateChangeContext, FPerContextData> ContextData;
 
 	//~ Begin UGameFeatureAction_WorldActionBase interface
 	virtual void AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) override;

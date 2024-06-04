@@ -39,7 +39,11 @@ private:
 	int32 StackCount = 0;
 };
 
-/** Container of gameplay tag stacks */
+/**
+ * FGameplayTagStackContainer
+ * 
+ * Container of GameplayTags to their stack counts (e.g.: `{ 'Equipment.Weapon.Ammunition': 21 }`)
+ */
 USTRUCT(BlueprintType)
 struct THIRDPERSONSHOOTER_API FGameplayTagStackContainer// : public FFastArraySerializer
 {
