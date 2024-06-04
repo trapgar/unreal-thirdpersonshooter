@@ -114,7 +114,20 @@ struct TStructOpsTypeTraits<FInventoryList> : public TStructOpsTypeTraitsBase2<F
 	enum { WithNetDeltaSerializer = true };
 };
 
-// Manages inventory held by a pawn
+/** 
+ * Manages inventory held by a pawn. Inventory is any item that the pawn is capable of carrying.
+ * While all equipment is technically part of the inventory, it is handled separately by the `EquipmentManagerComponent`
+ * as it may be worn by the pawn or have abilities to use.
+ * 
+ * TODO: There may be a better way to do this:
+ * Can be a bit weird as we may need to juggle the stats of items applied to an `UInventoryItemInstance` vs an `AEquipmentItemInstance`
+ * e.g.:
+ * 	1. You pick up a rifle with 30 rounds and put it in your inventory (`UInventoryItemInstance`)
+ * 	2. You 'equip' the rifle and we transfer it to the `EquipmentManagerComponent` which also transfers the stats to the
+ * 	`AEquipmentItemInstance` because it's now spawned as an actor
+ * 	3. You 'unequip' the rifle and we put it back in your inventory, which also transfers the stats back from the `AEquipmentItemInstance`
+ * 	to the `UInventoryItemInstance` as the equipment is despawned
+ */
 UCLASS(Blueprintable, BlueprintType)
 class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryManagerComponent : public UActorComponent
 {

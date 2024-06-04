@@ -3,8 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "Interaction/IInteractableTarget.h"
-#include "Interaction/InteractionOption.h"
+#include "Interaction/WorldInteractable.h"
 #include "Inventory/IPickupable.h"
 
 #include "WorldCollectable.generated.h"
@@ -14,9 +13,11 @@ struct FInteractionQuery;
 
 /**
  * Allows an actor to be picked up by a user and added to an inventory / grant abilities.
+ * 
+ * TODO: Should this inherit from AWorldInteractable? Guess it depends on what we're going for ('E to Pickup' vs auto pickup)
  */
 UCLASS(Abstract, Blueprintable)
-class AWorldCollectable : public AActor, public IInteractableTarget, public IPickupable
+class INVENTORYANDEQUIPMENTRUNTIME_API AWorldCollectable : public AWorldInteractable, public IPickupable
 {
 	GENERATED_BODY()
 
@@ -24,12 +25,9 @@ public:
 
 	AWorldCollectable();
 
-	virtual void GatherInteractionOptions(const FInteractionQuery& InteractQuery, FInteractionOptionBuilder& InteractionBuilder) override;
 	virtual FInventoryPickup GetPickupInventory() const override;
 
 protected:
-	UPROPERTY(EditAnywhere)
-	FInteractionOption Option;
 
 	UPROPERTY(EditAnywhere)
 	FInventoryPickup StaticInventory;

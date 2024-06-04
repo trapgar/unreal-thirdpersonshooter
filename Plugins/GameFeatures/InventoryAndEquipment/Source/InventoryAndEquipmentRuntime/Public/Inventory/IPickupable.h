@@ -19,20 +19,22 @@ class UObject;
 struct FFrame;
 
 USTRUCT(BlueprintType)
-struct FPickupTemplate
+struct INVENTORYANDEQUIPMENTRUNTIME_API FPickupTemplate
 {
 	GENERATED_BODY()
 
 public:
+	// Number of item instances to give to the player
 	UPROPERTY(EditAnywhere)
 	int32 StackCount = 1;
 
+	// The definition of the item to give
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UInventoryItemDefinition> ItemDef;
 };
 
 USTRUCT(BlueprintType)
-struct FPickupInstance
+struct INVENTORYANDEQUIPMENTRUNTIME_API FPickupInstance
 {
 	GENERATED_BODY()
 
@@ -42,7 +44,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FInventoryPickup
+struct INVENTORYANDEQUIPMENTRUNTIME_API FInventoryPickup
 {
 	GENERATED_BODY()
 

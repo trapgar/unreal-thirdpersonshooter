@@ -15,7 +15,7 @@ struct FGameplayTag;
 /**
  * UInventoryItemInstance
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, Blueprintable)
 class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryItemInstance : public UObject
 {
 	GENERATED_BODY()

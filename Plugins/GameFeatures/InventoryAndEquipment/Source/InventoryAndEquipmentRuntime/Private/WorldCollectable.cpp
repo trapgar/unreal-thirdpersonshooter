@@ -12,11 +12,6 @@ AWorldCollectable::AWorldCollectable()
 {
 }
 
-void AWorldCollectable::GatherInteractionOptions(const FInteractionQuery& InteractQuery, FInteractionOptionBuilder& InteractionBuilder)
-{
-	InteractionBuilder.AddInteractionOption(Option);
-}
-
 FInventoryPickup AWorldCollectable::GetPickupInventory() const
 {
 	return StaticInventory;
