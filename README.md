@@ -74,3 +74,9 @@ By following these steps, you'll be able to create complex gameplay abilities fo
 - Lyra has the `AbilitySystemComponent` off the PlayerState, not the Pawn, where is the best location?
 - `ADrivableSpaceVehicle` doesn't hear input events (IA or otherwise)
     - Lyra uses `GA_Collectable` which grants an Interaction Ability
+- Make sure I'm using ALevelInstance right with `GameFeatureAction_AddLevelInstance` (streaming, etc)
+    - [World Partition in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition-in-unreal-engine)
+    - [Level Instancing in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/level-instancing-in-unreal-engine)
+- Add a func for `InteractableObjectsFound` instead of just changed
+- Move `GA_Interaction_Activate` to a C++ class
+    - Same with `GA_Interaction_Collection`

@@ -20,7 +20,7 @@ class UInputActionToGameplayTagBindings;
  * 
  * Adds the relationship between an input action and Input Gameplay Tag to the `UGameplayInputComponent`.
  */
-UCLASS(MinimalAPI, meta = (DisplayName = "Add Input Binding"))
+UCLASS(MinimalAPI, meta = (DisplayName = "Add Input Bindings"))
 class UGameFeatureAction_AddInputBinding final : public UGameFeatureAction_WorldActionBase
 {
 	GENERATED_BODY()

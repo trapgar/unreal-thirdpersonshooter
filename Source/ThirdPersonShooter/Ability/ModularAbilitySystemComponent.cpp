@@ -178,5 +178,15 @@ void UModularAbilitySystemComponent::ClearAbilityInput()
 
 void UModularAbilitySystemComponent::HandleControllerChanged()
 {
-	RefreshAbilityActorInfo();
+	// TODO: is this right?
+	// Need to refresh the ability actor info, but if the player possesses another pawn,
+	// is this still what we want to do?
+
+	if (APawn* Pawn = Cast<APawn>(GetOwnerActor()))
+	{
+		if (Pawn->GetController())
+		{
+			RefreshAbilityActorInfo();
+		}
+	}
 }

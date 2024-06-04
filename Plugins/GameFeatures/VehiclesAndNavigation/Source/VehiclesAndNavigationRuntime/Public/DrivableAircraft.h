@@ -32,10 +32,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Vehicle|Abilities")
 	UAbilitySystemComponent* AbilitySystemComponent;
 
-	// what is this used for?
-	UFUNCTION(BlueprintCallable, Category = "Vehicle|Abilities")
-	void InitializeAbility(TSubclassOf<UGameplayAbility> AbilityToGet, int32 AbilityLevel = 1);
-
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
 	{
 		return AbilitySystemComponent;

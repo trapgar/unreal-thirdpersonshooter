@@ -43,6 +43,7 @@ void ADrivableAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ADrivableAircraft::PossessedBy(AController *NewController)
 {
 	Super::PossessedBy(NewController);
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_BindInputsNow);
 }
 
 void ADrivableAircraft::UnPossessed()
@@ -54,19 +55,6 @@ void ADrivableAircraft::UnPossessed()
 void ADrivableAircraft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
-
-void ADrivableAircraft::InitializeAbility(TSubclassOf<UGameplayAbility> AbilityToGet, int32 AbilityLevel)
-{
-	if (AbilitySystemComponent)
-	{
-		if (HasAuthority() && AbilityToGet)
-		{
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityToGet, AbilityLevel, 0));
-		}
-
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-	}
 }
 
 void ADrivableAircraft::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const

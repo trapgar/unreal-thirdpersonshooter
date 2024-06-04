@@ -19,6 +19,8 @@ THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_AbilityInputB
  * Modular Ability System Component that extends the ability system component for tying Abilities to Input Gameplay Tags.
  * 
  * Also supports more flexible activation policies, like `WhileInputActive`.
+ * 
+ * <i>PlayerController is used by some abilities, so must be set on Possess to prevent errors.</i>
  */
 UCLASS()
 class THIRDPERSONSHOOTER_API UModularAbilitySystemComponent : public UAbilitySystemComponent
