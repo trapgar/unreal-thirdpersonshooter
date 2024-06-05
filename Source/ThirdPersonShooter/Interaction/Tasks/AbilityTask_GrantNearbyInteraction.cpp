@@ -33,6 +33,15 @@ void UAbilityTask_GrantNearbyInteraction::Activate()
 
 	UWorld* World = GetWorld();
 	World->GetTimerManager().SetTimer(QueryTimerHandle, this, &ThisClass::QueryInteractables, InteractionScanRate, true);
+	
+	FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
+	Handle_AvatarPossessed = AbilitySystemComponent->GenericGameplayEventCallbacks
+		.FindOrAdd(TAG_GameplayEvent_Possessed)
+		.AddUObject(this, &UAbilityTask_GrantNearbyInteraction::AvatarPossessed);
+	FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
+	Handle_AvatarUnpossessed = AbilitySystemComponent->GenericGameplayEventCallbacks
+		.FindOrAdd(TAG_GameplayEvent_Unpossessed)
+		.AddUObject(this, &UAbilityTask_GrantNearbyInteraction::AvatarUnpossessed);
 }
 
 void UAbilityTask_GrantNearbyInteraction::OnDestroy(bool AbilityEnded)
@@ -41,8 +50,29 @@ void UAbilityTask_GrantNearbyInteraction::OnDestroy(bool AbilityEnded)
 	{
 		World->GetTimerManager().ClearTimer(QueryTimerHandle);
 	}
+		
+	FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
+	AbilitySystemComponent->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Possessed), Handle_AvatarPossessed);
+	FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
+	AbilitySystemComponent->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Unpossessed), Handle_AvatarUnpossessed);
 
 	Super::OnDestroy(AbilityEnded);
+}
+
+void UAbilityTask_GrantNearbyInteraction::AvatarPossessed(const FGameplayEventData* Payload)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(QueryTimerHandle, this, &ThisClass::QueryInteractables, InteractionScanRate, true);
+	}
+}
+
+void UAbilityTask_GrantNearbyInteraction::AvatarUnpossessed(const FGameplayEventData* Payload)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(QueryTimerHandle);
+	}
 }
 
 void UAbilityTask_GrantNearbyInteraction::QueryInteractables()

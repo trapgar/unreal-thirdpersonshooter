@@ -25,6 +25,9 @@ class UAbilityTask_WaitForInteractableTargets_SingleLineTrace : public UAbilityT
 
 private:
 
+	void AvatarPossessed(const FGameplayEventData* Payload);
+	void AvatarUnpossessed(const FGameplayEventData* Payload);
+
 	virtual void OnDestroy(bool AbilityEnded) override;
 
 	void PerformTrace();
@@ -40,4 +43,6 @@ private:
 	bool bShowDebug = false;
 
 	FTimerHandle TimerHandle;
+	FDelegateHandle Handle_AvatarPossessed;
+	FDelegateHandle Handle_AvatarUnpossessed;
 };

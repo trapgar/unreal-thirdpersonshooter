@@ -31,7 +31,40 @@ struct FGameFeatureDeactivatingContext;
 // --------------------------------------------------------
 // UGameFeatureAction_AddLevelInstance
 
-void UGameFeatureAction_AddLevelInstance::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
+void UGameFeatureAction_AddLevelInstance::OnGameFeatureLoading()
+{
+	Super::OnGameFeatureLoading();
+
+	for (const FGameFeatureLevelInstanceEntry& Entry : LevelInstanceList)
+	{
+		const FSoftObjectPath& AssetPath = Entry.LevelInstance.ToSoftObjectPath();
+		if (AssetPath.IsValid())
+		{
+			if (!Entry.LevelInstance.IsValid())
+			{
+				Entry.LevelInstance.LoadSynchronous();
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.LevelInstance` '%s'. Level instance will not be added."), *AssetPath.ToString());
+		}
+		const FSoftObjectPath& AssetPath2 = Entry.TargetWorld.ToSoftObjectPath();
+		if (AssetPath2.IsValid())
+		{
+			if (!Entry.TargetWorld.IsValid())
+			{
+				Entry.TargetWorld.LoadSynchronous();
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.TargetWorld` '%s'. Level instance will not be added."), *AssetPath.ToString());
+		}
+	}
+}
+
+void UGameFeatureAction_AddLevelInstance::OnGameFeatureActivating(FGameFeatureActivatingContext &Context)
 {
 	Super::OnGameFeatureActivating(Context);
 }
@@ -52,7 +85,12 @@ EDataValidationResult UGameFeatureAction_AddLevelInstance::IsDataValid(FDataVali
 		if (Entry.LevelInstance.IsNull())
 		{
 			Result = EDataValidationResult::Invalid;
-			Context.AddError(FText::Format(LOCTEXT("LevelEntryNull", "Null level reference at index {0} in LevelInstanceList"), FText::AsNumber(EntryIndex)));
+			Context.AddError(FText::Format(LOCTEXT("LevelInstanceNull", "Null level instance reference at index {0} in LevelInstanceList"), FText::AsNumber(EntryIndex)));
+		}
+		if (Entry.TargetWorld.IsNull())
+		{
+			Result = EDataValidationResult::Invalid;
+			Context.AddError(FText::Format(LOCTEXT("TargetWorldNull", "Null level reference at index {0} in LevelInstanceList"), FText::AsNumber(EntryIndex)));
 		}
 
 		++EntryIndex;

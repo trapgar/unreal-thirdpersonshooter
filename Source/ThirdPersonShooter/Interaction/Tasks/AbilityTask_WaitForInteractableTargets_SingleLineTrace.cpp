@@ -2,6 +2,7 @@
 
 #include "AbilityTask_WaitForInteractableTargets_SingleLineTrace.h"
 #include "Interaction/InteractionStatics.h"
+#include "AbilitySystemComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -32,6 +33,18 @@ void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::Activate()
 
 	UWorld* World = GetWorld();
 	World->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::PerformTrace, InteractionScanRate, true);
+	
+	if (auto ASC = AbilitySystemComponent.Get())
+	{
+		FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
+		Handle_AvatarPossessed = ASC->GenericGameplayEventCallbacks
+			.FindOrAdd(TAG_GameplayEvent_Possessed)
+			.AddUObject(this, &UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarPossessed);
+		FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
+		Handle_AvatarUnpossessed = ASC->GenericGameplayEventCallbacks
+			.FindOrAdd(TAG_GameplayEvent_Unpossessed)
+			.AddUObject(this, &UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarUnpossessed);
+	}
 }
 
 void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::OnDestroy(bool AbilityEnded)
@@ -41,7 +54,31 @@ void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::OnDestroy(bool Abi
 		World->GetTimerManager().ClearTimer(TimerHandle);
 	}
 
+	if (auto ASC = AbilitySystemComponent.Get())
+	{
+		FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
+		ASC->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Possessed), Handle_AvatarPossessed);
+		FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
+		ASC->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Unpossessed), Handle_AvatarUnpossessed);
+	}
+
 	Super::OnDestroy(AbilityEnded);
+}
+
+void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarPossessed(const FGameplayEventData* Payload)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::PerformTrace, InteractionScanRate, true);
+	}
+}
+
+void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarUnpossessed(const FGameplayEventData* Payload)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle);
+	}
 }
 
 void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::PerformTrace()

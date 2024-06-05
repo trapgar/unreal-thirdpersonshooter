@@ -22,10 +22,6 @@ void UGameFeatureAction_AddInputBinding::OnGameFeatureLoading()
 {
 	Super::OnGameFeatureLoading();
 
-	// TODO: fix this
-	// Assets referenced by the ModularGameMode need to be loaded synchronously;
-	// otherwise they will be null on AddInputBindingsForPlayer(...)
-	// Probably because ModularGameMode isn't a normal GameFeature.
 	for (const TSoftObjectPtr<const UInputActionToGameplayTagBindings>& Entry : InputConfigs)
 	{
 		const FSoftObjectPath& AssetPath = Entry.ToSoftObjectPath();
@@ -38,7 +34,7 @@ void UGameFeatureAction_AddInputBinding::OnGameFeatureLoading()
 		}
 		else
 		{
-			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `UInputActionToGameplayTagBindings` '%s'. Input mappings will not be added."), *AssetPath.ToString());
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry` '%s'. Input bindings will not be added."), *AssetPath.ToString());
 		}
 	}
 }
@@ -65,7 +61,7 @@ EDataValidationResult UGameFeatureAction_AddInputBinding::IsDataValid(FDataValid
 		if (Entry.IsNull())
 		{
 			Result = EDataValidationResult::Invalid;
-			Context.AddError(FText::Format(LOCTEXT("NullInputConfig", "Null InputConfig at index {0}."), Index));
+			Context.AddError(FText::Format(LOCTEXT("NullInputBinding", "Null InputBinding at index {0}."), Index));
 		}
 		++Index;
 	}

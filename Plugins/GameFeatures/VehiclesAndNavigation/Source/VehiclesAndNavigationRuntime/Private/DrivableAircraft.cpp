@@ -43,11 +43,31 @@ void ADrivableAircraft::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ADrivableAircraft::PossessedBy(AController *NewController)
 {
 	Super::PossessedBy(NewController);
+
+	if (auto MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
+	{
+		MASC->HandleControllerChanged();
+		FGameplayEventData Payload;
+		Payload.EventTag = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
+		Payload.Instigator = this;
+		Payload.Target = this;
+		MASC->HandleGameplayEvent(Payload.EventTag, &Payload);
+	}
 }
 
 void ADrivableAircraft::UnPossessed()
 {
 	Super::UnPossessed();
+
+	if (auto MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
+	{
+		MASC->HandleControllerChanged();
+		FGameplayEventData Payload;
+		Payload.EventTag = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
+		Payload.Instigator = this;
+		Payload.Target = this;
+		MASC->HandleGameplayEvent(Payload.EventTag, &Payload);
+	}
 }
 
 // Called every frame

@@ -3,9 +3,13 @@
 #include "Ability/ModularAbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
+#include "NativeGameplayTags.h"
 
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularCharacter)
+
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_AvatarPossessed, "GameplayEvent.Possessed");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_AvatarUnpossessed, "GameplayEvent.Unpossessed");
 
 class UEnhancedInputLocalPlayerSubsystem;
 
@@ -40,9 +44,14 @@ void AModularCharacter::PossessedBy(AController *NewController)
 {
 	Super::PossessedBy(NewController);
 
-	if (UModularAbilitySystemComponent* MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
+	if (auto MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
 	{
 		MASC->HandleControllerChanged();
+		FGameplayEventData Payload;
+		Payload.EventTag = TAG_GameplayEvent_AvatarPossessed;
+		Payload.Instigator = this;
+		Payload.Target = this;
+		MASC->HandleGameplayEvent(TAG_GameplayEvent_AvatarPossessed, &Payload);
 	}
 }
 
@@ -50,9 +59,14 @@ void AModularCharacter::UnPossessed()
 {
 	Super::UnPossessed();
 
-	if (UModularAbilitySystemComponent* MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
+	if (auto MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
 	{
 		MASC->HandleControllerChanged();
+		FGameplayEventData Payload;
+		Payload.EventTag = TAG_GameplayEvent_AvatarUnpossessed;
+		Payload.Instigator = this;
+		Payload.Target = this;
+		MASC->HandleGameplayEvent(TAG_GameplayEvent_AvatarUnpossessed, &Payload);
 	}
 }
 
