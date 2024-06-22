@@ -4,6 +4,7 @@
 
 #include "Common/TaggedActor.h"
 #include "Common/GameplayTagStack.h"
+#include "Inventory/InventoryItemDefinition.h"
 
 #include "InventoryItemInstance.generated.h"
 
@@ -32,7 +33,7 @@ public:
 	void AddStatTagStack(FGameplayTag Tag, int32 StackCount);
 
 	// Removes a specified number of stacks from the tag (does nothing if StackCount is below 1)
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category= Inventory)
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
 	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount);
 
 	// Returns the stack count of the specified tag (or 0 if the tag is not present)
@@ -52,14 +53,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure=false, meta=(DeterminesOutputType=FragmentClass))
 	const UInventoryItemFragment* FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const
 	{
-		// return ItemDef ? ItemDef->FindFragmentByClass(FragmentClass) : nullptr;
-		return nullptr;
+		return ItemDef ? ItemDef->FindFragmentByClass(FragmentClass) : nullptr;
 	}
 
 	void SetItemDef(UInventoryItemDefinition* InDef);
 
 	void AddSpawnedActor(AActor* Actor) { SpawnedActors.Emplace(Actor); }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category = "Inventory")
 	TArray<AActor*>& GetSpawnedActors() { return SpawnedActors; }
 
 	friend struct FInventoryList;

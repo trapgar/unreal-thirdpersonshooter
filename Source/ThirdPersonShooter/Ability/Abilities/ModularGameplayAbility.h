@@ -116,6 +116,12 @@ public:
 		return (CurrentActorInfo ? CurrentActorInfo->PlayerController.Get() : nullptr);
 	}
 
+	UFUNCTION(BlueprintCallable, Category = "Ability|Pawn")
+	APawn* GetPawnFromActorInfo() const
+	{
+		return (CurrentActorInfo ? Cast<APawn>(CurrentActorInfo->OwnerActor.Get()) : nullptr);
+	}
+
 	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
 
 protected:
