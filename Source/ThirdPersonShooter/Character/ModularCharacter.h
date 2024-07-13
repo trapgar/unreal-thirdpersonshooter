@@ -28,7 +28,7 @@ class THIRDPERSONSHOOTER_API AModularCharacter : public ACharacter, public IAbil
 
 public:
 	// Sets default values for this character's properties
-	AModularCharacter();
+	AModularCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

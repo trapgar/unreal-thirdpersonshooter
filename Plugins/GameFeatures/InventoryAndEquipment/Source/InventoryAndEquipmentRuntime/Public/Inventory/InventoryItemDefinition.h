@@ -67,6 +67,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display)
 	FText DisplayName;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display)
+	TObjectPtr<UMaterialInterface> Icon;
+
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display, Instanced)
 	TArray<TObjectPtr<UInventoryItemFragment>> Fragments;
 

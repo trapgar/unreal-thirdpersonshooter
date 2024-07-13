@@ -57,12 +57,14 @@ public:
 	bool HasStatTag(FGameplayTag Tag) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category = Equipment)
-	TSubclassOf<UEquipmentItemDefinition> GetItemDef() const
-	{
-		return ItemDef;
-	}
+	TSubclassOf<UEquipmentItemDefinition> GetItemDef() const { return ItemDef; }
 
 	void SetItemDef(TSubclassOf<UEquipmentItemDefinition> InDef);
+
+	UFUNCTION(BlueprintPure, Category=Equipment)
+	UObject* GetSource() const { return Source; }
+
+	void SetSource(UObject* InSource) { Source = InSource; }
 
 protected:
 	virtual void PreInitializeComponents() override;
@@ -83,4 +85,8 @@ private:
 
 	// The item definition
 	TSubclassOf<UEquipmentItemDefinition> ItemDef;
+
+private:
+	// UPROPERTY(ReplicatedUsing=OnRep_Instigator)
+	TObjectPtr<UObject> Source;
 };

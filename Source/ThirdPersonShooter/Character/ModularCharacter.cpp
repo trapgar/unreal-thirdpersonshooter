@@ -1,6 +1,7 @@
 #include "ModularCharacter.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Ability/ModularAbilitySystemComponent.h"
+#include "ModularCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
 #include "NativeGameplayTags.h"
@@ -13,7 +14,8 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_AvatarUnpossessed, "GameplayEven
 
 class UEnhancedInputLocalPlayerSubsystem;
 
-AModularCharacter::AModularCharacter()
+AModularCharacter::AModularCharacter(const FObjectInitializer &ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;

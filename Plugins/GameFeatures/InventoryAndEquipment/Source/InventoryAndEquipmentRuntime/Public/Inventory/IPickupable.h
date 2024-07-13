@@ -25,11 +25,11 @@ struct INVENTORYANDEQUIPMENTRUNTIME_API FPickupTemplate
 
 public:
 	// Number of item instances to give to the player
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 StackCount = 1;
 
 	// The definition of the item to give
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UInventoryItemDefinition> ItemDef;
 };
 
@@ -56,14 +56,22 @@ public:
 	TArray<FPickupTemplate> Templates;
 };
 
-/**  */
+/**
+ * UPickupable
+ * 
+ * Blueprint type that represents an object that can be picked up by the player.
+ */
 UINTERFACE(MinimalAPI, BlueprintType, meta = (CannotImplementInterfaceInBlueprint))
 class UPickupable : public UInterface
 {
 	GENERATED_BODY()
 };
 
-/**  */
+/**
+ * IPickupable
+ * 
+ * Represents an object that can be picked up by the player.
+ */
 class IPickupable
 {
 	GENERATED_BODY()
@@ -73,7 +81,11 @@ public:
 	virtual FInventoryPickup GetPickupInventory() const = 0;
 };
 
-/**  */
+/**
+ * UPickupableStatics
+ * 
+ * Blueprint static library functions for IPickupable.
+ */
 UCLASS()
 class UPickupableStatics : public UBlueprintFunctionLibrary
 {

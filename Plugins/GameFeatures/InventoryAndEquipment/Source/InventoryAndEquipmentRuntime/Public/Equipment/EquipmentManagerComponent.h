@@ -25,7 +25,7 @@ struct FEquipmentChangedMessage
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category=Equipment)
-	TObjectPtr<UActorComponent> EquipmentOwner = nullptr;
+	TObjectPtr<UActorComponent> Source = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category=Equipment)
 	TObjectPtr<AEquipmentItemInstance> Instance = nullptr;
@@ -35,22 +35,6 @@ struct FEquipmentChangedMessage
 
 	UPROPERTY(BlueprintReadOnly, Category=Equipment)
 	int32 Delta = 0;
-};
-
-
-// --------------------------------------------------------
-
-
-USTRUCT(BlueprintType)
-struct FEquipmentActiveIndexChangedMessage
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly, Category=Equipment)
-	TObjectPtr<APawn> Owner = nullptr;
-
-	UPROPERTY(BlueprintReadOnly, Category=Equipment)
-	int32 ActiveIndex = 0;
 };
 
 
@@ -67,25 +51,12 @@ struct FEquipmentEntry
 
 	FString GetDebugString() const;
 
-	bool IsApplied() const { return bIsApplied; }
-	void Apply();
-	void Unapply();
-
-	UAbilitySystemComponent* GetAbilitySystemComponent() const { return Cast<UAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Instance->GetOwner())); }
-
 private:
 	friend FEquipmentList;
 	friend UEquipmentManagerComponent;
 
 	UPROPERTY()
 	TObjectPtr<AEquipmentItemInstance> Instance = nullptr;
-
-	// Authority-only list of granted handles
-	UPROPERTY(NotReplicated)
-	FModularAbilitySet_GrantedHandles GrantedHandles;
-
-	// Flag indicating if the equipment is 'applied' (e.g.: active vs holstered)
-	bool bIsApplied = false;
 };
 
 
@@ -115,11 +86,6 @@ public:
 
 	void RemoveEntry(AEquipmentItemInstance* Instance);
 
-	// Returns true if the entry was previously unapplied, false otherwise
-	bool ApplyEntry(AEquipmentItemInstance* Instance);
-
-	void UnapplyEntry(AEquipmentItemInstance* Instance);
-
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 	{
 		return false;
@@ -128,7 +94,17 @@ public:
 private:
 	void BroadcastChangeMessage(AEquipmentItemInstance* Entry, int32 OldCount, int32 NewCount);
 
+	// Authority-only list of granted handles
+	UPROPERTY(NotReplicated)
+	FModularAbilitySet_GrantedHandles GrantedHandles;
+
 private:
+
+	UAbilitySystemComponent* GetAbilitySystemComponent() const
+	{
+		return Cast<UAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwnerComponent->GetOwner()));
+	}
+
 	friend UEquipmentManagerComponent;
 
 private:
@@ -183,35 +159,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
 	TArray<AEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const;
 
-	// Gets the item in the given slot index
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category=Equipment)
-	AEquipmentItemInstance* GetItemInSlot(int32 SlotIndex);
-
-	// Adds an item to the given slot index
-	UFUNCTION(BlueprintCallable, Category=Equipment)
-	void AddItemToSlot(int32 SlotIndex, AEquipmentItemInstance* Item);
-
-	// Removes an item from the given slot index
-	UFUNCTION(BlueprintCallable, Category=Equipment)
-	AEquipmentItemInstance* RemoveItemFromSlot(int32 SlotIndex);
-
-	// Draws the item in the given slot index
-	UFUNCTION(BlueprintCallable, Category=Equipment)
-	AEquipmentItemInstance* DrawItemInSlot(int32 SlotIndex);
-
-	// Holsters the item in the given slot index
-	UFUNCTION(BlueprintCallable, Category=Equipment)
-	void HolsterItemInSlot(int32 SlotIndex);
-
 protected:
-	// Number that controls the max number of quickslots we have (e.g.: IA_QuickbarSlot 1-5 will try to draw an item)
-	UPROPERTY()
-	int32 NumSlots = 5;
-
-	virtual void BeginPlay() override;
 
 	//~UObject interface
-	virtual void InitializeComponent() override;
 	virtual void UninitializeComponent() override;
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 	virtual void ReadyForReplication() override;
@@ -224,16 +174,9 @@ protected:
 	void K2_OnEquipmentItemRemoved(AEquipmentItemInstance* EquipmentItemInstance);
 
 private:
-	UPROPERTY()
-	TArray<TObjectPtr<AEquipmentItemInstance>> Slots;
-
 	// List of all equipped items
 	UPROPERTY(Replicated)
 	FEquipmentList EquipmentList;
-
-	FGameplayMessageListenerHandle ListenerHandle;
-
-	void OnInventoryStackChanged(FGameplayTag Channel, const FInventoryChangedMessage& Notification);
 
 };
 

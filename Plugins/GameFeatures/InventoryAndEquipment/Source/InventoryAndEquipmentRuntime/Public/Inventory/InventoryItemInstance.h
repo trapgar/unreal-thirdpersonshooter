@@ -15,6 +15,8 @@ struct FGameplayTag;
 
 /**
  * UInventoryItemInstance
+ * 
+ * Represents an instance of an inventory item.
  */
 UCLASS(BlueprintType, Blueprintable)
 class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryItemInstance : public UObject
@@ -54,6 +56,12 @@ public:
 	const UInventoryItemFragment* FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const
 	{
 		return ItemDef ? ItemDef->FindFragmentByClass(FragmentClass) : nullptr;
+	}
+
+	template <typename ResultClass>
+	const ResultClass* FindFragmentByClass() const
+	{
+		return (ResultClass*)FindFragmentByClass(ResultClass::StaticClass());
 	}
 
 	void SetItemDef(UInventoryItemDefinition* InDef);

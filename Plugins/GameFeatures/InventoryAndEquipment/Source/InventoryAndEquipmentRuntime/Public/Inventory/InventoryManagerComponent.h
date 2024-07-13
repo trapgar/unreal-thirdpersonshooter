@@ -19,7 +19,7 @@ struct FInventoryChangedMessage
 
 	//@TODO: Tag based names+owning actors for inventories instead of directly exposing the component?
 	UPROPERTY(BlueprintReadOnly, Category = Inventory)
-	TObjectPtr<UActorComponent> InventoryOwner = nullptr;
+	TObjectPtr<UActorComponent> Source = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = Inventory)
 	TObjectPtr<UInventoryItemInstance> Instance = nullptr;

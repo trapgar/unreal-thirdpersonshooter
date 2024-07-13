@@ -1,6 +1,23 @@
 #include "ModularGameplayAbility.h"
+#include "Ability/ModularAbilitySystemComponent.h"
+#include "ModularAbilitySimpleFailureMessage.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
+#include "ModularAbilityCost.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularGameplayAbility)
+
+#define ENSURE_ABILITY_IS_INSTANTIATED_OR_RETURN(FunctionName, ReturnValue)																				\
+{																																						\
+	if (!ensure(IsInstantiated()))																														\
+	{																																					\
+		ABILITY_LOG(Error, TEXT("%s: " #FunctionName " cannot be called on a non-instanced ability. Check the instancing policy."), *GetPathName());	\
+		return ReturnValue;																																\
+	}																																					\
+}
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_ABILITY_SIMPLE_FAILURE_MESSAGE, "Ability.UserFacingSimpleActivateFail.Message");
+UE_DEFINE_GAMEPLAY_TAG(TAG_ABILITY_PLAY_MONTAGE_FAILURE_MESSAGE, "Ability.PlayMontageOnActivateFail.Message");
 
 UModularGameplayAbility::UModularGameplayAbility(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -28,6 +45,102 @@ void UModularGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* A
 	K2_OnAbilityRemoved();
 
 	Super::OnRemoveAbility(ActorInfo, Spec);
+}
+
+bool UModularGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags) || !ActorInfo)
+	{
+		return false;
+	}
+
+	// Verify we can afford any additional costs
+	for (TObjectPtr<UModularAbilityCost> AdditionalCost : AdditionalCosts)
+	{
+		if (AdditionalCost != nullptr)
+		{
+			if (!AdditionalCost->CheckCost(this, Handle, ActorInfo, /*inout*/ OptionalRelevantTags))
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+void UModularGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
+
+	check(ActorInfo);
+
+	// Used to determine if the ability actually hit a target (as some costs are only spent on successful attempts)
+	auto DetermineIfAbilityHitTarget = [&]()
+	{
+		if (ActorInfo->IsNetAuthority())
+		{
+			if (UModularAbilitySystemComponent* ASC = Cast<UModularAbilitySystemComponent>(ActorInfo->AbilitySystemComponent.Get()))
+			{
+				FGameplayAbilityTargetDataHandle TargetData;
+				ASC->GetAbilityTargetData(Handle, ActivationInfo, TargetData);
+
+				for (int32 TargetDataIdx = 0; TargetDataIdx < TargetData.Data.Num(); ++TargetDataIdx)
+				{
+					if (UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetData, TargetDataIdx))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	};
+
+	// Pay any additional costs
+	bool bAbilityHitTarget = false;
+	bool bHasDeterminedIfAbilityHitTarget = false;
+	for (TObjectPtr<UModularAbilityCost> AdditionalCost : AdditionalCosts)
+	{
+		if (AdditionalCost != nullptr)
+		{
+			AdditionalCost->ApplyCost(this, Handle, ActorInfo, ActivationInfo);
+		}
+	}
+}
+
+void UModularGameplayAbility::NativeOnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
+{
+	bool bSimpleFailureFound = false;
+	for (FGameplayTag Reason : FailedReason)
+	{
+		if (!bSimpleFailureFound)
+		{
+			if (const FText* pUserFacingMessage = FailureTagToUserFacingMessages.Find(Reason))
+			{
+				FModularAbilitySimpleFailureMessage Message;
+				Message.PlayerController = GetActorInfo().PlayerController.Get();
+				Message.FailureTags = FailedReason;
+				Message.UserFacingReason = *pUserFacingMessage;
+
+				UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());
+				MessageSystem.BroadcastMessage(TAG_ABILITY_SIMPLE_FAILURE_MESSAGE, Message);
+				bSimpleFailureFound = true;
+			}
+		}
+		
+		if (UAnimMontage* pMontage = FailureTagToAnimMontage.FindRef(Reason))
+		{
+			FModularAbilityMontageFailureMessage Message;
+			Message.PlayerController = GetActorInfo().PlayerController.Get();
+			Message.FailureTags = FailedReason;
+			Message.FailureMontage = pMontage;
+
+			UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());
+			MessageSystem.BroadcastMessage(TAG_ABILITY_PLAY_MONTAGE_FAILURE_MESSAGE, Message);
+		}
+	}
 }
 
 void UModularGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const

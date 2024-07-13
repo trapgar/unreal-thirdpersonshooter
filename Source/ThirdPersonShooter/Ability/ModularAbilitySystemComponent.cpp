@@ -1,5 +1,6 @@
 #include "Ability/ModularAbilitySystemComponent.h"
-#include "ModularAbilitySystemComponent.h"
+
+#include "CustomLogChannels.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularAbilitySystemComponent)
 
@@ -13,6 +14,52 @@ UModularAbilitySystemComponent::UModularAbilitySystemComponent(const FObjectInit
 	InputHeldSpecHandles.Reset();
 
 	FMemory::Memset(ActivationGroupCounts, 0, sizeof(ActivationGroupCounts));
+}
+
+void UModularAbilitySystemComponent::CancelAbilitiesByFunc(TShouldCancelAbilityFunc ShouldCancelFunc, bool bReplicateCancelAbility)
+{
+	ABILITYLIST_SCOPE_LOCK();
+	for (const FGameplayAbilitySpec& AbilitySpec : ActivatableAbilities.Items)
+	{
+		if (!AbilitySpec.IsActive())
+		{
+			continue;
+		}
+
+		UModularGameplayAbility* ModularAbilityCDO = CastChecked<UModularGameplayAbility>(AbilitySpec.Ability);
+
+		if (ModularAbilityCDO->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
+		{
+			// Cancel all the spawned instances, not the CDO.
+			TArray<UGameplayAbility*> Instances = AbilitySpec.GetAbilityInstances();
+			for (UGameplayAbility* AbilityInstance : Instances)
+			{
+				UModularGameplayAbility* ModularAbilityInstance = CastChecked<UModularGameplayAbility>(AbilityInstance);
+
+				if (ShouldCancelFunc(ModularAbilityInstance, AbilitySpec.Handle))
+				{
+					if (ModularAbilityInstance->CanBeCanceled())
+					{
+						ModularAbilityInstance->CancelAbility(AbilitySpec.Handle, AbilityActorInfo.Get(), ModularAbilityInstance->GetCurrentActivationInfo(), bReplicateCancelAbility);
+					}
+					else
+					{
+						UE_LOG(LogAbilities, Error, TEXT("CancelAbilitiesByFunc: Can't cancel ability [%s] because CanBeCanceled is false."), *ModularAbilityInstance->GetName());
+					}
+				}
+			}
+		}
+		else
+		{
+			// Cancel the non-instanced ability CDO.
+			if (ShouldCancelFunc(ModularAbilityCDO, AbilitySpec.Handle))
+			{
+				// Non-instanced abilities can always be canceled.
+				check(ModularAbilityCDO->CanBeCanceled());
+				ModularAbilityCDO->CancelAbility(AbilitySpec.Handle, AbilityActorInfo.Get(), FGameplayAbilityActivationInfo(), bReplicateCancelAbility);
+			}
+		}
+	}
 }
 
 void UModularAbilitySystemComponent::AbilitySpecInputPressed(FGameplayAbilitySpec& Spec)
@@ -39,6 +86,128 @@ void UModularAbilitySystemComponent::AbilitySpecInputReleased(FGameplayAbilitySp
 		// Invoke the InputReleased event. This is not replicated here. If someone is listening, they may replicate the InputReleased event to the server.
 		InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, Spec.Handle, Spec.ActivationInfo.GetActivationPredictionKey());
 	}
+}
+
+void UModularAbilitySystemComponent::NotifyAbilityActivated(const FGameplayAbilitySpecHandle Handle, UGameplayAbility* Ability)
+{
+	Super::NotifyAbilityActivated(Handle, Ability);
+
+	UModularGameplayAbility* ModularAbility = CastChecked<UModularGameplayAbility>(Ability);
+
+	AddAbilityToActivationGroup(ModularAbility->GetActivationGroup(), ModularAbility);
+}
+
+void UModularAbilitySystemComponent::NotifyAbilityFailed(const FGameplayAbilitySpecHandle Handle, UGameplayAbility* Ability, const FGameplayTagContainer& FailureReason)
+{
+	Super::NotifyAbilityFailed(Handle, Ability, FailureReason);
+
+	if (APawn* Avatar = Cast<APawn>(GetAvatarActor()))
+	{
+		if (!Avatar->IsLocallyControlled() && Ability->IsSupportedForNetworking())
+		{
+			ClientNotifyAbilityFailed(Ability, FailureReason);
+			return;
+		}
+	}
+
+	HandleAbilityFailed(Ability, FailureReason);
+}
+
+void UModularAbilitySystemComponent::NotifyAbilityEnded(FGameplayAbilitySpecHandle Handle, UGameplayAbility* Ability, bool bWasCancelled)
+{
+	Super::NotifyAbilityEnded(Handle, Ability, bWasCancelled);
+
+	UModularGameplayAbility* ModularAbility = CastChecked<UModularGameplayAbility>(Ability);
+
+	RemoveAbilityFromActivationGroup(ModularAbility->GetActivationGroup(), ModularAbility);
+}
+
+void UModularAbilitySystemComponent::ClientNotifyAbilityFailed_Implementation(const UGameplayAbility* Ability, const FGameplayTagContainer& FailureReason)
+{
+	HandleAbilityFailed(Ability, FailureReason);
+}
+
+void UModularAbilitySystemComponent::HandleAbilityFailed(const UGameplayAbility* Ability, const FGameplayTagContainer& FailureReason)
+{
+	if (const UModularGameplayAbility* ModularAbility = Cast<const UModularGameplayAbility>(Ability))
+	{
+		ModularAbility->OnAbilityFailedToActivate(FailureReason);
+	}
+}
+
+bool UModularAbilitySystemComponent::IsActivationGroupBlocked(EModularAbilityActivationGroup Group) const
+{
+	bool bBlocked = false;
+
+	switch (Group)
+	{
+	case EModularAbilityActivationGroup::Independent:
+		// Independent abilities are never blocked.
+		bBlocked = false;
+		break;
+
+	case EModularAbilityActivationGroup::Exclusive_Replaceable:
+	case EModularAbilityActivationGroup::Exclusive_Blocking:
+		// Exclusive abilities can activate if nothing is blocking.
+		bBlocked = (ActivationGroupCounts[(uint8)EModularAbilityActivationGroup::Exclusive_Blocking] > 0);
+		break;
+
+	default:
+		checkf(false, TEXT("IsActivationGroupBlocked: Invalid ActivationGroup [%d]\n"), (uint8)Group);
+		break;
+	}
+
+	return bBlocked;
+}
+
+void UModularAbilitySystemComponent::AddAbilityToActivationGroup(EModularAbilityActivationGroup Group, UModularGameplayAbility* ModularAbility)
+{
+	check(ModularAbility);
+	check(ActivationGroupCounts[(uint8)Group] < INT32_MAX);
+
+	ActivationGroupCounts[(uint8)Group]++;
+
+	const bool bReplicateCancelAbility = false;
+
+	switch (Group)
+	{
+	case EModularAbilityActivationGroup::Independent:
+		// Independent abilities do not cancel any other abilities.
+		break;
+
+	case EModularAbilityActivationGroup::Exclusive_Replaceable:
+	case EModularAbilityActivationGroup::Exclusive_Blocking:
+		CancelActivationGroupAbilities(EModularAbilityActivationGroup::Exclusive_Replaceable, ModularAbility, bReplicateCancelAbility);
+		break;
+
+	default:
+		checkf(false, TEXT("AddAbilityToActivationGroup: Invalid ActivationGroup [%d]\n"), (uint8)Group);
+		break;
+	}
+
+	const int32 ExclusiveCount = ActivationGroupCounts[(uint8)EModularAbilityActivationGroup::Exclusive_Replaceable] + ActivationGroupCounts[(uint8)EModularAbilityActivationGroup::Exclusive_Blocking];
+	if (!ensure(ExclusiveCount <= 1))
+	{
+		UE_LOG(LogAbilities, Error, TEXT("AddAbilityToActivationGroup: Multiple exclusive abilities are running."));
+	}
+}
+
+void UModularAbilitySystemComponent::RemoveAbilityFromActivationGroup(EModularAbilityActivationGroup Group, UModularGameplayAbility* ModularAbility)
+{
+	check(ModularAbility);
+	check(ActivationGroupCounts[(uint8)Group] > 0);
+
+	ActivationGroupCounts[(uint8)Group]--;
+}
+
+void UModularAbilitySystemComponent::CancelActivationGroupAbilities(EModularAbilityActivationGroup Group, UModularGameplayAbility* IgnoreModularAbility, bool bReplicateCancelAbility)
+{
+	auto ShouldCancelFunc = [this, Group, IgnoreModularAbility](const UModularGameplayAbility* ModularAbility, FGameplayAbilitySpecHandle Handle)
+	{
+		return ((ModularAbility->GetActivationGroup() == Group) && (ModularAbility != IgnoreModularAbility));
+	};
+
+	CancelAbilitiesByFunc(ShouldCancelFunc, bReplicateCancelAbility);
 }
 
 void UModularAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
@@ -188,5 +357,14 @@ void UModularAbilitySystemComponent::HandleControllerChanged()
 		{
 			RefreshAbilityActorInfo();
 		}
+	}
+}
+
+void UModularAbilitySystemComponent::GetAbilityTargetData(const FGameplayAbilitySpecHandle AbilityHandle, FGameplayAbilityActivationInfo ActivationInfo, FGameplayAbilityTargetDataHandle& OutTargetDataHandle)
+{
+	TSharedPtr<FAbilityReplicatedDataCache> ReplicatedData = AbilityTargetDataMap.Find(FGameplayAbilitySpecHandleAndPredictionKey(AbilityHandle, ActivationInfo.GetActivationPredictionKey()));
+	if (ReplicatedData.IsValid())
+	{
+		OutTargetDataHandle = ReplicatedData->TargetData;
 	}
 }

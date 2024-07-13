@@ -103,8 +103,8 @@ public:
 
 	void OnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
 	{
-		// NativeOnAbilityFailedToActivate(FailedReason);
-		// ScriptOnAbilityFailedToActivate(FailedReason);
+		NativeOnAbilityFailedToActivate(FailedReason);
+		K2_OnFailedToActivate(FailedReason);
 	}
 
 	EModularAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
@@ -126,6 +126,13 @@ public:
 
 protected:
 
+	// Called when the ability fails to activate
+	virtual void NativeOnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const;
+
+	// Called when the ability fails to activate
+	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnFailedToActivate"))
+	void K2_OnFailedToActivate(const FGameplayTagContainer& FailedReason) const;
+
 	//~UGameplayAbility interface
 	// virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
 	// virtual void SetCanBeCanceled(bool bCanBeCanceled) override;
@@ -133,8 +140,8 @@ protected:
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	// virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	// virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
-	// virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
-	// virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
+	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	// virtual FGameplayEffectContextHandle MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const override;
 	// virtual void ApplyAbilityTagsToGameplayEffectSpec(FGameplayEffectSpec& Spec, FGameplayAbilitySpec* AbilitySpec) const override;
 	// virtual bool DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
@@ -153,6 +160,14 @@ protected:
 	// Additional costs that must be paid to activate this ability
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = Costs, meta=(DisplayName="Additional Costs"))
 	TArray<TObjectPtr<UModularAbilityCost>> AdditionalCosts;
+
+	// Map of failure tags to simple error messages
+	UPROPERTY(EditDefaultsOnly, Category = "Advanced")
+	TMap<FGameplayTag, FText> FailureTagToUserFacingMessages;
+
+	// Map of failure tags to anim montages that should be played with them
+	UPROPERTY(EditDefaultsOnly, Category = "Advanced")
+	TMap<FGameplayTag, TObjectPtr<UAnimMontage>> FailureTagToAnimMontage;
 
 	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnAbilityAdded"))
 	void K2_OnAbilityAdded();

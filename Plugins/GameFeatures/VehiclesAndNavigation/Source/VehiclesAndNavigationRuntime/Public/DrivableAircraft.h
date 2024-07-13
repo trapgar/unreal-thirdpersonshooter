@@ -14,7 +14,11 @@
 
 #include "DrivableAircraft.generated.h"
 
-// A Pawn players can control that has vertical and horizontal movement
+/**
+ * ADrivableAircraft
+ * 
+ * A Pawn players can control that has vertical and horizontal movement.
+ */
 UCLASS(Blueprintable, BlueprintType)
 class VEHICLESANDNAVIGATIONRUNTIME_API ADrivableAircraft : public APawn, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {

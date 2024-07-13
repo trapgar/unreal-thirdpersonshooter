@@ -34,7 +34,7 @@ FString FInventoryEntry::GetDebugString() const
 void FInventoryList::BroadcastChangeMessage(UInventoryItemInstance* Instance, int32 OldCount, int32 NewCount)
 {
 	FInventoryChangedMessage Message;
-	Message.InventoryOwner = OwnerComponent;
+	Message.Source = OwnerComponent;
 	Message.Instance = Instance;
 	Message.NewCount = NewCount;
 	Message.Delta = NewCount - OldCount;
@@ -153,7 +153,6 @@ UInventoryItemInstance* UInventoryManagerComponent::AddItemByDefinition(TSubclas
 	if (ItemDefinition != nullptr)
 	{
 		ItemInstance = AddItem(ItemDefinition->GetDefaultObject<UInventoryItemDefinition>(), StackCount);
-		K2_OnItemAdded(ItemInstance);
 	}
 
 	return ItemInstance;

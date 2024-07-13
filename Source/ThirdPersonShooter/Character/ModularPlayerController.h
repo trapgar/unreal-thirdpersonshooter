@@ -38,17 +38,16 @@ public:
 	//~APlayerController interface
 	virtual void AttachToPawn(APawn* InPawn) override;
 	virtual void DetachFromPawn() override;
-	// virtual void ReceivedPlayer() override;
-	// virtual void PlayerTick(float DeltaTime) override;
-	// virtual void SetPlayer(UPlayer* InPlayer) override;
-	// virtual void AddCheats(bool bForce) override;
-	// virtual void UpdateForceFeedback(IInputInterface* InputInterface, const int32 ControllerId) override;
-	// virtual void UpdateHiddenComponents(const FVector& ViewLocation, TSet<FPrimitiveComponentId>& OutHiddenComponents) override;
-	// virtual void PreProcessInput(const float DeltaTime, const bool bGamePaused) override;
 	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
 	//~End of APlayerController interface
 
+protected:
+
+	virtual void PreInitializeComponents() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:
+
 	UModularAbilitySystemComponent* AbilitySystemComponent;
 
 };

@@ -1,4 +1,5 @@
 #include "ModularPlayerController.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Ability/ModularAbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularPlayerController)
@@ -8,10 +9,22 @@ AModularPlayerController::AModularPlayerController(const FObjectInitializer &Obj
 {
 }
 
+void AModularPlayerController::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+}
+
 void AModularPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	SetActorHiddenInGame(false);
+}
+
+void AModularPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
+	Super::EndPlay(EndPlayReason);
 }
 
 void AModularPlayerController::AttachToPawn(APawn *InPawn)
