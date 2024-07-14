@@ -39,7 +39,15 @@ public:
 
 	// Actor class to spawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Default")
-	TSubclassOf<AEquipmentItemInstance> InstanceType;
+	TSubclassOf<AEquipmentItemInstance> ActorToSpawn;
+
+	// Socket name to attach the equipment actor instance to
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Default")
+	FName AttachSocketName;
+
+	// Transform to apply to the equipment actor instance
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Default")
+	FTransform AttachTransform;
 
 	// Gameplay ability sets to grant when this item is equipped
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")

@@ -127,6 +127,8 @@ struct TStructOpsTypeTraits<FEquipmentList> : public TStructOpsTypeTraitsBase2<F
 
 
 /**
+ * UEquipmentManagerComponent
+ * 
  * Manages equipment applied to a pawn. Equipment is inventory that can be seen & potentially 'used' by the player.
  */
 UCLASS(Blueprintable, BlueprintType)

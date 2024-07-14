@@ -3,13 +3,13 @@
 #include "EquipmentItemDefinition.h"
 #include "Templates/SubclassOf.h"
 
-#include "EquipmentFragment_AttachmentInfo.generated.h"
+#include "EquipmentFragment_CosmeticInfo.generated.h"
 
 class UEquipmentItemDefinition;
 class UObject;
 
-UCLASS(BlueprintType)
-class UEquipmentFragment_AttachmentInfo : public UEquipmentItemFragment
+UCLASS(BlueprintType, Const)
+class UEquipmentFragment_CosmeticInfo : public UEquipmentItemFragment
 {
 	GENERATED_BODY()
 
@@ -22,12 +22,4 @@ public:
 	// Transform to apply to the equipment when attached to the holstered socket
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attach Info")
 	FTransform HolsteredTransform;
-
-	// Socket tag to attach the equipment to when in active use (drawn)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attach Info")
-	FName DrawnSocketName;
-
-	// Transform to apply to the equipment when attached to the drawn socket
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attach Info")
-	FTransform DrawnTransform;
 };

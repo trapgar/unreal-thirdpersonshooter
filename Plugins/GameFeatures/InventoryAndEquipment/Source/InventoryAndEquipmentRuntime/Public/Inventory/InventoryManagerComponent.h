@@ -115,18 +115,9 @@ struct TStructOpsTypeTraits<FInventoryList> : public TStructOpsTypeTraitsBase2<F
 };
 
 /** 
- * Manages inventory held by a pawn. Inventory is any item that the pawn is capable of carrying.
- * While all equipment is technically part of the inventory, it is handled separately by the `EquipmentManagerComponent`
- * as it may be worn by the pawn or have abilities to use.
+ * UInventoryManagerComponent
  * 
- * TODO: There may be a better way to do this:
- * Can be a bit weird as we may need to juggle the stats of items applied to an `UInventoryItemInstance` vs an `AEquipmentItemInstance`
- * e.g.:
- * 	1. You pick up a rifle with 30 rounds and put it in your inventory (`UInventoryItemInstance`)
- * 	2. You 'equip' the rifle and we transfer it to the `EquipmentManagerComponent` which also transfers the stats to the
- * 	`AEquipmentItemInstance` because it's now spawned as an actor
- * 	3. You 'unequip' the rifle and we put it back in your inventory, which also transfers the stats back from the `AEquipmentItemInstance`
- * 	to the `UInventoryItemInstance` as the equipment is despawned
+ * Manages inventory held by a pawn. Inventory is any item that the pawn is capable of carrying.
  */
 UCLASS(Blueprintable, BlueprintType)
 class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryManagerComponent : public UActorComponent
@@ -137,21 +128,27 @@ public:
 	// Sets default values for this component's properties
 	UInventoryManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	// Adds an item to the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
 	UInventoryItemInstance* AddItem(UInventoryItemDefinition* ItemDefinition, int32 StackCount = 1);
 
+	// Adds an item by definition to the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
 	UInventoryItemInstance* AddItemByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDefinition, int32 StackCount = 1);
 
+	// Removes an item from the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
 	void RemoveItem(UInventoryItemInstance* ItemInstance);
 
+	// Returns a list of all items in the inventory
 	UFUNCTION(BlueprintCallable, Category=Inventory, BlueprintPure=false)
 	TArray<UInventoryItemInstance*> GetAllItems() const;
 
+	// Returns the first item in the inventory that matches the given definition
 	UFUNCTION(BlueprintCallable, Category=Inventory, BlueprintPure)
 	UInventoryItemInstance* FindFirstItemStackByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
 
+	// Returns the total number of items in the inventory that matches the given definition
 	int32 GetTotalItemCountByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
 
 protected:

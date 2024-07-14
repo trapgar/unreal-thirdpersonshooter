@@ -6,7 +6,6 @@
 #include "Engine/ActorChannel.h"
 #include "Equipment/EquipmentItemDefinition.h"
 #include "Equipment/EquipmentItemInstance.h"
-#include "Equipment/EquipmentFragment_AttachmentInfo.h"
 #include "Inventory/InventoryFragment_EquippableItem.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
@@ -57,10 +56,10 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	const UEquipmentItemDefinition* EquipmentCDO = GetDefault<UEquipmentItemDefinition>(EquipmentDefinition);
 
 	// If for some reason the equipment class isn't set, use the default (NOTE: I think this is abstract so idk if this will break?)
-	TSubclassOf<AEquipmentItemInstance> InstanceType = EquipmentCDO->InstanceType;
-	if (InstanceType == nullptr)
+	TSubclassOf<AEquipmentItemInstance> ActorToSpawn = EquipmentCDO->ActorToSpawn;
+	if (ActorToSpawn == nullptr)
 	{
-		InstanceType = AEquipmentItemInstance::StaticClass();
+		ActorToSpawn = AEquipmentItemInstance::StaticClass();
 	}
 
 	FTransform SpawnTransform = FTransform(FQuat::Identity, FVector::ZeroVector, FVector(1.0f, 1.0f, 1.0f));
@@ -72,14 +71,8 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	if (USkeletalMeshComponent* Skele = Owner->GetComponentByClass<USkeletalMeshComponent>())
 	{
 		Attachee = Skele;
-		FTransform SkeleTransform = Skele->GetComponentTransform();
-
-		if (UEquipmentFragment_AttachmentInfo* AttachmentInfo = EquipmentCDO->FindFragmentByClass<UEquipmentFragment_AttachmentInfo>())
-		{
-			SocketName = AttachmentInfo->HolsteredSocketName;
-			FTransform SocketTransform = Skele->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_Actor);
-			SpawnTransform = AttachmentInfo->HolsteredTransform;
-		}
+		SocketName = EquipmentCDO->AttachSocketName;
+		SpawnTransform = EquipmentCDO->AttachTransform;
 	}
 	
 	FActorSpawnParameters SpawnInfo;
@@ -91,7 +84,7 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	}
 
 	FEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.Instance = World->SpawnActor<AEquipmentItemInstance>(InstanceType, SpawnTransform, SpawnInfo); //@TODO: Using the actor instead of component as the outer due to UE-127172
+	NewEntry.Instance = World->SpawnActorDeferred<AEquipmentItemInstance>(ActorToSpawn, SpawnTransform, SpawnInfo.Owner, SpawnInfo.Instigator);
 	NewEntry.Instance->SetItemDef(EquipmentDefinition);
 	Result = NewEntry.Instance;
 
@@ -108,7 +101,7 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 		}
 	}
 
-	Result->OnReady();
+	Result->FinishSpawning(SpawnTransform);
 
 	// Only passive items give their abilities on equip
 	const UEquipmentItemDefinition* EquipmentDefinitionCDO = GetDefault<UEquipmentItemDefinition>(EquipmentDefinition);
