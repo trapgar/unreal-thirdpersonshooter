@@ -54,7 +54,7 @@ public:
 	TArray<TObjectPtr<const UModularAbilitySet>> AbilitySetsToGrant;
 
 	// Flag indicating if the AbilitySets granted by this item should be applied on equip (passively), or on draw (not passively)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects", meta=(DisplayName="Granted AbilitySets are Passive?"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects", meta=(DisplayName="Is Passive?"))
 	bool bIsPassive = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Attributes, Instanced)

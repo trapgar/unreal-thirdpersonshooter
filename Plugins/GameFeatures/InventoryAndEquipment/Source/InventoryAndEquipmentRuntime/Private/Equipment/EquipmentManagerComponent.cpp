@@ -86,6 +86,7 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 	FEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
 	NewEntry.Instance = World->SpawnActorDeferred<AEquipmentItemInstance>(ActorToSpawn, SpawnTransform, SpawnInfo.Owner, SpawnInfo.Instigator);
 	NewEntry.Instance->SetItemDef(EquipmentDefinition);
+	NewEntry.Instance->FinishSpawning(SpawnTransform);
 	Result = NewEntry.Instance;
 
 	// Attach to the appropriate socket if valid
@@ -100,8 +101,6 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 			UE_LOG(LogEquipment, Warning, TEXT("Failed to attach equipment %s to %s - most likely SKM was not found."), *EquipmentCDO->GetName(), *Attachee->GetName());
 		}
 	}
-
-	Result->FinishSpawning(SpawnTransform);
 
 	// Only passive items give their abilities on equip
 	const UEquipmentItemDefinition* EquipmentDefinitionCDO = GetDefault<UEquipmentItemDefinition>(EquipmentDefinition);
