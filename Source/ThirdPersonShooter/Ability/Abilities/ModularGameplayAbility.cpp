@@ -1,6 +1,5 @@
 #include "ModularGameplayAbility.h"
 #include "Ability/ModularAbilitySystemComponent.h"
-#include "ModularAbilitySimpleFailureMessage.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "ModularAbilityCost.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -16,8 +15,7 @@
 	}																																					\
 }
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_ABILITY_SIMPLE_FAILURE_MESSAGE, "Ability.UserFacingSimpleActivateFail.Message");
-UE_DEFINE_GAMEPLAY_TAG(TAG_ABILITY_PLAY_MONTAGE_FAILURE_MESSAGE, "Ability.PlayMontageOnActivateFail.Message");
+UE_DEFINE_GAMEPLAY_TAG(TAG_ABILITY_FAILURE_MESSAGE, "Ability.Failed.Message");
 
 UModularGameplayAbility::UModularGameplayAbility(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -110,37 +108,14 @@ void UModularGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle,
 	}
 }
 
-void UModularGameplayAbility::NativeOnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
+void UModularGameplayAbility::OnAbilityFailedToActivate_Broadcast(const FGameplayTagContainer& FailedReason) const
 {
-	bool bSimpleFailureFound = false;
-	for (FGameplayTag Reason : FailedReason)
-	{
-		if (!bSimpleFailureFound)
-		{
-			if (const FText* pUserFacingMessage = FailureTagToUserFacingMessages.Find(Reason))
-			{
-				FModularAbilitySimpleFailureMessage Message;
-				Message.PlayerController = GetActorInfo().PlayerController.Get();
-				Message.FailureTags = FailedReason;
-				Message.UserFacingReason = *pUserFacingMessage;
+	FModularAbilityFailureMessage Message;
+	Message.PlayerController = GetActorInfo().PlayerController.Get();
+	Message.FailureTags = FailedReason;
 
-				UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());
-				MessageSystem.BroadcastMessage(TAG_ABILITY_SIMPLE_FAILURE_MESSAGE, Message);
-				bSimpleFailureFound = true;
-			}
-		}
-		
-		if (UAnimMontage* pMontage = FailureTagToAnimMontage.FindRef(Reason))
-		{
-			FModularAbilityMontageFailureMessage Message;
-			Message.PlayerController = GetActorInfo().PlayerController.Get();
-			Message.FailureTags = FailedReason;
-			Message.FailureMontage = pMontage;
-
-			UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());
-			MessageSystem.BroadcastMessage(TAG_ABILITY_PLAY_MONTAGE_FAILURE_MESSAGE, Message);
-		}
-	}
+	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());
+	MessageSystem.BroadcastMessage(TAG_ABILITY_FAILURE_MESSAGE, Message);
 }
 
 void UModularGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const

@@ -135,31 +135,6 @@ void UModularAbilitySystemComponent::HandleAbilityFailed(const UGameplayAbility*
 	}
 }
 
-bool UModularAbilitySystemComponent::IsActivationGroupBlocked(EModularAbilityActivationGroup Group) const
-{
-	bool bBlocked = false;
-
-	switch (Group)
-	{
-	case EModularAbilityActivationGroup::Independent:
-		// Independent abilities are never blocked.
-		bBlocked = false;
-		break;
-
-	case EModularAbilityActivationGroup::Exclusive_Replaceable:
-	case EModularAbilityActivationGroup::Exclusive_Blocking:
-		// Exclusive abilities can activate if nothing is blocking.
-		bBlocked = (ActivationGroupCounts[(uint8)EModularAbilityActivationGroup::Exclusive_Blocking] > 0);
-		break;
-
-	default:
-		checkf(false, TEXT("IsActivationGroupBlocked: Invalid ActivationGroup [%d]\n"), (uint8)Group);
-		break;
-	}
-
-	return bBlocked;
-}
-
 void UModularAbilitySystemComponent::AddAbilityToActivationGroup(EModularAbilityActivationGroup Group, UModularGameplayAbility* ModularAbility)
 {
 	check(ModularAbility);

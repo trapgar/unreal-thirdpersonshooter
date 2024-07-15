@@ -27,7 +27,7 @@ struct FGameplayEventData;
 /**
  * EModularAbilityActivationPolicy
  *
- *	Defines how an ability is meant to activate.
+ * Defines how an ability is meant to activate.
  */
 UENUM(BlueprintType)
 enum class EModularAbilityActivationPolicy : uint8
@@ -47,7 +47,7 @@ enum class EModularAbilityActivationPolicy : uint8
 /**
  * EModularAbilityActivationGroup
  *
- *	Defines how an ability activates in relation to other abilities.
+ * Defines how an ability activates in relation to other abilities.
  */
 UENUM(BlueprintType)
 enum class EModularAbilityActivationGroup : uint8
@@ -64,23 +64,25 @@ enum class EModularAbilityActivationGroup : uint8
 	MAX	UMETA(Hidden)
 };
 
-/** Failure reason that can be used to play an animation montage when a failure occurs */
+/**
+ * FModularAbilityFailureMessage
+ * 
+ * Message sent thru the GameplayMessageSubsystem when an ability fails to activate
+ */
 USTRUCT(BlueprintType)
-struct THIRDPERSONSHOOTER_API FModularAbilityMontageFailureMessage
+struct THIRDPERSONSHOOTER_API FModularAbilityFailureMessage
 {
 	GENERATED_BODY()
 
 public:
 	
+	// Owning controller of the ability
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<APlayerController> PlayerController = nullptr;
 
 	// All the reasons why this ability has failed
 	UPROPERTY(BlueprintReadWrite)
 	FGameplayTagContainer FailureTags;
-
-	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UAnimMontage> FailureMontage = nullptr;
 };
 
 /**
@@ -89,6 +91,7 @@ public:
  * The base gameplay ability class used by this project.
  * 
  * Using a custom override of the `UGameplayAbility` class because the default implementation doesn't support `EModularAbilityActivationPolicy::WhileInputActive` ActivationPolicy.
+ * Also added an `AdditionalCosts` prop that is more flexible than the default `Costs`.
  * 
  * The default `Triggers` category is still used when the trigger is a GameplayEvent (triggered programmatically).
  */
@@ -103,7 +106,7 @@ public:
 
 	void OnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
 	{
-		NativeOnAbilityFailedToActivate(FailedReason);
+		OnAbilityFailedToActivate_Broadcast(FailedReason);
 		K2_OnFailedToActivate(FailedReason);
 	}
 
@@ -111,27 +114,17 @@ public:
 	EModularAbilityActivationGroup GetActivationGroup() const { return ActivationGroup; }
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|Controller")
-	AController* GetControllerFromActorInfo() const
-	{
-		return (CurrentActorInfo ? CurrentActorInfo->PlayerController.Get() : nullptr);
-	}
+	AController* GetControllerFromActorInfo() const { return (CurrentActorInfo ? CurrentActorInfo->PlayerController.Get() : nullptr); }
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|Pawn")
-	APawn* GetPawnFromActorInfo() const
-	{
-		return (CurrentActorInfo ? Cast<APawn>(CurrentActorInfo->OwnerActor.Get()) : nullptr);
-	}
+	APawn* GetPawnFromActorInfo() const { return (CurrentActorInfo ? Cast<APawn>(CurrentActorInfo->OwnerActor.Get()) : nullptr); }
 
 	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
 
 protected:
 
-	// Called when the ability fails to activate
-	virtual void NativeOnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const;
-
-	// Called when the ability fails to activate
-	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnFailedToActivate"))
-	void K2_OnFailedToActivate(const FGameplayTagContainer& FailedReason) const;
+	// Broadcast to the GameplayMessageSubsystem when the ability fails to activate
+	virtual void OnAbilityFailedToActivate_Broadcast(const FGameplayTagContainer& FailedReason) const;
 
 	//~UGameplayAbility interface
 	// virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
@@ -161,17 +154,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = Costs, meta=(DisplayName="Additional Costs"))
 	TArray<TObjectPtr<UModularAbilityCost>> AdditionalCosts;
 
-	// Map of failure tags to simple error messages
-	UPROPERTY(EditDefaultsOnly, Category = "Advanced")
-	TMap<FGameplayTag, FText> FailureTagToUserFacingMessages;
+	// Called when the ability fails to activate
+	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnFailedToActivate"))
+	void K2_OnFailedToActivate(const FGameplayTagContainer& FailedReason) const;
 
-	// Map of failure tags to anim montages that should be played with them
-	UPROPERTY(EditDefaultsOnly, Category = "Advanced")
-	TMap<FGameplayTag, TObjectPtr<UAnimMontage>> FailureTagToAnimMontage;
-
+	// Called when the ability was added
 	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnAbilityAdded"))
 	void K2_OnAbilityAdded();
 
+	// Called when the ability was removed
 	UFUNCTION(BlueprintImplementableEvent, Category=Ability, meta=(DisplayName="OnAbilityRemoved"))
 	void K2_OnAbilityRemoved();
 };
