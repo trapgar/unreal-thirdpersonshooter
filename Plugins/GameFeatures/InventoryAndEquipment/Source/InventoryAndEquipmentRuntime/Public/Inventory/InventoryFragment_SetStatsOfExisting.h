@@ -12,6 +12,11 @@ class UInventoryItemInstance;
 class UObject;
 struct FGameplayTag;
 
+/*
+ * UInventoryFragment_SetStatsOfExisting
+ * 
+ * Updates the stats of an existing inventory item, find by definition.
+ */
 UCLASS()
 class UInventoryFragment_SetStatsOfExisting : public UInventoryItemFragment
 {
@@ -19,11 +24,11 @@ class UInventoryFragment_SetStatsOfExisting : public UInventoryItemFragment
 
 protected:
 
-	// List of additional stats for item (starting magazine ammo, etc.)
+	// List of additional stats to add to the item (ammo, etc.)
 	UPROPERTY(EditDefaultsOnly, Category=Inventory)
 	TMap<FGameplayTag, int32> AdditionalItemStats;
 
-	// Definition of the equipment item to find & set stats for
+	// Definition of the inventory item to find & set stats for
 	UPROPERTY(EditDefaultsOnly, Category=Inventory)
 	TSubclassOf<UInventoryItemDefinition> ItemDefinition;
 
