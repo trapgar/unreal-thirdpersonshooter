@@ -48,7 +48,6 @@ UInventoryItemInstance *FInventoryList::AddEntry(UInventoryItemDefinition* ItemD
 	UInventoryItemInstance* Result = nullptr;
 
 	check(ItemDef != nullptr);
-	// TODO: Why is this sometimes null???
 	check(OwnerComponent);
 
 	AActor* OwningActor = OwnerComponent->GetOwner();

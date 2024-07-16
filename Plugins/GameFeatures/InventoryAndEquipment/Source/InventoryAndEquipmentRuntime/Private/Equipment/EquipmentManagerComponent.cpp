@@ -83,6 +83,7 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 		SpawnInfo.Instigator = Instigator;
 	}
 
+	// TODO: add to the inventory SpawnedActor list
 	FEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
 	NewEntry.Instance = World->SpawnActorDeferred<AEquipmentItemInstance>(ActorToSpawn, SpawnTransform, SpawnInfo.Owner, SpawnInfo.Instigator);
 	NewEntry.Instance->SetItemDef(EquipmentDefinition);

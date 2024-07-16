@@ -17,7 +17,7 @@ class UInventoryFragment_EquippableItem : public UInventoryItemFragment
 
 public:
 
-	// Equipment item definition
+	// Item definition for the equipment to be added
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Equipment)
 	TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition;
 };

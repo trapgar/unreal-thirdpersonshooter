@@ -25,6 +25,4 @@ protected:
 
 public:
 	virtual void OnInstanceCreated(UInventoryItemInstance* Instance) const override;
-
-	int32 GetItemStatByTag(FGameplayTag Tag) const;
 };

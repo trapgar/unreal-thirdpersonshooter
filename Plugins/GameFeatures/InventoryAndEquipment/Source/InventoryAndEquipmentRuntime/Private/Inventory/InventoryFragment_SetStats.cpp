@@ -13,13 +13,3 @@ void UInventoryFragment_SetStats::OnInstanceCreated(UInventoryItemInstance* Inst
 		Instance->AddStatTagStack(KVP.Key, KVP.Value);
 	}
 }
-
-int32 UInventoryFragment_SetStats::GetItemStatByTag(FGameplayTag Tag) const
-{
-	if (const int32* StatPtr = InitialItemStats.Find(Tag))
-	{
-		return *StatPtr;
-	}
-
-	return 0;
-}

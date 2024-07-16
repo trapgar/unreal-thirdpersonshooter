@@ -47,10 +47,7 @@ public:
 	bool HasStatTag(FGameplayTag Tag) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category = "Inventory")
-	UInventoryItemDefinition* GetItemDef() const
-	{
-		return ItemDef;
-	}
+	UInventoryItemDefinition* GetItemDef() const { return ItemDef; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure=false, meta=(DeterminesOutputType=FragmentClass))
 	const UInventoryItemFragment* FindFragmentByClass(TSubclassOf<UInventoryItemFragment> FragmentClass) const
@@ -59,10 +56,7 @@ public:
 	}
 
 	template <typename ResultClass>
-	const ResultClass* FindFragmentByClass() const
-	{
-		return (ResultClass*)FindFragmentByClass(ResultClass::StaticClass());
-	}
+	const ResultClass* FindFragmentByClass() const { return (ResultClass*)FindFragmentByClass(ResultClass::StaticClass()); }
 
 	void SetItemDef(UInventoryItemDefinition* InDef);
 
