@@ -30,7 +30,7 @@ FString FEquipmentEntry::GetDebugString() const
 	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(Instance->GetItemDef()));
 }
 
-void FEquipmentList::BroadcastChangeMessage(AEquipmentItemInstance* Instance, int32 OldCount, int32 NewCount)
+void FEquipmentList::BroadcastChangeMessage(UEquipmentItemInstance* Instance, int32 OldCount, int32 NewCount)
 {
 	FEquipmentChangedMessage Message;
 	Message.Source = OwnerComponent;
@@ -42,73 +42,38 @@ void FEquipmentList::BroadcastChangeMessage(AEquipmentItemInstance* Instance, in
 	MessageSystem.BroadcastMessage(TAG_Equipment_Message_StackChanged, Message);
 }
 
-AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition)
+UEquipmentItemInstance* FEquipmentList::AddEntry(UEquipmentItemDefinition* EquipmentDef)
 {
-	AEquipmentItemInstance* Result = nullptr;
+	UEquipmentItemInstance* Result = nullptr;
 
-	check(EquipmentDefinition != nullptr);
+	check(EquipmentDef != nullptr);
 	check(OwnerComponent);
-	AActor* Owner = OwnerComponent->GetOwner();
+
+	APawn* Owner = Cast<APawn>(OwnerComponent->GetOwner());
 	check(Owner->HasAuthority());
-	UWorld* World = Owner->GetWorld();
-	check(World);
-
-	const UEquipmentItemDefinition* EquipmentCDO = GetDefault<UEquipmentItemDefinition>(EquipmentDefinition);
-
-	// If for some reason the equipment class isn't set, use the default (NOTE: I think this is abstract so idk if this will break?)
-	TSubclassOf<AEquipmentItemInstance> ActorToSpawn = EquipmentCDO->ActorToSpawn;
-	if (ActorToSpawn == nullptr)
-	{
-		ActorToSpawn = AEquipmentItemInstance::StaticClass();
-	}
-
-	FTransform SpawnTransform = FTransform(FQuat::Identity, FVector::ZeroVector, FVector(1.0f, 1.0f, 1.0f));
-	USceneComponent* Attachee = Owner->GetRootComponent();
-	FName SocketName = "";
-
-	// Find the skeletal mesh to attach to
-	// NOTE: Unreal recommends not attaching directly to the SKM, but instead with it's own animations (I think?)
-	if (USkeletalMeshComponent* Skele = Owner->GetComponentByClass<USkeletalMeshComponent>())
-	{
-		Attachee = Skele;
-		SocketName = EquipmentCDO->AttachSocketName;
-		SpawnTransform = EquipmentCDO->AttachTransform;
-	}
 	
-	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.Owner = Owner;
-
-	if (APawn* Instigator = Cast<APawn>(Owner))
+	TSubclassOf<UEquipmentItemInstance> InstanceType = EquipmentDef->InstanceType;
+	if (InstanceType == nullptr)
 	{
-		SpawnInfo.Instigator = Instigator;
+		InstanceType = UEquipmentItemInstance::StaticClass();
 	}
 
-	// TODO: add to the inventory SpawnedActor list
 	FEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.Instance = World->SpawnActorDeferred<AEquipmentItemInstance>(ActorToSpawn, SpawnTransform, SpawnInfo.Owner, SpawnInfo.Instigator);
-	NewEntry.Instance->SetItemDef(EquipmentDefinition);
-	NewEntry.Instance->FinishSpawning(SpawnTransform);
-	Result = NewEntry.Instance;
+	Result = NewEntry.Instance = NewObject<UEquipmentItemInstance>(OwnerComponent->GetOwner(), InstanceType); //@TODO: Using the actor instead of component as the outer due to UE-127172
+	Result->SetItemDef(EquipmentDef);
+	Result->SetInstigator(Owner);
 
-	// Attach to the appropriate socket if valid
-	if (SocketName.IsValid())
+	for (UEquipmentItemFragment* Fragment : EquipmentDef->Fragments)
 	{
-		if (Result->AttachToComponent(Attachee, FAttachmentTransformRules::KeepRelativeTransform, SocketName))
+		if (Fragment != nullptr)
 		{
-			Result->SetActorHiddenInGame(false);
-		}
-		else
-		{
-			UE_LOG(LogEquipment, Warning, TEXT("Failed to attach equipment %s to %s - most likely SKM was not found."), *EquipmentCDO->GetName(), *Attachee->GetName());
+			Fragment->OnInstanceCreated(Result);
 		}
 	}
-
-	// Only passive items give their abilities on equip
-	const UEquipmentItemDefinition* EquipmentDefinitionCDO = GetDefault<UEquipmentItemDefinition>(EquipmentDefinition);
 
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
 	{
-		for (auto AbilitySet : EquipmentDefinitionCDO->AbilitySetsToGrant)
+		for (auto AbilitySet : EquipmentDef->AbilitySetsToGrant)
 		{
 			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &GrantedHandles, Result);
 		}
@@ -118,14 +83,13 @@ AEquipmentItemInstance* FEquipmentList::AddEntry(TSubclassOf<UEquipmentItemDefin
 		UE_LOG(LogEquipment, Warning, TEXT("Cannot grant abilities from %s when the UAbilitySystemComponent is missing."), *GetNameSafe(Result));
 	}
 
-	Result->OnEquipped();
-
 	// MarkItemDirty(NewEntry);
+	// BroadcastChangeMessage(Result, /*OldCount=*/0, /*NewCount=*/StackCount);
 
 	return Result;
 }
 
-void FEquipmentList::RemoveEntry(AEquipmentItemInstance* Instance)
+void FEquipmentList::RemoveEntry(UEquipmentItemInstance* Instance)
 {
 	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
 	{
@@ -142,16 +106,21 @@ void FEquipmentList::RemoveEntry(AEquipmentItemInstance* Instance)
 			}
 
 			Instance->OnUnequipped();
-			Instance->Destroy();
+
+			for (UEquipmentItemFragment* Fragment : Instance->GetItemDef()->Fragments)
+			{
+				Fragment->OnInstanceDestroyed(Instance);
+			}
+
 			EntryIt.RemoveCurrent();
 			// MarkArrayDirty();
 		}
 	}
 }
 
-TArray<AEquipmentItemInstance*> FEquipmentList::GetAllItems() const
+TArray<UEquipmentItemInstance*> FEquipmentList::GetAllItems() const
 {
-	TArray<AEquipmentItemInstance*> Results;
+	TArray<UEquipmentItemInstance*> Results;
 	Results.Reserve(Entries.Num());
 
 	for (const FEquipmentEntry& Entry : Entries)
@@ -178,7 +147,7 @@ UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer&
 
 void UEquipmentManagerComponent::UninitializeComponent()
 {
-	TArray<AEquipmentItemInstance*> AllEquipmentInstances;
+	TArray<UEquipmentItemInstance*> AllEquipmentInstances;
 
 	// gathering all instances before removal to avoid side effects affecting the equipment list iterator	
 	for (const FEquipmentEntry& Entry : EquipmentList.Entries)
@@ -186,7 +155,7 @@ void UEquipmentManagerComponent::UninitializeComponent()
 		AllEquipmentInstances.Add(Entry.Instance);
 	}
 
-	for (AEquipmentItemInstance* ItemInstance : AllEquipmentInstances)
+	for (UEquipmentItemInstance* ItemInstance : AllEquipmentInstances)
 	{
 		RemoveItem(ItemInstance);
 	}
@@ -207,7 +176,7 @@ bool UEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 
 	for (FEquipmentEntry& Entry : EquipmentList.Entries)
 	{
-		AEquipmentItemInstance* Instance = Entry.Instance;
+		UEquipmentItemInstance* Instance = Entry.Instance;
 
 		if (IsValid(Instance))
 		{
@@ -227,7 +196,7 @@ void UEquipmentManagerComponent::ReadyForReplication()
 	{
 		for (const FEquipmentEntry& Entry : EquipmentList.Entries)
 		{
-			AEquipmentItemInstance* Instance = Entry.Instance;
+			UEquipmentItemInstance* Instance = Entry.Instance;
 
 			if (IsValid(Instance))
 			{
@@ -237,18 +206,19 @@ void UEquipmentManagerComponent::ReadyForReplication()
 	}
 }
 
-AEquipmentItemInstance* UEquipmentManagerComponent::AddItem(TSubclassOf<UEquipmentItemDefinition> EquipmentClass)
+UEquipmentItemInstance* UEquipmentManagerComponent::AddItem(UEquipmentItemDefinition* EquipmentClass)
 {
 	if (EquipmentClass != nullptr)
 	{
-		if (AEquipmentItemInstance* Result = EquipmentList.AddEntry(EquipmentClass))
+		if (UEquipmentItemInstance* Result = EquipmentList.AddEntry(EquipmentClass))
 		{
+			Result->OnEquipped();
+			K2_OnEquipmentItemAdded(Result);
+
 			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
 			{
 				AddReplicatedSubObject(Result);
 			}
-
-			K2_OnEquipmentItemAdded(Result);
 
 			return Result;
 		}
@@ -257,7 +227,19 @@ AEquipmentItemInstance* UEquipmentManagerComponent::AddItem(TSubclassOf<UEquipme
 	return nullptr;
 }
 
-void UEquipmentManagerComponent::RemoveItem(AEquipmentItemInstance* ItemInstance)
+UEquipmentItemInstance* UEquipmentManagerComponent::AddItemByDefinition(TSubclassOf<UEquipmentItemDefinition> ItemDefinition)
+{
+	UEquipmentItemInstance* ItemInstance = nullptr;
+
+	if (ItemDefinition != nullptr)
+	{
+		ItemInstance = AddItem(ItemDefinition->GetDefaultObject<UEquipmentItemDefinition>());
+	}
+
+	return ItemInstance;
+}
+
+void UEquipmentManagerComponent::RemoveItem(UEquipmentItemInstance* ItemInstance)
 {
 	if (ItemInstance != nullptr)
 	{
@@ -271,16 +253,16 @@ void UEquipmentManagerComponent::RemoveItem(AEquipmentItemInstance* ItemInstance
 	}
 }
 
-TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetAllItems() const
+TArray<UEquipmentItemInstance*> UEquipmentManagerComponent::GetAllItems() const
 {
 	return EquipmentList.GetAllItems();
 }
 
-AEquipmentItemInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubclassOf<AEquipmentItemInstance> InstanceType)
+UEquipmentItemInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubclassOf<UEquipmentItemInstance> InstanceType)
 {
 	for (FEquipmentEntry& Entry : EquipmentList.Entries)
 	{
-		if (AEquipmentItemInstance* Instance = Entry.Instance)
+		if (UEquipmentItemInstance* Instance = Entry.Instance)
 		{
 			if (Instance->IsA(InstanceType))
 			{
@@ -292,13 +274,13 @@ AEquipmentItemInstance* UEquipmentManagerComponent::GetFirstInstanceOfType(TSubc
 	return nullptr;
 }
 
-TArray<AEquipmentItemInstance*> UEquipmentManagerComponent::GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const
+TArray<UEquipmentItemInstance*> UEquipmentManagerComponent::GetEquipmentInstancesOfType(TSubclassOf<UEquipmentItemInstance> InstanceType) const
 {
-	TArray<AEquipmentItemInstance*> Results;
+	TArray<UEquipmentItemInstance*> Results;
 
 	for (const FEquipmentEntry& Entry : EquipmentList.Entries)
 	{
-		if (AEquipmentItemInstance* Instance = Entry.Instance)
+		if (UEquipmentItemInstance* Instance = Entry.Instance)
 		{
 			if (Instance->IsA(InstanceType))
 			{

@@ -15,7 +15,7 @@
 
 #include "EquipmentManagerComponent.generated.h"
 
-class AEquipmentItemInstance;
+class UEquipmentItemInstance;
 struct FEquipmentList;
 
 
@@ -28,7 +28,7 @@ struct FEquipmentChangedMessage
 	TObjectPtr<UActorComponent> Source = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category=Equipment)
-	TObjectPtr<AEquipmentItemInstance> Instance = nullptr;
+	TObjectPtr<UEquipmentItemInstance> Instance = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category=Equipment)
 	int32 NewCount = 0;
@@ -56,7 +56,7 @@ private:
 	friend UEquipmentManagerComponent;
 
 	UPROPERTY()
-	TObjectPtr<AEquipmentItemInstance> Instance = nullptr;
+	TObjectPtr<UEquipmentItemInstance> Instance = nullptr;
 };
 
 
@@ -80,11 +80,11 @@ struct FEquipmentList
 	}
 
 public:
-	TArray<AEquipmentItemInstance*> GetAllItems() const;
+	TArray<UEquipmentItemInstance*> GetAllItems() const;
 
-	AEquipmentItemInstance* AddEntry(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition);
+	UEquipmentItemInstance* AddEntry(UEquipmentItemDefinition* EquipmentDefinition);
 
-	void RemoveEntry(AEquipmentItemInstance* Instance);
+	void RemoveEntry(UEquipmentItemInstance* Instance);
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 	{
@@ -92,7 +92,7 @@ public:
 	}
 
 private:
-	void BroadcastChangeMessage(AEquipmentItemInstance* Entry, int32 OldCount, int32 NewCount);
+	void BroadcastChangeMessage(UEquipmentItemInstance* Entry, int32 OldCount, int32 NewCount);
 
 	// Authority-only list of granted handles
 	UPROPERTY(NotReplicated)
@@ -139,27 +139,29 @@ class INVENTORYANDEQUIPMENTRUNTIME_API UEquipmentManagerComponent : public UActo
 public:
 	UEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	// Adds an equipment item to the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
-	AEquipmentItemInstance* AddItem(TSubclassOf<UEquipmentItemDefinition> EquipmentDefinition);
+	UEquipmentItemInstance* AddItem(UEquipmentItemDefinition* EquipmentDefinition);
+
+	// Adds an equipment item by definition to the inventory
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
+	UEquipmentItemInstance* AddItemByDefinition(TSubclassOf<UEquipmentItemDefinition> ItemDefinition);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
-	void RemoveItem(AEquipmentItemInstance* ItemInstance);
+	void RemoveItem(UEquipmentItemInstance* ItemInstance);
 
 	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure = false)
-	TArray<AEquipmentItemInstance*> GetAllItems() const;
+	TArray<UEquipmentItemInstance*> GetAllItems() const;
 
 	/** Returns the first equipped instance of a given type, or nullptr if none are found */
 	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
-	AEquipmentItemInstance* GetFirstInstanceOfType(TSubclassOf<AEquipmentItemInstance> InstanceType);
+	UEquipmentItemInstance* GetFirstInstanceOfType(TSubclassOf<UEquipmentItemInstance> InstanceType);
 	template <typename T>
-	T* GetFirstInstanceOfType()
-	{
-		return (T*)GetFirstInstanceOfType(T::StaticClass());
-	}
+	T* GetFirstInstanceOfType() { return (T*)GetFirstInstanceOfType(T::StaticClass()); }
 
 	/** Returns all equipped instances of a given type, or an empty array if none are found */
 	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
-	TArray<AEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<AEquipmentItemInstance> InstanceType) const;
+	TArray<UEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<UEquipmentItemInstance> InstanceType) const;
 
 protected:
 
@@ -170,10 +172,10 @@ protected:
 	//~End of UObject interface
 
 	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipmentItemAdded"))
-	void K2_OnEquipmentItemAdded(AEquipmentItemInstance* EquipmentItemInstance);
+	void K2_OnEquipmentItemAdded(UEquipmentItemInstance* EquipmentItemInstance);
 
 	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipmentItemRemoved"))
-	void K2_OnEquipmentItemRemoved(AEquipmentItemInstance* EquipmentItemInstance);
+	void K2_OnEquipmentItemRemoved(UEquipmentItemInstance* EquipmentItemInstance);
 
 private:
 	// List of all equipped items

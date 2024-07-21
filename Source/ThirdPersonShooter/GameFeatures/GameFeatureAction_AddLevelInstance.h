@@ -49,6 +49,8 @@ struct FGameFeatureLevelInstanceEntry
 
 /**
  * Loads the specified level instances at runtime to the linked UWorld.
+ * 
+ * TODO: Add level streaming.
  */
 UCLASS(MinimalAPI, meta = (DisplayName = "Add Level Instances"))
 class UGameFeatureAction_AddLevelInstance final : public UGameFeatureAction_WorldActionBase

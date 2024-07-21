@@ -1,14 +1,19 @@
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/Object.h"
-#include "Templates/SubclassOf.h"
-#include "EquipmentItemInstance.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Ability/ModularAbilitySet.h"
 
 #include "EquipmentItemDefinition.generated.h"
 
+template <typename T> class TSubclassOf;
+
+class AActor;
+class UModularAbilitySet;
+class UEquipmentItemInstance;
+
+
 // --------------------------------------------------------
+
 
 // Represents a fragment of an item definition
 UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
@@ -17,7 +22,8 @@ class INVENTORYANDEQUIPMENTRUNTIME_API UEquipmentItemFragment : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void OnInstanceCreated(AEquipmentItemInstance* Instance) const {}
+	virtual void OnInstanceCreated(UEquipmentItemInstance* Instance) const {}
+	virtual void OnInstanceDestroyed(UEquipmentItemInstance* Instance) const {}
 };
 
 
@@ -37,24 +43,16 @@ class UEquipmentItemDefinition : public UObject
 public:
 	UEquipmentItemDefinition(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	// Actor class to spawn
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Default")
-	TSubclassOf<AEquipmentItemInstance> ActorToSpawn;
-
-	// Socket name to attach the equipment actor instance to
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Default")
-	FName AttachSocketName;
-
-	// Transform to apply to the equipment actor instance
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Default")
-	FTransform AttachTransform;
+	// Class to spawn
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
+	TSubclassOf<UEquipmentItemInstance> InstanceType;
 
 	// Gameplay ability sets to grant when this item is equipped
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Effects)
 	TArray<TObjectPtr<const UModularAbilitySet>> AbilitySetsToGrant;
 
-	// Flag indicating if the AbilitySets granted by this item should be applied on equip (passively), or on draw (not passively)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects", meta=(DisplayName="Is Passive?"))
+	// Flag indicating if the AbilitySets granted by this item should be applied on add to inventory (passively), or only while equipped (activately in use)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Effects, meta=(DisplayName="Is Passive?"))
 	bool bIsPassive = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Attributes, Instanced)
@@ -64,16 +62,10 @@ public:
 	const UEquipmentItemFragment* FindFragmentByClass(TSubclassOf<UEquipmentItemFragment> FragmentClass) const;
 
 	template<class T>
-	T* FindFragmentByClass() const
+	const T* FindFragmentByClass() const
 	{
-		for (UEquipmentItemFragment* Fragment : Fragments)
-		{
-			if (T* Result = Cast<T>(Fragment))
-			{
-				return Result;
-			}
-		}
-		return nullptr;
+		static_assert(std::is_base_of<UEquipmentItemFragment, T>::value, "T must be a subclass of UEquipmentItemFragment");
+		return (T*)FindFragmentByClass(T::StaticClass());
 	}
 };
 
@@ -87,5 +79,5 @@ class UEquipmentFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintCallable, meta=(DeterminesOutputType=FragmentClass))
-	static const UEquipmentItemFragment* FindItemDefinitionFragment(TSubclassOf<UEquipmentItemDefinition> ItemDef, TSubclassOf<UEquipmentItemFragment> FragmentClass);
+	static const UEquipmentItemFragment* FindItemDefinitionFragment(UEquipmentItemDefinition* ItemDef, TSubclassOf<UEquipmentItemFragment> FragmentClass);
 };

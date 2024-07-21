@@ -8,18 +8,50 @@
 class UEquipmentItemDefinition;
 class UObject;
 
+/**
+ * EEquipmentCosmeticInfoLifeTime
+ *
+ * Defines when a cosmetic item should be spawned.
+ */
+UENUM(BlueprintType)
+enum class EEquipmentCosmeticInfoLifeTime : uint8
+{
+	// Spawned only while the item is actively being used.
+	WhileInUse,
+
+	MAX	UMETA(Hidden)
+};
+
+
+// --------------------------------------------------------
+
+
 UCLASS(BlueprintType, Const)
 class UEquipmentFragment_CosmeticInfo : public UEquipmentItemFragment
 {
 	GENERATED_BODY()
 
 public:
+	// Actor class to spawn
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
+	TSubclassOf<AActor> ActorToSpawn;
 
-	// Socket tag to attach the equipment to when not in active use (holstered)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attach Info")
-	FName HolsteredSocketName;
+	// When to spawn the actor
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
+	EEquipmentCosmeticInfoLifeTime LifeTime = EEquipmentCosmeticInfoLifeTime::WhileInUse;
 
-	// Transform to apply to the equipment when attached to the holstered socket
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attach Info")
-	FTransform HolsteredTransform;
+	// Socket tag to attach the spawned actor to
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
+	FName AttachSocketName;
+
+	// Transform to apply to the spawned actor
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Default)
+	FTransform AttachTransform;
+
+	void OnInstanceCreated(UEquipmentItemInstance* Instance) const override;
+	void OnInstanceDestroyed(UEquipmentItemInstance* Instance) const override;
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 };

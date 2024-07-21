@@ -12,6 +12,16 @@ UInventoryItemInstance::UInventoryItemInstance(const FObjectInitializer& ObjectI
 	: Super(ObjectInitializer)
 	, StatTags(FGameplayTagStackContainer())
 {
+	// UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
+	// Handle_QuickbarSlotsChanged = MessageSystem.RegisterListener(TAG_QuickBar_Message_SlotsChanged, this, &ThisClass::OnQuickbarSlotsChanged);
+}
+
+void UInventoryItemInstance::BeginDestroy()
+{
+	// UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	// MessageSubsystem.UnregisterListener(Handle_QuickbarSlotsChanged);
+
+	Super::BeginDestroy();
 }
 
 void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -20,30 +30,5 @@ void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 	DOREPLIFETIME(ThisClass, StatTags);
 	DOREPLIFETIME(ThisClass, ItemDef);
-}
-
-void UInventoryItemInstance::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
-{
-	StatTags.AddStack(Tag, StackCount);
-}
-
-void UInventoryItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCount)
-{
-	StatTags.RemoveStack(Tag, StackCount);
-}
-
-int32 UInventoryItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
-{
-	return StatTags.GetStackCount(Tag);
-}
-
-bool UInventoryItemInstance::HasStatTag(FGameplayTag Tag) const
-{
-	return StatTags.ContainsTag(Tag);
-}
-
-void UInventoryItemInstance::SetItemDef(UInventoryItemDefinition* InDef)
-{
-	ItemDef = InDef;
 }
 

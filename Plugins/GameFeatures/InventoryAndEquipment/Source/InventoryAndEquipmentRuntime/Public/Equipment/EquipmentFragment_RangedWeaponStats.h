@@ -2,20 +2,24 @@
 
 #include "Curves/CurveFloat.h"
 #include "EquipmentItemDefinition.h"
+#include "EquipmentItemInstance.h"
 #include "Templates/SubclassOf.h"
 #include "Weapons/RangedWeaponProjectile.h"
 
 #include "EquipmentFragment_RangedWeaponStats.generated.h"
 
+class UEquipmentItemInstance;
 class UEquipmentItemDefinition;
 class UPhysicalMaterial;
 class UObject;
-
 
 UCLASS(BlueprintType)
 class UEquipmentFragment_RangedWeaponStats : public UEquipmentItemFragment
 {
 	GENERATED_BODY()
+
+public:
+	virtual void OnInstanceCreated(UEquipmentItemInstance* Instance) const override;
 
 public:
 
@@ -84,4 +88,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Ammunition", meta=(DisplayName="Can Hold 1 in the Chamber?"))
 	bool bCanHold1InTheChamber = true;
 
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 };

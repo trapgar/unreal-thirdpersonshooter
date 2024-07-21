@@ -4,11 +4,10 @@
 
 #include "Equipment/EquipmentItemDefinition.h"
 #include "Equipment/EquipmentItemInstance.h"
-#include "Equipment/EquipmentManagerComponent.h"
+#include "Inventory/InventoryFragment_EquippableItem.h"
+#include "Inventory/InventoryFragment_QuickbarCosmeticInfo.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/Pawn.h"
-#include "Inventory/InventoryFragment_EquippableItem.h"
-#include "NativeGameplayTags.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(QuickBarComponent)
@@ -16,8 +15,8 @@
 class FLifetimeProperty;
 class UEquipmentItemDefinition;
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_QuickBar_Message_SlotsChanged, "QuickBar.Message.SlotsChanged");
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_QuickBar_Message_ActiveIndexChanged, "QuickBar.Message.ActiveIndexChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_QuickBar_Message_SlotsChanged, "QuickBar.Message.SlotsChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_QuickBar_Message_ActiveIndexChanged, "QuickBar.Message.ActiveIndexChanged");
 
 UQuickBarComponent::UQuickBarComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -45,13 +44,15 @@ void UQuickBarComponent::BeginPlay()
 
 void UQuickBarComponent::CycleActiveSlotForward()
 {
+	// tfw when you only have 1 quickslot
 	if (Slots.Num() < 2)
 	{
 		return;
 	}
 
-	const int32 OldIndex = (ActiveSlotIndex < 0 ? Slots.Num()-1 : ActiveSlotIndex);
+	const int32 OldIndex = (ActiveSlotIndex < 0 ? Slots.Num() - 1 : ActiveSlotIndex);
 	int32 NewIndex = ActiveSlotIndex;
+
 	do
 	{
 		NewIndex = (NewIndex + 1) % Slots.Num();
@@ -65,13 +66,15 @@ void UQuickBarComponent::CycleActiveSlotForward()
 
 void UQuickBarComponent::CycleActiveSlotBackward()
 {
+	// tfw when you only have 1 quickslot
 	if (Slots.Num() < 2)
 	{
 		return;
 	}
 
-	const int32 OldIndex = (ActiveSlotIndex < 0 ? Slots.Num()-1 : ActiveSlotIndex);
+	const int32 OldIndex = (ActiveSlotIndex < 0 ? Slots.Num() - 1 : ActiveSlotIndex);
 	int32 NewIndex = ActiveSlotIndex;
+
 	do
 	{
 		NewIndex = (NewIndex - 1 + Slots.Num()) % Slots.Num();
@@ -97,11 +100,11 @@ void UQuickBarComponent::EquipItemInSlot()
 			{
 				if (UEquipmentManagerComponent* EquipmentManager = FindEquipmentManager())
 				{
-					EquippedItem = EquipmentManager->AddItem(EquipDef);
+					EquippedItem = EquipmentManager->AddItemByDefinition(EquipDef);
 
 					if (EquippedItem != nullptr)
 					{
-						EquippedItem->SetSource(SlotItem);
+						EquippedItem->SetAssociatedItem(SlotItem);
 					}
 				}
 			}
@@ -121,30 +124,19 @@ void UQuickBarComponent::UnequipItemInSlot()
 	}
 }
 
-UEquipmentManagerComponent* UQuickBarComponent::FindEquipmentManager() const
-{
-	if (AController* OwnerController = Cast<AController>(GetOwner()))
-	{
-		if (APawn* Pawn = OwnerController->GetPawn())
-		{
-			return Pawn->FindComponentByClass<UEquipmentManagerComponent>();
-		}
-	}
-
-	return nullptr;
-}
-
 void UQuickBarComponent::SetActiveSlotIndex_Implementation(int32 NewIndex)
 {
 	if (Slots.IsValidIndex(NewIndex) && (ActiveSlotIndex != NewIndex))
 	{
-		UnequipItemInSlot();
+		// don't allow swapping to an empty slot
+		if (UInventoryItemInstance* SlotItem = Slots[NewIndex])
+		{
+			UnequipItemInSlot();
+			ActiveSlotIndex = NewIndex;
+			EquipItemInSlot();
 
-		ActiveSlotIndex = NewIndex;
-
-		EquipItemInSlot();
-
-		OnRep_ActiveSlotIndex();
+			OnRep_ActiveSlotIndex();
+		}
 	}
 }
 
@@ -175,6 +167,17 @@ void UQuickBarComponent::AddItemToSlot(int32 SlotIndex, UInventoryItemInstance* 
 		if (Slots[SlotIndex] == nullptr)
 		{
 			Slots[SlotIndex] = Item;
+
+			UInventoryItemDefinition* ItemDef = Item->GetItemDef();
+
+			for (UInventoryItemFragment* Fragment : ItemDef->Fragments)
+			{
+				if (UInventoryFragment_QuickbarCosmeticInfo* Cosmetic = Cast<UInventoryFragment_QuickbarCosmeticInfo>(Fragment))
+				{
+					Cosmetic->OnInstanceAdded(Item);
+				}
+			}
+
 			OnRep_Slots();
 		}
 	}

@@ -2,21 +2,28 @@
 
 #pragma once
 
-// #include "GameFramework/PlayerController.h"
 #include "Components/ControllerComponent.h"
+#include "Equipment/EquipmentManagerComponent.h"
 #include "Inventory/InventoryItemInstance.h"
+#include "NativeGameplayTags.h"
 
 #include "QuickBarComponent.generated.h"
 
 class AActor;
-class AEquipmentItemInstance;
+class UEquipmentItemInstance;
 class UEquipmentManagerComponent;
 class UObject;
 struct FFrame;
 
+INVENTORYANDEQUIPMENTRUNTIME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_QuickBar_Message_SlotsChanged);
+INVENTORYANDEQUIPMENTRUNTIME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_QuickBar_Message_ActiveIndexChanged);
+
+
+// --------------------------------------------------------
+
 
 USTRUCT(BlueprintType)
-struct FQuickBarSlotsChangedMessage
+struct INVENTORYANDEQUIPMENTRUNTIME_API FQuickBarSlotsChangedMessage
 {
 	GENERATED_BODY()
 
@@ -28,8 +35,11 @@ struct FQuickBarSlotsChangedMessage
 };
 
 
+// --------------------------------------------------------
+
+
 USTRUCT(BlueprintType)
-struct FQuickBarActiveIndexChangedMessage
+struct INVENTORYANDEQUIPMENTRUNTIME_API FQuickBarActiveIndexChangedMessage
 {
 	GENERATED_BODY()
 
@@ -39,6 +49,9 @@ struct FQuickBarActiveIndexChangedMessage
 	UPROPERTY(BlueprintReadOnly, Category=Inventory)
 	int32 ActiveIndex = 0;
 };
+
+
+// --------------------------------------------------------
 
 
 UCLASS(Blueprintable, HideCategories=("Component Tick", "Component Replication"), meta=(BlueprintSpawnableComponent))
@@ -54,15 +67,15 @@ public:
 	APlayerController* GetPlayerController() const { return GetController<APlayerController>(); }
 
 	// Cycle the active quickbar slot forward
-	UFUNCTION(BlueprintCallable, Category="Equipment")
+	UFUNCTION(BlueprintCallable, Category=Equipment)
 	void CycleActiveSlotForward();
 
 	// Cycle the active quickbar slot backward
-	UFUNCTION(BlueprintCallable, Category="Equipment")
+	UFUNCTION(BlueprintCallable, Category=Equipment)
 	void CycleActiveSlotBackward();
 
 	// Set the active quickbar slot index
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Equipment")
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category=Equipment)
 	void SetActiveSlotIndex(int32 NewIndex);
 
 	// Returns a list of all quickbar slots
@@ -99,10 +112,21 @@ private:
 	void UnequipItemInSlot();
 	void EquipItemInSlot();
 
-	UEquipmentManagerComponent* FindEquipmentManager() const;
+	UEquipmentManagerComponent* FindEquipmentManager() const
+	{
+		if (AController* OwnerController = Cast<AController>(GetOwner()))
+		{
+			if (APawn* Pawn = OwnerController->GetPawn())
+			{
+				return Pawn->FindComponentByClass<UEquipmentManagerComponent>();
+			}
+		}
+
+		return nullptr;
+	};
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Equipment")
+	UPROPERTY(EditDefaultsOnly, Category=Equipment)
 	int32 NumberOfSlots = 5;
 
 	UFUNCTION()
@@ -119,5 +143,5 @@ private:
 	int32 ActiveSlotIndex = -1;
 
 	UPROPERTY()
-	TObjectPtr<AEquipmentItemInstance> EquippedItem;
+	TObjectPtr<UEquipmentItemInstance> EquippedItem;
 };

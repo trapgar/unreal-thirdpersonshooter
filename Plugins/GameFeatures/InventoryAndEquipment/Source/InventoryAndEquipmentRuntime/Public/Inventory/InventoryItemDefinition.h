@@ -9,7 +9,6 @@
 template <typename T> class TSubclassOf;
 
 class UInventoryItemInstance;
-struct FFrame;
 
 
 // --------------------------------------------------------
@@ -23,30 +22,6 @@ class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryItemFragment : public UObject
 
 public:
 	virtual void OnInstanceCreated(UInventoryItemInstance* Instance) const {}
-};
-
-
-// --------------------------------------------------------
-
-
-/**
- * UInventoryItemDefinition
- * ---
- * This isn't used, I'm experimenting with this being a struct instead of a class so I don't have to create a new subclass for every unique item
- */
-USTRUCT(Blueprintable)
-struct FInventoryItemDefinitionAlt
-{
-	GENERATED_BODY()
-
-public:
-	FInventoryItemDefinitionAlt() {}
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display)
-	FText DisplayName;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display, Instanced)
-	TArray<TObjectPtr<UInventoryItemFragment>> Fragments;
 };
 
 
@@ -83,7 +58,6 @@ public:
 		static_assert(std::is_base_of<UInventoryItemFragment, T>::value, "T must be a subclass of UInventoryItemFragment");
 		return (T*)FindFragmentByClass(T::StaticClass());
 	}
-
 };
 
 

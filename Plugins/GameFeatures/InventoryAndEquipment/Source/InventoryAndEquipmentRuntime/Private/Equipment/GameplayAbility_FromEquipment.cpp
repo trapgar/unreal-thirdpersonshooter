@@ -15,11 +15,11 @@ UGameplayAbility_FromEquipment::UGameplayAbility_FromEquipment(const FObjectInit
 {
 }
 
-AEquipmentItemInstance* UGameplayAbility_FromEquipment::GetAssociatedEquipment() const
+UEquipmentItemInstance* UGameplayAbility_FromEquipment::GetAssociatedEquipment() const
 {
 	if (FGameplayAbilitySpec* Spec = UGameplayAbility::GetCurrentAbilitySpec())
 	{
-		return Cast<AEquipmentItemInstance>(Spec->SourceObject.Get());
+		return Cast<UEquipmentItemInstance>(Spec->SourceObject.Get());
 	}
 
 	return nullptr;
@@ -27,9 +27,9 @@ AEquipmentItemInstance* UGameplayAbility_FromEquipment::GetAssociatedEquipment()
 
 UInventoryItemInstance* UGameplayAbility_FromEquipment::GetAssociatedItem() const
 {
-	if (AEquipmentItemInstance* Equipment = GetAssociatedEquipment())
+	if (UEquipmentItemInstance* Equipment = GetAssociatedEquipment())
 	{
-		return Cast<UInventoryItemInstance>(Equipment->GetSource());
+		return Equipment->GetAssociatedItem();
 	}
 
 	return nullptr;

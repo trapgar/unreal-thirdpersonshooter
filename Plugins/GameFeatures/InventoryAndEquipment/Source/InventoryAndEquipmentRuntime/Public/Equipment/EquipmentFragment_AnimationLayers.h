@@ -62,9 +62,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category="Animation")
 	TSubclassOf<UAnimInstance> PickBestAnimationLayer(const FGameplayTagContainer& AppliedTags) const;
 
-	//~ Begin UObject interface
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
-	//~ End UObject interface
 };

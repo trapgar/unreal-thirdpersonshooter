@@ -26,27 +26,32 @@ class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryItemInstance : public UObject
 public:
 	UInventoryItemInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void BeginDestroy() override;
+
 	//~UObject interface
 	virtual bool IsSupportedForNetworking() const override { return true; }
 	//~End of UObject interface
 
+	UFUNCTION(BlueprintPure, Category=Inventory)
+	APawn* GetOwner() const { return Cast<APawn>(GetOuter()); };
+
 	// Adds a specified number of stacks to the tag (does nothing if StackCount is below 1)
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
-	void AddStatTagStack(FGameplayTag Tag, int32 StackCount);
+	void AddStatTagStack(FGameplayTag Tag, int32 StackCount) { StatTags.AddStack(Tag, StackCount); };
 
 	// Removes a specified number of stacks from the tag (does nothing if StackCount is below 1)
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
-	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount);
+	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount) { StatTags.RemoveStack(Tag, StackCount); };
 
 	// Returns the stack count of the specified tag (or 0 if the tag is not present)
 	UFUNCTION(BlueprintCallable, Category=Inventory)
-	int32 GetStatTagStackCount(FGameplayTag Tag) const;
+	int32 GetStatTagStackCount(FGameplayTag Tag) const { return StatTags.GetStackCount(Tag); };
 
 	// Returns true if there is at least one stack of the specified tag
 	UFUNCTION(BlueprintCallable, Category=Inventory)
-	bool HasStatTag(FGameplayTag Tag) const;
+	bool HasStatTag(FGameplayTag Tag) const { return StatTags.ContainsTag(Tag); };
 
-	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category = "Inventory")
+	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Inventory)
 	UInventoryItemDefinition* GetItemDef() const { return ItemDef; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure=false, meta=(DeterminesOutputType=FragmentClass))
@@ -55,19 +60,20 @@ public:
 		return ItemDef ? ItemDef->FindFragmentByClass(FragmentClass) : nullptr;
 	}
 
-	template <typename ResultClass>
-	const ResultClass* FindFragmentByClass() const { return (ResultClass*)FindFragmentByClass(ResultClass::StaticClass()); }
+	template <typename TResultClass>
+	const TResultClass* FindFragmentByClass() const { return (TResultClass*)FindFragmentByClass(TResultClass::StaticClass()); }
 
-	void SetItemDef(UInventoryItemDefinition* InDef);
+	void SetItemDef(UInventoryItemDefinition* InDef) { ItemDef = InDef; };
 
 	void AddSpawnedActor(AActor* Actor) { SpawnedActors.Emplace(Actor); }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category = "Inventory")
+	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Inventory)
 	TArray<AActor*>& GetSpawnedActors() { return SpawnedActors; }
 
 	friend struct FInventoryList;
 
 private:
+
 	UPROPERTY()
 	FGameplayTagStackContainer StatTags;
 

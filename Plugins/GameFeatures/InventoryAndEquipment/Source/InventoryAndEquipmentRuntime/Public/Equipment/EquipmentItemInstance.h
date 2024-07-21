@@ -2,72 +2,98 @@
 
 #pragma once
 
-#include "Engine/World.h"
 #include "Common/TaggedActor.h"
 #include "Common/GameplayTagStack.h"
-#include "GameplayTagContainer.h"
+#include "Equipment/EquipmentItemDefinition.h"
+#include "Inventory/InventoryItemInstance.h"
 
 #include "EquipmentItemInstance.generated.h"
 
 class AActor;
 class APawn;
+class UInventoryItemInstance;
 struct FFrame;
+
 
 /**
  * UEquipmentItemInstance
  *
  * A piece of equipment spawned and applied to a pawn
  */
-UCLASS(BlueprintType, Blueprintable, Abstract)
-class INVENTORYANDEQUIPMENTRUNTIME_API AEquipmentItemInstance : public ATaggedActor
+UCLASS(BlueprintType, Blueprintable)
+class INVENTORYANDEQUIPMENTRUNTIME_API UEquipmentItemInstance : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	AEquipmentItemInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UEquipmentItemInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	//~UObject interface
 	virtual bool IsSupportedForNetworking() const override { return true; }
+	virtual UWorld* GetWorld() const override final { return GetInstigator() ? GetInstigator()->GetWorld() : nullptr; };
 	//~End of UObject interface
 
 	UFUNCTION(BlueprintPure, Category=Equipment)
-	APawn* GetPawn() const;
+	APawn* GetInstigator() const { return Instigator; }
+
+	void SetInstigator(APawn* InInstigator) { Instigator = InInstigator; }
 
 	UFUNCTION(BlueprintPure, Category=Equipment, meta=(DeterminesOutputType=PawnType))
-	APawn* GetTypedPawn(TSubclassOf<APawn> PawnType) const;
+	APawn* GetTypedInstigator(TSubclassOf<APawn> PawnType) const
+	{
+		APawn* Result = nullptr;
+		if (UClass* ActualPawnType = PawnType)
+		{
+			if (GetInstigator()->IsA(ActualPawnType))
+			{
+				Result = Cast<APawn>(GetInstigator());
+			}
+		}
+		return Result;
+	}
 
-	virtual void OnEquipped();
-	virtual void OnUnequipped();
+	void OnEquipped() { K2_OnEquipped(); };
+	void OnUnequipped() { K2_OnUnequipped(); };
 
 	// Adds a specified number of stacks to the tag (does nothing if StackCount is below 1)
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
-	void AddStatTagStack(FGameplayTag Tag, int32 StackCount);
+	void AddStatTagStack(FGameplayTag Tag, int32 StackCount) { StatTags.AddStack(Tag, StackCount); };
 
 	// Removes a specified number of stacks from the tag (does nothing if StackCount is below 1)
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
-	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount);
+	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount) { StatTags.RemoveStack(Tag, StackCount); };
 
 	// Returns the stack count of the specified tag (or 0 if the tag is not present)
 	UFUNCTION(BlueprintCallable, Category=Equipment)
-	int32 GetStatTagStackCount(FGameplayTag Tag) const;
+	int32 GetStatTagStackCount(FGameplayTag Tag) const { return StatTags.GetStackCount(Tag); };
 
 	// Returns true if there is at least one stack of the specified tag
 	UFUNCTION(BlueprintCallable, Category=Equipment)
-	bool HasStatTag(FGameplayTag Tag) const;
+	bool HasStatTag(FGameplayTag Tag) const { return StatTags.ContainsTag(Tag); };
 
-	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category = Equipment)
-	TSubclassOf<UEquipmentItemDefinition> GetItemDef() const { return ItemDef; }
+	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Equipment)
+	UEquipmentItemDefinition* GetItemDef() const { return ItemDef; }
 
-	void SetItemDef(TSubclassOf<UEquipmentItemDefinition> InDef);
+	UFUNCTION(BlueprintCallable, BlueprintPure=false, meta=(DeterminesOutputType=FragmentClass))
+	const UEquipmentItemFragment* FindFragmentByClass(TSubclassOf<UEquipmentItemFragment> FragmentClass) const
+	{
+		return ItemDef ? ItemDef->FindFragmentByClass(FragmentClass) : nullptr;
+	}
+
+	template <typename ResultClass>
+	const ResultClass* FindFragmentByClass() const { return (ResultClass*)FindFragmentByClass(ResultClass::StaticClass()); }
+
+	void SetItemDef(UEquipmentItemDefinition* InDef) { ItemDef = InDef; };
+
+	void AddSpawnedActor(AActor* Actor) { SpawnedActors.Emplace(Actor); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Equipment)
+	TArray<AActor*> GetSpawnedActors() { return SpawnedActors; }
 
 	UFUNCTION(BlueprintPure, Category=Equipment)
-	UObject* GetSource() const { return Source; }
+	UInventoryItemInstance* GetAssociatedItem() const { return Source; }
 
-	void SetSource(UObject* InSource) { Source = InSource; }
-
-protected:
-	virtual void PreInitializeComponents() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	void SetAssociatedItem(UInventoryItemInstance* InSource) { Source = InSource; }
 
 	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipped"))
 	void K2_OnEquipped();
@@ -75,14 +101,28 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnUnequipped"))
 	void K2_OnUnequipped();
 
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+private:
+	UFUNCTION()
+	void OnRep_Instigator();
+
 private:
 
+	UPROPERTY(Replicated)
 	FGameplayTagStackContainer StatTags;
 
 	// The item definition
-	TSubclassOf<UEquipmentItemDefinition> ItemDef;
+	UPROPERTY(Replicated)
+	UEquipmentItemDefinition* ItemDef;
 
-private:
-	// UPROPERTY(ReplicatedUsing=OnRep_Instigator)
-	TObjectPtr<UObject> Source;
+	UPROPERTY(Replicated)
+	TArray<TObjectPtr<AActor>> SpawnedActors;
+
+	UPROPERTY(ReplicatedUsing=OnRep_Instigator)
+	TObjectPtr<APawn> Instigator;
+
+	TObjectPtr<UInventoryItemInstance> Source;
 };

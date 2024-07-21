@@ -6,7 +6,7 @@
 
 #include "GameplayAbility_FromEquipment.generated.h"
 
-class AEquipmentItemInstance;
+class UEquipmentItemInstance;
 class UInventoryItemInstance;
 
 /**
@@ -24,7 +24,7 @@ public:
 	UGameplayAbility_FromEquipment(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintCallable, Category="Ability|Equipment")
-	AEquipmentItemInstance* GetAssociatedEquipment() const;
+	UEquipmentItemInstance* GetAssociatedEquipment() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|Inventory")
 	UInventoryItemInstance* GetAssociatedItem() const;

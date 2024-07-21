@@ -10,80 +10,44 @@
 #include "GameplayTags.h"
 #include "Net/UnrealNetwork.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EquipmentItemInstance)
+
+#define LOCTEXT_NAMESPACE "Equipment"
 
 class FLifetimeProperty;
 class UClass;
 class USceneComponent;
 
-AEquipmentItemInstance::AEquipmentItemInstance(const FObjectInitializer& ObjectInitializer)
+
+UEquipmentItemInstance::UEquipmentItemInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, StatTags(FGameplayTagStackContainer())
 {
-	
 }
 
-void AEquipmentItemInstance::PreInitializeComponents()
+#if WITH_EDITOR
+EDataValidationResult UEquipmentItemInstance::IsDataValid(FDataValidationContext& Context) const
 {
-	Super::PreInitializeComponents();
-	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
-}
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
-void AEquipmentItemInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
-	Super::EndPlay(EndPlayReason);
-}
-
-APawn *AEquipmentItemInstance::GetPawn() const
-{
-	return Cast<APawn>(GetInstigator());
-}
-
-APawn *AEquipmentItemInstance::GetTypedPawn(TSubclassOf<APawn> PawnType) const
-{
-	APawn *Result = nullptr;
-	if (UClass *ActualPawnType = PawnType)
-	{
-		if (GetInstigator()->IsA(ActualPawnType))
-		{
-			Result = Cast<APawn>(GetInstigator());
-		}
-	}
 	return Result;
 }
+#endif
 
-void AEquipmentItemInstance::OnEquipped()
+void UEquipmentItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	K2_OnEquipped();
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, StatTags);
+	DOREPLIFETIME(ThisClass, ItemDef);
+	DOREPLIFETIME(ThisClass, Instigator);
+	DOREPLIFETIME(ThisClass, SpawnedActors);
 }
 
-void AEquipmentItemInstance::OnUnequipped()
+void UEquipmentItemInstance::OnRep_Instigator()
 {
-	K2_OnUnequipped();
-}
-
-void AEquipmentItemInstance::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
-{
-	StatTags.AddStack(Tag, StackCount);
-}
-
-void AEquipmentItemInstance::RemoveStatTagStack(FGameplayTag Tag, int32 StackCount)
-{
-	StatTags.RemoveStack(Tag, StackCount);
-}
-
-int32 AEquipmentItemInstance::GetStatTagStackCount(FGameplayTag Tag) const
-{
-	return StatTags.GetStackCount(Tag);
-}
-
-bool AEquipmentItemInstance::HasStatTag(FGameplayTag Tag) const
-{
-	return StatTags.ContainsTag(Tag);
-}
-
-void AEquipmentItemInstance::SetItemDef(TSubclassOf<UEquipmentItemDefinition> InDef)
-{
-	ItemDef = InDef;
 }
