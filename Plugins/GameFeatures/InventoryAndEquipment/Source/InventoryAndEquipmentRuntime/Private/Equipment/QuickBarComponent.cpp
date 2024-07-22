@@ -100,12 +100,7 @@ void UQuickBarComponent::EquipItemInSlot()
 			{
 				if (UEquipmentManagerComponent* EquipmentManager = FindEquipmentManager())
 				{
-					EquippedItem = EquipmentManager->AddItemByDefinition(EquipDef);
-
-					if (EquippedItem != nullptr)
-					{
-						EquippedItem->SetAssociatedItem(SlotItem);
-					}
+					EquippedItem = EquipmentManager->AddItemByDefinition(EquipDef, SlotItem);
 				}
 			}
 		}

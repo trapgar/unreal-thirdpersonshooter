@@ -9,26 +9,10 @@ class UInventoryItemDefinition;
 class UObject;
 
 /**
- * EQuickbarCosmeticInfoLifeTime
- *
- * Defines when a cosmetic item should be spawned.
+ * UInventoryFragment_QuickbarCosmeticInfo
+ * 
+ * Fragment containing cosmetic information for an inventory item that should be spawned when it is put in the Quickbar.
  */
-UENUM(BlueprintType)
-enum class EQuickbarCosmeticInfoLifeTime : uint8
-{
-	// Spawned while the item is in the quickbar.
-	Persistent,
-
-	// Spawned only while the item is *not* actively being used.
-	WhileNotInUse,
-
-	MAX	UMETA(Hidden)
-};
-
-
-// --------------------------------------------------------
-
-
 UCLASS(BlueprintType)
 class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryFragment_QuickbarCosmeticInfo : public UInventoryItemFragment
 {
@@ -36,19 +20,15 @@ class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryFragment_QuickbarCosmeticInfo :
 
 public:
 	// Actor class to spawn
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Cosmetic)
 	TSubclassOf<AActor> ActorToSpawn;
 
-	// When to spawn the actor
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
-	EQuickbarCosmeticInfoLifeTime LifeTime = EQuickbarCosmeticInfoLifeTime::Persistent;
-
 	// Socket tag to attach the spawned actor to
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Cosmetic)
 	FName AttachSocketName;
 
 	// Transform to apply to the spawned actor
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Default)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Cosmetic)
 	FTransform AttachTransform;
 
 	void OnInstanceAdded(UInventoryItemInstance* Instance);

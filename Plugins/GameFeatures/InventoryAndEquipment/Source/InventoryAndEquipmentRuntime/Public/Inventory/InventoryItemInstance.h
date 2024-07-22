@@ -33,7 +33,7 @@ public:
 	//~End of UObject interface
 
 	UFUNCTION(BlueprintPure, Category=Inventory)
-	APawn* GetOwner() const { return Cast<APawn>(GetOuter()); };
+	APawn* GetInstigator() const { return Cast<APawn>(GetOuter()); };
 
 	// Adds a specified number of stacks to the tag (does nothing if StackCount is below 1)
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Inventory)
@@ -69,6 +69,20 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Inventory)
 	TArray<AActor*>& GetSpawnedActors() { return SpawnedActors; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure=true, meta=(DeterminesOutputType=ActorClass))
+	AActor* FindSpawnedActorByClass(TSubclassOf<AActor> ActorClass)
+	{
+		for (AActor* Actor : SpawnedActors)
+		{
+			if (Actor && Actor->GetClass()->IsChildOf(ActorClass))
+			{
+				return Actor;
+			}
+		}
+
+		return nullptr;
+	}
 
 	friend struct FInventoryList;
 

@@ -42,7 +42,7 @@ void FEquipmentList::BroadcastChangeMessage(UEquipmentItemInstance* Instance, in
 	MessageSystem.BroadcastMessage(TAG_Equipment_Message_StackChanged, Message);
 }
 
-UEquipmentItemInstance* FEquipmentList::AddEntry(UEquipmentItemDefinition* EquipmentDef)
+UEquipmentItemInstance* FEquipmentList::AddEntry(UEquipmentItemDefinition* EquipmentDef, UInventoryItemInstance* Source)
 {
 	UEquipmentItemInstance* Result = nullptr;
 
@@ -62,6 +62,7 @@ UEquipmentItemInstance* FEquipmentList::AddEntry(UEquipmentItemDefinition* Equip
 	Result = NewEntry.Instance = NewObject<UEquipmentItemInstance>(OwnerComponent->GetOwner(), InstanceType); //@TODO: Using the actor instead of component as the outer due to UE-127172
 	Result->SetItemDef(EquipmentDef);
 	Result->SetInstigator(Owner);
+	Result->SetAssociatedItem(Source);
 
 	for (UEquipmentItemFragment* Fragment : EquipmentDef->Fragments)
 	{
@@ -206,11 +207,11 @@ void UEquipmentManagerComponent::ReadyForReplication()
 	}
 }
 
-UEquipmentItemInstance* UEquipmentManagerComponent::AddItem(UEquipmentItemDefinition* EquipmentClass)
+UEquipmentItemInstance* UEquipmentManagerComponent::AddItem(UEquipmentItemDefinition* EquipmentClass, UInventoryItemInstance* Source)
 {
 	if (EquipmentClass != nullptr)
 	{
-		if (UEquipmentItemInstance* Result = EquipmentList.AddEntry(EquipmentClass))
+		if (UEquipmentItemInstance* Result = EquipmentList.AddEntry(EquipmentClass, Source))
 		{
 			Result->OnEquipped();
 			K2_OnEquipmentItemAdded(Result);
@@ -227,13 +228,13 @@ UEquipmentItemInstance* UEquipmentManagerComponent::AddItem(UEquipmentItemDefini
 	return nullptr;
 }
 
-UEquipmentItemInstance* UEquipmentManagerComponent::AddItemByDefinition(TSubclassOf<UEquipmentItemDefinition> ItemDefinition)
+UEquipmentItemInstance* UEquipmentManagerComponent::AddItemByDefinition(TSubclassOf<UEquipmentItemDefinition> ItemDefinition, UInventoryItemInstance* Source)
 {
 	UEquipmentItemInstance* ItemInstance = nullptr;
 
 	if (ItemDefinition != nullptr)
 	{
-		ItemInstance = AddItem(ItemDefinition->GetDefaultObject<UEquipmentItemDefinition>());
+		ItemInstance = AddItem(ItemDefinition->GetDefaultObject<UEquipmentItemDefinition>(), Source);
 	}
 
 	return ItemInstance;

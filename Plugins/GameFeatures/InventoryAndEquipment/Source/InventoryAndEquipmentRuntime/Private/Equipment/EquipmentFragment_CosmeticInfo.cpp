@@ -17,6 +17,12 @@ EDataValidationResult UEquipmentFragment_CosmeticInfo::IsDataValid(FDataValidati
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
+	if (ActorToSpawn == nullptr)
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(FText::Format(LOCTEXT("EntryHasNullActor", "Null ActorToSpawn")));
+	}
+
 	return Result;
 }
 #endif
@@ -25,21 +31,18 @@ void UEquipmentFragment_CosmeticInfo::OnInstanceCreated(UEquipmentItemInstance* 
 {
 	if (APawn* OwningPawn = Instance->GetInstigator())
 	{
-		if (LifeTime == EEquipmentCosmeticInfoLifeTime::WhileInUse)
+		USceneComponent* AttachTarget = OwningPawn->GetRootComponent();
+		if (ACharacter* Char = Cast<ACharacter>(OwningPawn))
 		{
-			USceneComponent* AttachTarget = OwningPawn->GetRootComponent();
-			if (ACharacter* Char = Cast<ACharacter>(OwningPawn))
-			{
-				AttachTarget = Char->GetMesh();
-			}
-
-			AActor* NewActor = OwningPawn->GetWorld()->SpawnActorDeferred<AActor>(ActorToSpawn, FTransform::Identity, OwningPawn, OwningPawn);
-			NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
-			NewActor->SetActorRelativeTransform(AttachTransform);
-			NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, AttachSocketName);
-
-			Instance->AddSpawnedActor(NewActor);
+			AttachTarget = Char->GetMesh();
 		}
+
+		AActor* NewActor = OwningPawn->GetWorld()->SpawnActorDeferred<AActor>(ActorToSpawn, FTransform::Identity, OwningPawn, OwningPawn);
+		NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
+		NewActor->SetActorRelativeTransform(AttachTransform);
+		NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, AttachSocketName);
+
+		Instance->AddSpawnedActor(NewActor);
 	}
 }
 

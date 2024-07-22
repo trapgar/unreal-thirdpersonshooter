@@ -80,8 +80,8 @@ public:
 		return ItemDef ? ItemDef->FindFragmentByClass(FragmentClass) : nullptr;
 	}
 
-	template <typename ResultClass>
-	const ResultClass* FindFragmentByClass() const { return (ResultClass*)FindFragmentByClass(ResultClass::StaticClass()); }
+	template <typename TResultClass>
+	const TResultClass* FindFragmentByClass() const { return (TResultClass*)FindFragmentByClass(TResultClass::StaticClass()); }
 
 	void SetItemDef(UEquipmentItemDefinition* InDef) { ItemDef = InDef; };
 
@@ -89,6 +89,20 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Equipment)
 	TArray<AActor*> GetSpawnedActors() { return SpawnedActors; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure=true, meta=(DeterminesOutputType=ActorClass))
+	AActor* FindSpawnedActorByClass(TSubclassOf<AActor> ActorClass)
+	{
+		for (AActor* Actor : SpawnedActors)
+		{
+			if (Actor && Actor->GetClass()->IsChildOf(ActorClass))
+			{
+				return Actor;
+			}
+		}
+
+		return nullptr;
+	}
 
 	UFUNCTION(BlueprintPure, Category=Equipment)
 	UInventoryItemInstance* GetAssociatedItem() const { return Source; }

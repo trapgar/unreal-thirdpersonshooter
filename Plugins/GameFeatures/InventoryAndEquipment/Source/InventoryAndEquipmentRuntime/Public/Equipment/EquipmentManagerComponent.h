@@ -82,7 +82,7 @@ struct FEquipmentList
 public:
 	TArray<UEquipmentItemInstance*> GetAllItems() const;
 
-	UEquipmentItemInstance* AddEntry(UEquipmentItemDefinition* EquipmentDefinition);
+	UEquipmentItemInstance* AddEntry(UEquipmentItemDefinition* EquipmentDefinition, UInventoryItemInstance* Source);
 
 	void RemoveEntry(UEquipmentItemInstance* Instance);
 
@@ -141,11 +141,13 @@ public:
 
 	// Adds an equipment item to the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
-	UEquipmentItemInstance* AddItem(UEquipmentItemDefinition* EquipmentDefinition);
+	UEquipmentItemInstance* AddItem(UEquipmentItemDefinition* EquipmentDefinition) { return AddItem(EquipmentDefinition, nullptr); };
+	UEquipmentItemInstance* AddItem(UEquipmentItemDefinition* EquipmentDefinition, UInventoryItemInstance* Source);
 
 	// Adds an equipment item by definition to the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
-	UEquipmentItemInstance* AddItemByDefinition(TSubclassOf<UEquipmentItemDefinition> ItemDefinition);
+	UEquipmentItemInstance* AddItemByDefinition(TSubclassOf<UEquipmentItemDefinition> ItemDefinition) { return AddItemByDefinition(ItemDefinition, nullptr); };
+	UEquipmentItemInstance* AddItemByDefinition(TSubclassOf<UEquipmentItemDefinition> ItemDefinition, UInventoryItemInstance* Source);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
 	void RemoveItem(UEquipmentItemInstance* ItemInstance);
