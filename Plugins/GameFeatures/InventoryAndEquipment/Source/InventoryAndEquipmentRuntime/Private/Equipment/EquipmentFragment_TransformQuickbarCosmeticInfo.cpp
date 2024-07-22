@@ -20,7 +20,7 @@ EDataValidationResult UEquipmentFragment_TransformQuickbarCosmeticInfo::IsDataVa
 	if (ActorToFind == nullptr)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(LOCTEXT("EntryHasNullActor", "Null ActorToFind")));
+		Context.AddError(LOCTEXT("EntryHasNullActor", "Null ActorToFind"));
 	}
 
 	return Result;

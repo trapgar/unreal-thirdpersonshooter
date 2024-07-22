@@ -83,10 +83,6 @@ public:
 	template <typename TResultClass>
 	const TResultClass* FindFragmentByClass() const { return (TResultClass*)FindFragmentByClass(TResultClass::StaticClass()); }
 
-	void SetItemDef(UEquipmentItemDefinition* InDef) { ItemDef = InDef; };
-
-	void AddSpawnedActor(AActor* Actor) { SpawnedActors.Emplace(Actor); }
-
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Equipment)
 	TArray<AActor*> GetSpawnedActors() { return SpawnedActors; }
 
@@ -106,6 +102,21 @@ public:
 
 	UFUNCTION(BlueprintPure, Category=Equipment)
 	UInventoryItemInstance* GetAssociatedItem() const { return Source; }
+
+	void SetItemDef(UEquipmentItemDefinition* InDef) { ItemDef = InDef; };
+
+	void AddSpawnedActor(AActor* Actor) { SpawnedActors.Emplace(Actor); }
+
+	void DestroySpawnedActors()
+	{
+		for (AActor* Actor : SpawnedActors)
+		{
+			if (Actor)
+			{
+				Actor->Destroy();
+			}
+		}
+	}
 
 	void SetAssociatedItem(UInventoryItemInstance* InSource) { Source = InSource; }
 

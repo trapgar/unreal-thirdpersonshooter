@@ -83,7 +83,6 @@ void FInventoryList::RemoveEntry(UInventoryItemInstance *Instance)
 		FInventoryEntry& Entry = *EntryIt;
 		if (Entry.Instance == Instance)
 		{
-			// TODO: Remove all spawned actors
 			EntryIt.RemoveCurrent();
 			// MarkArrayDirty();
 		}

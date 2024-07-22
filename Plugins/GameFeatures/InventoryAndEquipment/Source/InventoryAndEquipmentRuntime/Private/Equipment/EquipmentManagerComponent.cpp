@@ -113,6 +113,8 @@ void FEquipmentList::RemoveEntry(UEquipmentItemInstance* Instance)
 				Fragment->OnInstanceDestroyed(Instance);
 			}
 
+			Instance->DestroySpawnedActors();
+
 			EntryIt.RemoveCurrent();
 			// MarkArrayDirty();
 		}

@@ -84,6 +84,17 @@ public:
 		return nullptr;
 	}
 
+	void DestroySpawnedActors()
+	{
+		for (AActor* Actor : SpawnedActors)
+		{
+			if (Actor)
+			{
+				Actor->Destroy();
+			}
+		}
+	}
+
 	friend struct FInventoryList;
 
 private:

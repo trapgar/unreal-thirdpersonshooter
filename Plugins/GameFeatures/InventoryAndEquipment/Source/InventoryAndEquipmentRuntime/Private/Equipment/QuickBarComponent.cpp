@@ -165,6 +165,7 @@ void UQuickBarComponent::AddItemToSlot(int32 SlotIndex, UInventoryItemInstance* 
 
 			UInventoryItemDefinition* ItemDef = Item->GetItemDef();
 
+			// TODO: Interface?
 			for (UInventoryItemFragment* Fragment : ItemDef->Fragments)
 			{
 				if (UInventoryFragment_QuickbarCosmeticInfo* Cosmetic = Cast<UInventoryFragment_QuickbarCosmeticInfo>(Fragment))
@@ -195,6 +196,7 @@ UInventoryItemInstance* UQuickBarComponent::RemoveItemFromSlot(int32 SlotIndex)
 		if (Result != nullptr)
 		{
 			Slots[SlotIndex] = nullptr;
+			Result->DestroySpawnedActors();
 			OnRep_Slots();
 		}
 	}

@@ -20,7 +20,7 @@ EDataValidationResult UEquipmentFragment_CosmeticInfo::IsDataValid(FDataValidati
 	if (ActorToSpawn == nullptr)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(LOCTEXT("EntryHasNullActor", "Null ActorToSpawn")));
+		Context.AddError(LOCTEXT("EntryHasNullActor", "Null ActorToSpawn"));
 	}
 
 	return Result;
