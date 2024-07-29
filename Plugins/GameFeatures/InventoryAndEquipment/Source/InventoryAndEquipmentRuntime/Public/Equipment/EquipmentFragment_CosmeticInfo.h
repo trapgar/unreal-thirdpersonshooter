@@ -24,7 +24,7 @@ public:
 	FName AttachSocketName;
 
 	// Transform to apply to the spawned actor
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Default)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Cosmetic)
 	FTransform AttachTransform;
 
 	void OnInstanceCreated(UEquipmentItemInstance* Instance) const override;

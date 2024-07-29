@@ -13,7 +13,7 @@ class UObject;
  * 
  * Fragment containing cosmetic information for an inventory item that should be spawned when it is put in the Quickbar.
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, Const)
 class INVENTORYANDEQUIPMENTRUNTIME_API UInventoryFragment_QuickbarCosmeticInfo : public UInventoryItemFragment
 {
 	GENERATED_BODY()

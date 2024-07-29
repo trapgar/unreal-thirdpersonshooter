@@ -3,13 +3,15 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 
+static FName NAME_ProjectileCollisionProfile(TEXT("Projectile"));
+
 ARangedWeaponProjectile::ARangedWeaponProjectile()
 {
 	RootComponent = CollisionVolume = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CollisionVolume"));
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 
 	CollisionVolume->InitCapsuleSize(5.0f, 5.0f);
-	CollisionVolume->SetCollisionProfileName(TEXT("PhysicsActor"));
+	CollisionVolume->SetCollisionProfileName(NAME_ProjectileCollisionProfile);
 	CollisionVolume->CanCharacterStepUpOn = ECB_No;
 }
 
