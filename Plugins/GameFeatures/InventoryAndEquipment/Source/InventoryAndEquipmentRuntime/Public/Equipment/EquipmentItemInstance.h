@@ -31,6 +31,7 @@ public:
 	//~UObject interface
 	virtual bool IsSupportedForNetworking() const override { return true; }
 	virtual UWorld* GetWorld() const override final { return GetInstigator() ? GetInstigator()->GetWorld() : nullptr; };
+	virtual void Tick(float DeltaTime) {};
 	//~End of UObject interface
 
 	UFUNCTION(BlueprintPure, Category=Equipment)
@@ -52,8 +53,8 @@ public:
 		return Result;
 	}
 
-	void OnEquipped() { K2_OnEquipped(); };
-	void OnUnequipped() { K2_OnUnequipped(); };
+	virtual void OnEquipped() { K2_OnEquipped(); };
+	virtual void OnUnequipped() { K2_OnUnequipped(); };
 
 	// Adds a specified number of stacks to the tag (does nothing if StackCount is below 1)
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)

@@ -47,6 +47,8 @@ public class InventoryAndEquipmentRuntime : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"UMG",
+				"CommonUI",
 				// ... add private dependencies that you statically link with here ...	
 			}
 		);

@@ -18,9 +18,9 @@
 class FLifetimeProperty;
 struct FReplicationFlags;
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Weapon_Ammunition, "Equipment.Weapon.Ammunition");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Weapon_Ammunition, "Equipment.Weapon.Ammunition");
 
 // --------------------------------------------------------
 // FEquipmentEntry
@@ -145,7 +145,16 @@ UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer&
 	, EquipmentList(this)
 {
 	SetIsReplicatedByDefault(true);
-	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = true;
+}
+
+void UEquipmentManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	for (UEquipmentItemInstance* Instance : EquipmentList.GetAllItems())
+	{
+		Instance->Tick(DeltaTime);
+	}
 }
 
 void UEquipmentManagerComponent::UninitializeComponent()

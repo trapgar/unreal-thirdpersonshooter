@@ -24,8 +24,11 @@ void ARangedWeaponProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UWorld* World = GetWorld();
-	World->GetTimerManager().SetTimer(ExpirationTimerHandle, this, &ThisClass::OnExpiration, MaxLifeTime, false);
+	if (MaxLifeTime > 0)
+	{
+		UWorld* World = GetWorld();
+		World->GetTimerManager().SetTimer(ExpirationTimerHandle, this, &ThisClass::OnExpiration, MaxLifeTime, false);
+	}
 }
 
 void ARangedWeaponProjectile::OnExpiration()

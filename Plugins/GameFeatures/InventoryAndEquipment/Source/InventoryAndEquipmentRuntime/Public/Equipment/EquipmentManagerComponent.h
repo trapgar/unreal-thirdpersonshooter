@@ -12,11 +12,19 @@
 #include "Ability/ModularAbilitySet.h"
 #include "Inventory/InventoryManagerComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
+#include "NativeGameplayTags.h"
 
 #include "EquipmentManagerComponent.generated.h"
 
 class UEquipmentItemInstance;
 struct FEquipmentList;
+
+
+INVENTORYANDEQUIPMENTRUNTIME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Message_StackChanged);
+INVENTORYANDEQUIPMENTRUNTIME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Message_ActiveIndexChanged);
+INVENTORYANDEQUIPMENTRUNTIME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Weapon_Ammunition);
+
+// --------------------------------------------------------
 
 
 USTRUCT(BlueprintType)
@@ -139,6 +147,8 @@ class INVENTORYANDEQUIPMENTRUNTIME_API UEquipmentManagerComponent : public UActo
 public:
 	UEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	// Adds an equipment item to the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
 	UEquipmentItemInstance* AddItem(UEquipmentItemDefinition* EquipmentDefinition) { return AddItem(EquipmentDefinition, nullptr); };
@@ -185,4 +195,3 @@ private:
 	FEquipmentList EquipmentList;
 
 };
-
