@@ -20,32 +20,18 @@ void UWeaponReticleWidgetBase::InitializeFromEquipment(UEquipmentItemInstance* I
 	OnEquipmentInitialized();
 }
 
-
 float UWeaponReticleWidgetBase::ComputeSpreadAngle() const
 {
 	if (const URangedWeaponItemInstance* RangedWeapon = Cast<const URangedWeaponItemInstance>(EquipmentInstance))
 	{
-		const float BaseSpreadAngle = RangedWeapon->GetCalculatedSpreadAngle();
-		const float SpreadAngleMultiplier = RangedWeapon->GetCalculatedSpreadAngleMultiplier();
+		const float BaseSpreadAngle = RangedWeapon->GetSpreadAngle();
+		const float SpreadAngleMultiplier = RangedWeapon->GetSpreadAngleMultiplier();
 		const float ActualSpreadAngle = BaseSpreadAngle * SpreadAngleMultiplier;
 
 		return ActualSpreadAngle;
 	}
 
 	return 0.0f;
-}
-
-bool UWeaponReticleWidgetBase::HasFirstShotAccuracy() const
-{
-	return false;
-	// if (const URangedWeaponInstance* RangedWeapon = Cast<const URangedWeaponInstance>(EquipmentInstance))
-	// {
-	// 	return RangedWeapon->HasFirstShotAccuracy();
-	// }
-	// else
-	// {
-	// 	return false;
-	// }
 }
 
 float UWeaponReticleWidgetBase::ComputeMaxScreenspaceSpreadRadius() const
@@ -72,7 +58,6 @@ float UWeaponReticleWidgetBase::ComputeMaxScreenspaceSpreadRadius() const
 		FVector CamUpDir = CamOrient.RotateVector(FVector::UpVector);
 
 		FVector OffsetTargetAtDistance = CamPos + (CamForwDir * LongShotDistance) + (CamUpDir * SpreadRadiusAtDistance);
-
 		FVector2D OffsetTargetInScreenspace;
 
 		if (PC->ProjectWorldLocationToScreen(OffsetTargetAtDistance, OffsetTargetInScreenspace, true))

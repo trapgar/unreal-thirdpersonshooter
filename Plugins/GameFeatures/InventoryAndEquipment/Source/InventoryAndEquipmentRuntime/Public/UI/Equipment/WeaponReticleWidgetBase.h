@@ -33,13 +33,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float ComputeMaxScreenspaceSpreadRadius() const;
 
-	/**
-	 * Returns true if the current weapon is at 'first shot accuracy'
-	 * (the weapon allows it and it is at min spread)
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool HasFirstShotAccuracy() const;
-
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UEquipmentItemInstance> EquipmentInstance;

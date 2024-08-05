@@ -13,6 +13,15 @@ class UEquipmentItemDefinition;
 class UPhysicalMaterial;
 class UObject;
 
+/**
+ * UEquipmentFragment_RangedWeaponStats
+ * 
+ * Equipment Fragment containing stats for ranged weapons.
+ * 
+ * @note Spread is the random angle applied to the projectile's initial spawn transform.
+ * @note Recoil is the random jitter applier to the players' camera
+ * @note Vertical recoil receives a random multiplier between 0.9 and 1.0 when applied
+ */
 UCLASS(BlueprintType)
 class UEquipmentFragment_RangedWeaponStats : public UEquipmentItemFragment
 {
@@ -25,30 +34,32 @@ public:
 
 	// Initial velocity of the bullet on projectile spawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm/s"))
-	float MuzzleVelocity = 25000.0f;
+	float MuzzleVelocity = 60000.0f;
 
 	// A curve that maps the distance (in cm) to a multiplier on the base damage from the associated gameplay effect
-	// If there is no data in this curve, then the weapon is assumed to have no falloff with distance
+	// If there is no data in this curve, then the weapon is assumed to have no damage falloff with distance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="cm"))
 	FRuntimeFloatCurve DistanceDamageFalloff;
 
 	// The radius for bullet traces sweep spheres (0.0 will result in a line trace)
+	// TODO: not entirely sure what the benefit of this is... while bullets have a measurable diameter, idk if this actually results in a gameplay difference?
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm"))
 	float BulletTraceSweepRadius = 1.0f;
 
-	// The maximum distance at which this weapon can deal damage
-	// TODO: May not need this prop as it is already in DistanceDamageFalloff?
+	// The maximum distance at which this weapon can deal damage - used for despawning
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="cm"))
-	float MaxDamageRange = 25000.0f;
+	float MaxDamageRange = 50000.0f;
 
-	// Bullet class definition to spawn on weapon fire
+	// Bullet actor class definition to spawn on weapon fire
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics")
 	TSubclassOf<ARangedWeaponProjectile> ProjectileToSpawn;
 
+	// Flag indicating if the 1st shot of a heat should be perfectly accurate or not (0 spread applied)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(DisplayName="Has Perfect First Shot Accuracy?"))
 	bool bHasFirstShotAccuracy = false;
 
-	// Applied damage type
+	// Applied damage type on hit
+	// TODO: Should this be an attribute of the projectile instead?
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	TSubclassOf<UGameplayEffect> DamageType;
 
@@ -71,7 +82,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling", meta=(Categories="Equipment.Weapon.Mode"))
 	FGameplayTagContainer FireModes;
 
-	// Spread angle in degrees while aiming down sight (base spread angle)
+	// Spread angle in degrees while aiming down sight
+	// This is the initial spread angle all the multipliers are applied to
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
 	float SpreadAngleAimDownSight = 0.2f;
 
@@ -83,7 +95,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
 	float SpreadAngleMultiplierHipFire = 15.0f;
 
-	// Max angle of the spread in degrees
+	// Max angle of the spread in degrees - cap used to prevent spread from going too high (e.g.: 180deg)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
 	float SpreadAngleMax = 3.5f;
 
@@ -99,6 +111,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
 	float RecoilYawMax = 0.28f;
 
+	// Additional recoil multiplier applied to the first shot of the heat
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
 	float FirstShotRecoilMultiplier = 2.3f;
 
@@ -110,7 +123,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammunition", meta=(ClampMin=1, UIMin=1))
 	int32 BulletsPerCartridge = 1;
 
-	// Flag indicating if the gun can hold an additional round in the chamber at when max capacity
+	// Flag indicating if the gun can hold an additional round in the chamber when at max capacity
+	// (e.g.: an M16 can hold 30+1 bullets, while a .44 Magnum can hold at most 6)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammunition", meta=(DisplayName="Can Hold 1 in the Chamber?"))
 	bool bCanHold1InTheChamber = true;
 

@@ -7,10 +7,10 @@ Also trying to use C++ over blueprints to make source compare easier.
 ## Backlog
 - figure out how to attach components at runtime based on Game Mode or something...
     - AbilitySystemComponent w/ default ability set for the character
-    - InventoryManagerComponent w/ default items & equipment
-        - add ability sets on item equip
-- create lookup table for GameplayTag to sockets so Rifles all go off the left shoulder etc.
-- make a URangedWeaponStatSheet for the ballistics, handling, etc & have the gun actor expose it on spawn
+- add a silhouette to the gunrange for testing
+- change the angles & multipliers in bullet spread/recoil to something that's easier to work with
+- spawn decals on bullet impact
+- 
 
 ## Conversion Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I import

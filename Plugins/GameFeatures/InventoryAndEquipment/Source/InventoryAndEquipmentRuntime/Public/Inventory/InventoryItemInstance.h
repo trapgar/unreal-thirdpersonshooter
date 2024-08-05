@@ -70,6 +70,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Inventory)
 	TArray<AActor*>& GetSpawnedActors() { return SpawnedActors; }
 
+	template <typename TResultClass>
+	TResultClass* FindSpawnedActorByClass() { return (TResultClass*)FindSpawnedActorByClass(TResultClass::StaticClass()); }
+
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, meta=(DeterminesOutputType=ActorClass))
 	AActor* FindSpawnedActorByClass(TSubclassOf<AActor> ActorClass)
 	{

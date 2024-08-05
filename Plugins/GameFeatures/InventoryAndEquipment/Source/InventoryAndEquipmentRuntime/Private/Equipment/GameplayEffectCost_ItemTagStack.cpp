@@ -1,6 +1,6 @@
 #include "Equipment/GameplayEffectCost_ItemTagStack.h"
 
-#include "Equipment/GameplayAbility_FromEquipment.h"
+#include "Abilities/GameplayAbility_FromEquipment.h"
 #include "Inventory/InventoryItemInstance.h"
 #include "NativeGameplayTags.h"
 
