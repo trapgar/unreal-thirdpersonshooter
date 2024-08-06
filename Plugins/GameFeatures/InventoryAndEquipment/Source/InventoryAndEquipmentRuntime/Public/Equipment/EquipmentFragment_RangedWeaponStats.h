@@ -76,28 +76,36 @@ public:
 
 	// Max rate of fire in rounds per minute
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling", meta=(ClampMin=1.0f, UIMin=1.0f, ForceUnits="rpm"))
-	float RoundsPerMinute = 600.0f;
+	float RoundsPerMinute = 750.0f;
 
 	// List of available fire modes the player can cycle through (e.g. single, semi-auto, full-auto, etc.)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling", meta=(Categories="Equipment.Weapon.Mode"))
 	FGameplayTagContainer FireModes;
 
-	// Spread angle in degrees while aiming down sight
+	// Base spread angle in degrees
 	// This is the initial spread angle all the multipliers are applied to
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
-	float SpreadAngleAimDownSight = 0.2f;
+	float SpreadAngleBase = 1.0f;
 
-	// Spread angle penalty multiplier while moving
+	// Spread angle multiplier in degrees while aiming down sight
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
-	float SpreadAngleMultiplierWhileMoving = 5.0f;
+	float SpreadAngleMultiplier_AimDownSight = 0.2f;
 
 	// Spread angle penalty multiplier while hip firing
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
-	float SpreadAngleMultiplierHipFire = 15.0f;
+	float SpreadAngleMultiplier_HipFire = 3.5f;
 
-	// Max angle of the spread in degrees - cap used to prevent spread from going too high (e.g.: 180deg)
+	// Spread angle penalty multiplier while moving
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
+	float SpreadAngleMultiplier_Moving = 1.1667f;
+
+	// Degrees to increase the spread angle by per tick (degrees per shot)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
-	float SpreadAngleMax = 3.5f;
+	float SpreadAngleAccumulationAmount = 0.098f;
+
+	// Degrees to decrease the spread angle by per tick (degrees per second)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
+	float SpreadAngleDecayAmount = 11.1f;
 
 	// Max recoil pitch angle in degrees
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))

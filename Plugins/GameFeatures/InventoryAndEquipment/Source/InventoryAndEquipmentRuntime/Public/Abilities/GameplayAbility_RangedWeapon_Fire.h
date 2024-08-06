@@ -45,17 +45,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon|Accuracy")
 	virtual FRotator GetProjectileSpreadRotator() const;
 
+	UFUNCTION(BlueprintCallable, Category="Ability|Weapon")
 	URangedWeaponItemInstance* GetAssociatedWeapon() const { return Cast<URangedWeaponItemInstance>(GetAssociatedEquipment()); }
 
 private:
 	// Returns the spread angle multiplier that should be applied to the base spread angle
-	float CalculateSpreadAngleMultiplier() const;
+	float GetSpreadAngleMultiplier() const;
 
 	// Tells the associated weapon to what the current spread angle & multiplier is
-	void OnTickSpreadCheck();
+	void OnHandleBroadcastWeaponStatsChanged();
 
 	// Decays the spread accumulated by automatic fire
-	void OnTickSpreadDecay();
+	void OnHandleSpreadDecay();
 
 	FTimerHandle TimerHandleSpread;
 	FTimerHandle TimerHandleSpreadDecay;
@@ -66,12 +67,15 @@ private:
 	// This is used by in the spread calculation
 	float TimeLastFired = 0.0f;
 
-	// World time tath this weapon was last equipped
+	// World time that this weapon was last equipped
 	// This is used by the auto reload GameplayAbility
 	float TimeLastEquipped = 0.0f;
 
-	// The current spread angle multiplier accumulated by automatic fire
-	float AccumulatedSpreadAngleMultiplier = 1.0f;
+	// World seconds that the decay tick was last called
+	float TimeSinceLastDecayed = 0.0f;
+
+	// The current spread angle accumulated by automatic fire
+	float AccumulatedSpreadAngle = 0.0f;
 
 	// Do we currently have first shot accuracy?
 	// TODO: Not used - pull from RangedWeaponStats if/when actually implemented

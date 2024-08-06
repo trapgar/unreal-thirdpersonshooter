@@ -4,6 +4,7 @@
 #include "Equipment/EquipmentManagerComponent.h"
 #include "NativeGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 #include "Kismet/KismetMathLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayAbility_RangedWeapon_Fire)
@@ -33,8 +34,6 @@ void UGameplayAbility_RangedWeapon_Fire::OnGiveAbility(const FGameplayAbilityAct
 
 	check(RangedWeapon);
 	
-	RangedWeapon->SetTimeLastEquipped(TimeLastEquipped);
-
 	if (AActor* EActor = Equipment->FindSpawnedActorByClass<AActor>())
 	{
 		WeaponComponent = EActor->GetRootComponent();
@@ -44,7 +43,7 @@ void UGameplayAbility_RangedWeapon_Fire::OnGiveAbility(const FGameplayAbilityAct
 		WeaponComponent = IActor->GetRootComponent();
 	}
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnTickSpreadCheck, 0.1f, true);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged, 0.1f, true);
 }
 
 void UGameplayAbility_RangedWeapon_Fire::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
@@ -70,12 +69,9 @@ void UGameplayAbility_RangedWeapon_Fire::ActivateAbility(const FGameplayAbilityS
 
 		UInventoryItemInstance* Item = GetAssociatedItem();
 		bHas1InTheChamber = Item->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition) > 0;
+		AccumulatedSpreadAngle += RangedWeaponStats->SpreadAngleAccumulationAmount;
 
-		AccumulatedSpreadAngleMultiplier += 1.49f;
-
-		URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
-		RangedWeapon->SetHas1InTheChamber(bHas1InTheChamber);
-		OnTickSpreadCheck();
+		OnHandleBroadcastWeaponStatsChanged();
 
 		World->GetTimerManager().ClearTimer(TimerHandleSpreadDecay);
 	}
@@ -100,10 +96,10 @@ void UGameplayAbility_RangedWeapon_Fire::EndAbility(const FGameplayAbilitySpecHa
 	{
 		UWorld* World = GetWorld();
 		// NOTE - timers are invalidated implicitly on ActivateAbility, so we need to set them again
-		World->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnTickSpreadCheck, 0.1f, true);
+		World->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged, 0.1f, true);
 		World->GetTimerManager().SetTimer(TimerHandleSpreadDecay,
 			this,
-			&UGameplayAbility_RangedWeapon_Fire::OnTickSpreadDecay,
+			&UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay,
 			// 60s / rounds per minute (e.g.: 800rpm) * 1.25 == min time to pass before the accumulated spread decays
 			// Would *like* this to just be 60/rpm, but depending on timing the decay may occur before the activation resets the handle
 			(60 / RangedWeaponStats->RoundsPerMinute) * 1.25f,
@@ -185,9 +181,10 @@ FRotator UGameplayAbility_RangedWeapon_Fire::GetProjectileSpreadRotator() const
 	APawn* Pawn = GetPawnFromActorInfo();
 	check(Pawn);
 
-	float BaseSpread = RangedWeaponStats->SpreadAngleAimDownSight;
-	float Multiplier = CalculateSpreadAngleMultiplier();
-	float Max = BaseSpread * Multiplier;
+	float BaseSpread = RangedWeaponStats->SpreadAngleBase;
+	float Multiplier = GetSpreadAngleMultiplier();
+	float Accumulated = AccumulatedSpreadAngle;
+	float Max = (BaseSpread + Accumulated) * Multiplier;
 	float Min = Max * -1;
 
 	float Pitch = FMath::RandRange(Min, Max);
@@ -196,14 +193,9 @@ FRotator UGameplayAbility_RangedWeapon_Fire::GetProjectileSpreadRotator() const
 	return FRotator(Pitch, Yaw, 0.0f);
 }
 
-float UGameplayAbility_RangedWeapon_Fire::CalculateSpreadAngleMultiplier() const
+float UGameplayAbility_RangedWeapon_Fire::GetSpreadAngleMultiplier() const
 {
 	float RunningMultiplier = 0.0f;
-
-	if (AccumulatedSpreadAngleMultiplier > 1.0f)
-	{
-		RunningMultiplier += AccumulatedSpreadAngleMultiplier;
-	}
 
 	// See if we are moving, and if so, smoothly apply the penalty
 	APawn* Pawn = GetPawnFromActorInfo();
@@ -213,56 +205,62 @@ float UGameplayAbility_RangedWeapon_Fire::CalculateSpreadAngleMultiplier() const
 	// TODO: want "close" to 0 speed to count as standing still, but idk what uom this is - need to check (think lyra has 80.0f?)
 	if (PawnSpeed > 10.0f)
 	{
-		RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplierWhileMoving;
+		RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplier_Moving;
 	}
 
 	if (IGameplayTagAssetInterface* Taggable = Cast<IGameplayTagAssetInterface>(Pawn))
 	{
-		if (!Taggable->HasMatchingGameplayTag(TAG_Movement_AimingDownSights))
+		if (Taggable->HasMatchingGameplayTag(TAG_Movement_AimingDownSights))
 		{
-			RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplierHipFire;
+			RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplier_AimDownSight;
+		}
+		else
+		{
+			RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplier_HipFire;
 		}
 	}
-
-	float BaseSpread = RangedWeaponStats->SpreadAngleAimDownSight;
-	float Max = BaseSpread * RunningMultiplier;
 	
 	return RunningMultiplier;
 }
 
-void UGameplayAbility_RangedWeapon_Fire::OnTickSpreadCheck()
+void UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged()
 {
 	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
+	float CurrentSpreadAngle = RangedWeaponStats->SpreadAngleBase + AccumulatedSpreadAngle;
+	float CurrentSpreadMultiplier = GetSpreadAngleMultiplier();
+	FWeaponStatsChangedMessage Message;
+	Message.Owner = RangedWeapon;
+	Message.TimeLastFired = TimeLastFired;
+	Message.TimeLastEquipped = TimeLastEquipped;
+	Message.SpreadAngle = CurrentSpreadAngle;
+	Message.SpreadAngleMultiplier = CurrentSpreadMultiplier;
+	Message.bHas1InTheChamber = bHas1InTheChamber;
 
-	// TODO: Not a huge fan of how this is done, but idk how else to get this info to the reticle widget
-	// Maybe the GameplayMessageRouter?
-	float BaseSpreadAngle = RangedWeaponStats->SpreadAngleAimDownSight;
-	float CurrentSpreadMultiplier = CalculateSpreadAngleMultiplier();
-	RangedWeapon->SetSpreadAngle(BaseSpreadAngle);
-	RangedWeapon->SetSpreadAngleMultiplier(CurrentSpreadMultiplier);
+	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
+	MessageSystem.BroadcastMessage(TAG_Weapon_Message_StatsChanged, Message);
 }
 
-void UGameplayAbility_RangedWeapon_Fire::OnTickSpreadDecay()
+void UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay()
 {
 	UWorld* World = GetWorld();
-	// TODO: keep track of when this func was last called, so if it's been longer than the expected 100ms,
-	// we can decrement the accumulated multiplier by the correct amount
-	const float TimeSinceFired = World->TimeSince(TimeLastFired);
-	const float DeltaSeconds = World->DeltaTimeSeconds;
+	const float DeltaSeconds = World->TimeSince(FMath::Max(TimeLastFired, TimeSinceLastDecayed));
+	const float Decay = RangedWeaponStats->SpreadAngleDecayAmount;
 
-	AccumulatedSpreadAngleMultiplier = FMath::Max(1.0f, AccumulatedSpreadAngleMultiplier - 1.11f);
+	AccumulatedSpreadAngle = FMath::Max(0.0f, AccumulatedSpreadAngle - Decay / DeltaSeconds);
 
 	// Spread is at minimum, set to zero and stop the timer
-	if (FMath::IsNearlyEqual(AccumulatedSpreadAngleMultiplier, 1.0f, KINDA_SMALL_NUMBER))
+	if (FMath::IsNearlyEqual(AccumulatedSpreadAngle, 0.0f, KINDA_SMALL_NUMBER))
 	{
-		AccumulatedSpreadAngleMultiplier = 1.0f;
+		AccumulatedSpreadAngle = 0.0f;
+		TimeSinceLastDecayed = 0.0f;
 	}
 	// Queue another tick to update the spread again
 	else
 	{
+		TimeSinceLastDecayed = World->GetTimeSeconds();
 		World->GetTimerManager().SetTimer(TimerHandleSpreadDecay,
 			this,
-			&UGameplayAbility_RangedWeapon_Fire::OnTickSpreadDecay,
+			&UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay,
 			0.1f,
 			false
 		);

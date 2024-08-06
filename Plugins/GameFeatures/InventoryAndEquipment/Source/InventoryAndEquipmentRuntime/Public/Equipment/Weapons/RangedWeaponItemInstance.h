@@ -2,9 +2,44 @@
 
 #include "Equipment/EquipmentItemInstance.h"
 #include "Equipment/EquipmentFragment_RangedWeaponStats.h"
+#include "NativeGameplayTags.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 
 #include "RangedWeaponItemInstance.generated.h"
 
+
+INVENTORYANDEQUIPMENTRUNTIME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Weapon_Message_StatsChanged);
+
+
+// --------------------------------------------------------
+
+
+USTRUCT(BlueprintType)
+struct INVENTORYANDEQUIPMENTRUNTIME_API FWeaponStatsChangedMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category=Weapon)
+	TObjectPtr<UEquipmentItemInstance> Owner = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category=Weapon)
+	float TimeLastFired;
+
+	UPROPERTY(BlueprintReadOnly, Category=Weapon)
+	float TimeLastEquipped;
+
+	UPROPERTY(BlueprintReadOnly, Category=Weapon)
+	float SpreadAngle;
+
+	UPROPERTY(BlueprintReadOnly, Category=Weapon)
+	float SpreadAngleMultiplier;
+
+	UPROPERTY(BlueprintReadOnly, Category=Weapon)
+	bool bHas1InTheChamber;
+};
+
+
+// --------------------------------------------------------
 
 UCLASS(Abstract)
 class INVENTORYANDEQUIPMENTRUNTIME_API URangedWeaponItemInstance : public UEquipmentItemInstance
@@ -12,30 +47,31 @@ class INVENTORYANDEQUIPMENTRUNTIME_API URangedWeaponItemInstance : public UEquip
 	GENERATED_BODY()
 
 public:
-	URangedWeaponItemInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	virtual void OnEquipped() override;
+	virtual void OnUnequipped() override;
 
 public:
 
 	/** Returns World time that this weapon was last fired (returns 0 if never fired) */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Timing")
 	float GetTimeLastFired() const { return TimeLastFired; }
-	void SetTimeLastFired(float NewValue) { TimeLastFired = NewValue; }
 
 	/** Returns World time tath this weapon was last equipped (returns 0 if never equipped) */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Timing")
 	float GetTimeLastEquipped() const { return TimeLastEquipped; }
-	void SetTimeLastEquipped(float NewValue) { TimeLastEquipped = NewValue; }
 
 	/** Returns whether or not the weapon has a bullet in the chamber */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Ammunition", meta=(DisplayName="Has 1 in the Chamber?"))
 	bool Has1InTheChamber() const { return bHas1InTheChamber; }
-	void SetHas1InTheChamber(bool bNewValue) { bHas1InTheChamber = bNewValue; };
 
-	float GetSpreadAngle() const { return SpreadAngle; };
-	void SetSpreadAngle(float NewAngle) { SpreadAngle = NewAngle; };
+	/** Returns whether or not the weapon has a bullet in the chamber */
+	UFUNCTION(BlueprintCallable, Category="Weapon|Spread")
+	float GetSpreadAngle() const { return SpreadAngle; }
 
-	float GetSpreadAngleMultiplier() const { return SpreadAngleMultiplier; };
-	void SetSpreadAngleMultiplier(float NewMultiplier) { SpreadAngleMultiplier = NewMultiplier; };
+	/** Returns whether or not the weapon has a bullet in the chamber */
+	UFUNCTION(BlueprintCallable, Category="Weapon|Spread")
+	float GetSpreadAngleMultiplier() const { return SpreadAngleMultiplier; }
 
 private:
 	float TimeLastFired = 0.0f;
@@ -44,4 +80,8 @@ private:
 	float SpreadAngleMultiplier = 1.0f;
 	bool bHas1InTheChamber = false;
 
+private:
+	FGameplayMessageListenerHandle Handle_WeaponStatsChanged;
+
+	void OnWeaponStatsChanged(const FGameplayTag Channel, const FWeaponStatsChangedMessage& Payload);
 };

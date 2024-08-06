@@ -14,6 +14,14 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Equipment_Weapon_MagazineSize, "Equipment.Weap
 
 #define LOCTEXT_NAMESPACE "Equipment"
 
+void UEquipmentFragment_RangedWeaponStats::OnInstanceCreated(UEquipmentItemInstance* Instance) const
+{
+	if (UInventoryItemInstance* ItemInstance = Instance->GetAssociatedItem())
+	{
+		ItemInstance->AddStatTagStack(TAG_Equipment_Weapon_MagazineSize, MagazineSize);
+	}
+}
+
 #if WITH_EDITOR
 EDataValidationResult UEquipmentFragment_RangedWeaponStats::IsDataValid(FDataValidationContext& Context) const
 {
@@ -22,11 +30,3 @@ EDataValidationResult UEquipmentFragment_RangedWeaponStats::IsDataValid(FDataVal
 	return Result;
 }
 #endif
-
-void UEquipmentFragment_RangedWeaponStats::OnInstanceCreated(UEquipmentItemInstance* Instance) const
-{
-	if (UInventoryItemInstance* ItemInstance = Instance->GetAssociatedItem())
-	{
-		ItemInstance->AddStatTagStack(TAG_Equipment_Weapon_MagazineSize, MagazineSize);
-	}
-}
