@@ -2,7 +2,8 @@ Binaries
 DerivedDataCache
 Intermediate
 Saved
-.vscode
+.vscode/*
+!.vscode/settings.json
 .vs
 *.VC.db
 *.opensdf

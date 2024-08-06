@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        "**/__ExternalActors__": true,
+        "**/__ExternalObjects__": true,
+        "**/DerivedDataCache": true,
+        "**/Binaries": true,
+        "**/Intermediate": true
+    },
+    "editor.insertSpaces": false,
+    "editor.tabSize": 4,
+    "C_Cpp.formatting": "vcFormat",
+    "C_Cpp.vcFormat.space.pointerReferenceAlignment": "left"
+}
