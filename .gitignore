@@ -4,6 +4,8 @@ Intermediate
 Saved
 .vscode/*
 !.vscode/settings.json
+!.vscode/extensions.json
+*.code-workspace
 .vs
 *.VC.db
 *.opensdf

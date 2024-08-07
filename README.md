@@ -4,6 +4,24 @@ what that template is doing.
 
 Also trying to use C++ over blueprints to make source compare easier.
 
+## Getting Started
+1. Download & install [Visual Studio Code](https://code.visualstudio.com/download) and [Unreal Engine](https://www.unrealengine.com/en-US/download)
+2. Clone the repo
+3. Launch the Unreal editor by double+clicking on the `.uproject` file in `File Explorer` or by launching the editor directly
+4. `Edit > Editor Preferences... > Source Code`
+5. Change the `Source Code Editor` to `Visual Studio Code`
+6. `Tools > Refresh Visual Studio Code Project`
+7. Close out the Unreal editor
+8. Open the newly created `.code-workspace` file in the root of the project
+9. `Ctrl+Shift+D` to show the `Run and Debug` clover
+10. Select `Launch ThirdPersonShooterEditor (Development)`
+11. `F5` to launch the Unreal editor with the VS Code debugger attached!
+
+### Tips and Tricks
+C++ intellisense is borderline-useless with Unreal projects. Might be size, idk. Anyways, I mainly use `Search (Ctrl+F)` to find variable references.
+Make sure that if you're doing this globally that you toggle the `Search Details` (triple dot) and add `./ThirdPersonShooter` to the `files to include`.
+This will prevent Code from searching the entire Unreal Engine source, which is probably not what you want.
+
 ## Backlog
 - figure out how to attach components at runtime based on Game Mode or something...
     - AbilitySystemComponent w/ default ability set for the character
@@ -11,56 +29,16 @@ Also trying to use C++ over blueprints to make source compare easier.
 - spawn decals on bullet impact
 - test that `GA_Weapon_Fire` works with spread shots...
 
-## Conversion Notes
-- Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I import
-
-```md
->>> How do I use Gameplay Abilities in Unreal Engine 5?
-Gameplay Abilities are a powerful feature in Unreal Engine 5 that allows you to create complex behaviors and interactions for your characters.
-Here's a step-by-step guide on how to use Gameplay Abilities:
-
-1. **Create a new Ability**:
-    * In the Content Browser, right-click and select "Blueprint Class" > "GameplayAbility".
-    * Name your ability (e.g., "JumpAttack").
-2. **Set up the Ability Blueprint**:
-    * Double-click the Ability blueprint to open it in the Blueprint Editor.
-    * Create a new event graph by clicking the "+" icon at the top-right corner of the editor.
-3. **Define the Ability's Behavior**:
-    * In the event graph, create an event node (e.g., "OnAbilityActivated") that will trigger when the ability is activated.
-    * Add nodes to define the ability's behavior, such as:
-        + Playing a sound or animation
-        + Applying forces or impulses to the character
-        + Changing the character's state (e.g., making them invincible)
-4. **Set up Ability Parameters**:
-    * In the Ability blueprint, you can add parameters that will affect its behavior.
-    * For example, you might create a parameter called "JumpHeight" that determines how high the character jumps when using the JumpAttack ability.
-5. **Create an Ability Blueprint Class**:
-    * Right-click in the Content Browser and select "Blueprint Class" > "GameplayAbility".
-    * Name your blueprint class (e.g., "JumpAttackBP").
-6. **Create an Ability Asset**:
-    * In the Content Browser, right-click and select "GameplayAbilityAsset".
-    * Name your ability asset (e.g., "JumpAttackAA").
-7. **Add the Ability to a Character Class**:
-    * Open the character blueprint (e.g., "MyCharacterBP") in the Blueprint Editor.
-    * Add an instance of the GameplayAbility class you created (e.g., "JumpAttackBP") as a component to the character.
-8. **Configure Ability Activation**:
-    * In the character blueprint, create an event node that will trigger when the ability is activated (e.g., "OnJumpAttackActivated").
-    * Add nodes to define how the ability should be activated, such as:
-        + Pressing a specific key or button
-        + Meeting certain conditions (e.g., being close enough to an enemy)
-9. **Test and Refine Your Ability**:
-    * Compile and save your blueprint changes.
-    * Test your game to ensure the ability works as expected.
-    * Refine the ability's behavior by adjusting parameters, adding more nodes, or creating additional blueprints.
-
-By following these steps, you'll be able to create complex gameplay abilities for your characters in Unreal Engine 5. Happy coding!
-```
-
 ## Developer Notes
-- Should the ModularAbilitySet replace the InputTag with a ref to the IA?
-    - How would this affect abstract abilities like GA_Weapon_Fire_Auto?
+- Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file
+    - I'm sure this is important for multiplayer, so will need to address this eventually
+- Should the `ModularAbilitySet` replace the `InputTag` with a ref to the IA?
+    - How would this affect abstract abilities like `GA_Weapon_Fire_Auto`?
 - Need to figure out how to keep track of inventory items that can vs can't stack
-- create an asset manager for the UEquipmentConfiguration UDataAsset
+- research asset manager registrations for:
+    - `UEquipmentConfiguration`
+    - `UInventoryItemDefinition`
+    - `UEquipmentItemDefinition`
 
 ## Open Questions
 - What is the difference between a `GameplayCue`, and a `GameplayEvent` in terms of GameplayTags?
@@ -80,6 +58,7 @@ By following these steps, you'll be able to create complex gameplay abilities fo
 - Make sure I'm using ALevelInstance right with `GameFeatureAction_AddLevelInstance` (streaming, etc)
     - [World Partition in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition-in-unreal-engine)
     - [Level Instancing in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/level-instancing-in-unreal-engine)
+    - [Data Layers in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition---data-layers-in-unreal-engine)
 - Add a func for `InteractableObjectsFound` instead of just changed
 - Move `GA_Interaction_Activate` to a C++ class
     - Same with `GA_Interaction_Collection`
