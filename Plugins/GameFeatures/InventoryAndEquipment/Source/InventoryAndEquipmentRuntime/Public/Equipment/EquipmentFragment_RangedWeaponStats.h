@@ -32,7 +32,7 @@ public:
 
 public:
 
-	// Initial velocity of the bullet on projectile spawn
+	// Initial velocity of the projectile on spawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm/s"))
 	float MuzzleVelocity = 60000.0f;
 
@@ -99,27 +99,32 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
 	float SpreadAngleMultiplier_Moving = 1.1667f;
 
-	// Degrees to increase the spread angle by per tick (degrees per shot)
+	// Angle in degrees to increase the spread by on every shot
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
-	float SpreadAngleAccumulationAmount = 0.098f;
+	float SpreadAngleAccumulationPerShot = 0.098f;
 
-	// Degrees to decrease the spread angle by per tick (degrees per second)
+	// Angle in degrees to decrease the spread by per second
+	// @note this does not get applied until the weapon has not been fired for 60s / `RoundsPerMinute` * 1.2s
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
-	float SpreadAngleDecayAmount = 11.1f;
+	float SpreadAngleAccumulationDecayPerSecond = 11.1f;
 
 	// Max recoil pitch angle in degrees
+	// @note this will be applied as `RecoilPitch * FMath::RandRange(0.9f, 1.0f)`
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
 	float RecoilPitch = 0.32f;
 
 	// Min recoil yaw angle in degrees
+	// @note horizontal recoil is applied as `FMath::RandRange(RecoilYawMin, RecoilYawMax)`
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMax=0.0f, UIMax=0.0f, ForceUnits="deg"))
 	float RecoilYawMin = -0.12f;
 
 	// Max recoil yaw angle in degrees
+	// @note horizontal recoil is applied as `FMath::RandRange(RecoilYawMin, RecoilYawMax)`
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
 	float RecoilYawMax = 0.28f;
 
 	// Additional recoil multiplier applied to the first shot of the heat
+	// @experimental
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
 	float FirstShotRecoilMultiplier = 2.3f;
 

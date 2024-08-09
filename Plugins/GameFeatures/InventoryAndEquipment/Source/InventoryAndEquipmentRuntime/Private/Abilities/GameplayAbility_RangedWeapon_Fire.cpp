@@ -69,7 +69,7 @@ void UGameplayAbility_RangedWeapon_Fire::ActivateAbility(const FGameplayAbilityS
 
 		UInventoryItemInstance* Item = GetAssociatedItem();
 		bHas1InTheChamber = Item->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition) > 0;
-		AccumulatedSpreadAngle += RangedWeaponStats->SpreadAngleAccumulationAmount;
+		AccumulatedSpreadAngle += RangedWeaponStats->SpreadAngleAccumulationPerShot;
 
 		OnHandleBroadcastWeaponStatsChanged();
 
@@ -100,9 +100,9 @@ void UGameplayAbility_RangedWeapon_Fire::EndAbility(const FGameplayAbilitySpecHa
 		World->GetTimerManager().SetTimer(TimerHandleSpreadDecay,
 			this,
 			&UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay,
-			// 60s / rounds per minute (e.g.: 800rpm) * 1.25 == min time to pass before the accumulated spread decays
+			// 60s / rounds per minute (e.g.: 800rpm) * 1.2 == min time to pass before the accumulated spread decays
 			// Would *like* this to just be 60/rpm, but depending on timing the decay may occur before the activation resets the handle
-			(60 / RangedWeaponStats->RoundsPerMinute) * 1.25f,
+			60 / RangedWeaponStats->RoundsPerMinute * 1.2f,
 			false
 		);
 	}
@@ -228,6 +228,17 @@ void UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged()
 	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 	float CurrentSpreadAngle = RangedWeaponStats->SpreadAngleBase + AccumulatedSpreadAngle;
 	float CurrentSpreadMultiplier = GetSpreadAngleMultiplier();
+
+	if (CurrentSpreadAngle == RangedWeapon->GetSpreadAngle() &&
+		CurrentSpreadMultiplier == RangedWeapon->GetSpreadAngleMultiplier() &&
+		TimeLastFired == RangedWeapon->GetTimeLastFired() &&
+		TimeLastEquipped == RangedWeapon->GetTimeLastEquipped() &&
+		bHas1InTheChamber == RangedWeapon->GetHas1InTheChamber()
+	)
+	{
+		return;
+	}
+
 	FWeaponStatsChangedMessage Message;
 	Message.Owner = RangedWeapon;
 	Message.TimeLastFired = TimeLastFired;
@@ -238,13 +249,15 @@ void UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged()
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
 	MessageSystem.BroadcastMessage(TAG_Weapon_Message_StatsChanged, Message);
+
+	// TODO: long fix -- move spread bonuses and penalties to GameplayEffects
 }
 
 void UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay()
 {
 	UWorld* World = GetWorld();
 	const float DeltaSeconds = World->TimeSince(FMath::Max(TimeLastFired, TimeSinceLastDecayed));
-	const float Decay = RangedWeaponStats->SpreadAngleDecayAmount;
+	const float Decay = RangedWeaponStats->SpreadAngleAccumulationDecayPerSecond;
 
 	AccumulatedSpreadAngle = FMath::Max(0.0f, AccumulatedSpreadAngle - Decay / DeltaSeconds);
 

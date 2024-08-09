@@ -63,7 +63,7 @@ public:
 
 	/** Returns whether or not the weapon has a bullet in the chamber */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Ammunition", meta=(DisplayName="Has 1 in the Chamber?"))
-	bool Has1InTheChamber() const { return bHas1InTheChamber; }
+	bool GetHas1InTheChamber() const { return bHas1InTheChamber; }
 
 	/** Returns whether or not the weapon has a bullet in the chamber */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Spread")
