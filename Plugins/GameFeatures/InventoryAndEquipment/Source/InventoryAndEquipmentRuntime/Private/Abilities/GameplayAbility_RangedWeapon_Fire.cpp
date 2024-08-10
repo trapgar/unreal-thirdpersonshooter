@@ -43,7 +43,7 @@ void UGameplayAbility_RangedWeapon_Fire::OnGiveAbility(const FGameplayAbilityAct
 		WeaponComponent = IActor->GetRootComponent();
 	}
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged, 0.1f, true);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnHandleUpdateWeaponStatsChanged, 0.1f, true);
 }
 
 void UGameplayAbility_RangedWeapon_Fire::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
@@ -71,7 +71,7 @@ void UGameplayAbility_RangedWeapon_Fire::ActivateAbility(const FGameplayAbilityS
 		bHas1InTheChamber = Item->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition) > 0;
 		AccumulatedSpreadAngle += RangedWeaponStats->SpreadAngleAccumulationPerShot;
 
-		OnHandleBroadcastWeaponStatsChanged();
+		OnHandleUpdateWeaponStatsChanged();
 
 		World->GetTimerManager().ClearTimer(TimerHandleSpreadDecay);
 	}
@@ -96,7 +96,7 @@ void UGameplayAbility_RangedWeapon_Fire::EndAbility(const FGameplayAbilitySpecHa
 	{
 		UWorld* World = GetWorld();
 		// NOTE - timers are invalidated implicitly on ActivateAbility, so we need to set them again
-		World->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged, 0.1f, true);
+		World->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnHandleUpdateWeaponStatsChanged, 0.1f, true);
 		World->GetTimerManager().SetTimer(TimerHandleSpreadDecay,
 			this,
 			&UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay,
@@ -223,7 +223,7 @@ float UGameplayAbility_RangedWeapon_Fire::GetSpreadAngleMultiplier() const
 	return RunningMultiplier;
 }
 
-void UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged()
+void UGameplayAbility_RangedWeapon_Fire::OnHandleUpdateWeaponStatsChanged()
 {
 	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 	float CurrentSpreadAngle = RangedWeaponStats->SpreadAngleBase + AccumulatedSpreadAngle;
@@ -240,6 +240,7 @@ void UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged()
 		return;
 	}
 
+	// TODO: should these bonuses and penalties be moved to GameplayEffects?
 	FWeaponStatsChangedMessage Message;
 	Message.Owner = RangedWeapon;
 	Message.TimeLastFired = TimeLastFired;
@@ -250,8 +251,6 @@ void UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged()
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
 	MessageSystem.BroadcastMessage(TAG_Weapon_Message_StatsChanged, Message);
-
-	// TODO: long fix -- move spread bonuses and penalties to GameplayEffects
 }
 
 void UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay()

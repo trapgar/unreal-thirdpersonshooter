@@ -26,8 +26,7 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - figure out how to attach components at runtime based on Game Mode or something...
     - AbilitySystemComponent w/ default ability set for the character
 - add a silhouette to the gunrange for testing
-- spawn decals on bullet impact
-- test that `GA_Weapon_Fire` works with spread shots...
+- spawn decals & sparks on bullet impact
 
 ## Developer Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file
@@ -35,7 +34,7 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - Should the `ModularAbilitySet` replace the `InputTag` with a ref to the IA?
     - How would this affect abstract abilities like `GA_Weapon_Fire_Auto`?
 - Need to figure out how to keep track of inventory items that can vs can't stack
-- research asset manager registrations for:
+- Research asset manager registrations for:
     - `UEquipmentConfiguration`
     - `UInventoryItemDefinition`
     - `UEquipmentItemDefinition`

@@ -53,7 +53,7 @@ private:
 	float GetSpreadAngleMultiplier() const;
 
 	// Tells the associated weapon to what the current spread angle & multiplier is
-	void OnHandleBroadcastWeaponStatsChanged();
+	void OnHandleUpdateWeaponStatsChanged();
 
 	// Decays the spread accumulated by automatic fire
 	void OnHandleSpreadDecay();
