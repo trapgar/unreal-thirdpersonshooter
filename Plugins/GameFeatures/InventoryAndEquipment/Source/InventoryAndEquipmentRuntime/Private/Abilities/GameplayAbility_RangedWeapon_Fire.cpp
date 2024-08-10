@@ -33,7 +33,7 @@ void UGameplayAbility_RangedWeapon_Fire::OnGiveAbility(const FGameplayAbilityAct
 	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 
 	check(RangedWeapon);
-	
+
 	if (AActor* EActor = Equipment->FindSpawnedActorByClass<AActor>())
 	{
 		WeaponComponent = EActor->GetRootComponent();
@@ -147,9 +147,9 @@ FTransform UGameplayAbility_RangedWeapon_Fire::GetBaseProjectileSpawnTransform(f
 		for (FHitResult& CurHitResult : HitResults)
 		{
 			auto Pred = [&CurHitResult](const FHitResult& Other)
-			{
-				return Other.HitObjectHandle == CurHitResult.HitObjectHandle;
-			};
+				{
+					return Other.HitObjectHandle == CurHitResult.HitObjectHandle;
+				};
 
 			if (!HitResults.ContainsByPredicate(Pred))
 			{
@@ -197,7 +197,7 @@ float UGameplayAbility_RangedWeapon_Fire::GetSpreadAngleMultiplier() const
 {
 	float RunningMultiplier = 0.0f;
 
-	// See if we are moving, and if so, smoothly apply the penalty
+	// See if we are moving, and if so, apply the penalty
 	APawn* Pawn = GetPawnFromActorInfo();
 	UCharacterMovementComponent* CharMovementComp = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
 	const float PawnSpeed = Pawn->GetVelocity().Size();
@@ -219,7 +219,7 @@ float UGameplayAbility_RangedWeapon_Fire::GetSpreadAngleMultiplier() const
 			RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplier_HipFire;
 		}
 	}
-	
+
 	return RunningMultiplier;
 }
 
@@ -229,12 +229,13 @@ void UGameplayAbility_RangedWeapon_Fire::OnHandleBroadcastWeaponStatsChanged()
 	float CurrentSpreadAngle = RangedWeaponStats->SpreadAngleBase + AccumulatedSpreadAngle;
 	float CurrentSpreadMultiplier = GetSpreadAngleMultiplier();
 
-	if (CurrentSpreadAngle == RangedWeapon->GetSpreadAngle() &&
+	const bool bNothingHasChanged = CurrentSpreadAngle == RangedWeapon->GetSpreadAngle() &&
 		CurrentSpreadMultiplier == RangedWeapon->GetSpreadAngleMultiplier() &&
 		TimeLastFired == RangedWeapon->GetTimeLastFired() &&
 		TimeLastEquipped == RangedWeapon->GetTimeLastEquipped() &&
-		bHas1InTheChamber == RangedWeapon->GetHas1InTheChamber()
-	)
+		bHas1InTheChamber == RangedWeapon->GetHas1InTheChamber();
+
+	if (bNothingHasChanged)
 	{
 		return;
 	}
