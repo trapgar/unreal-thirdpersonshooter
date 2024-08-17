@@ -9,7 +9,7 @@
 // #include "Net/Serialization/FastArraySerializer.h"
 #include "EquipmentItemDefinition.h"
 #include "EquipmentItemInstance.h"
-#include "Ability/ModularAbilitySet.h"
+#include "GameplayAbilities/ModularAbilitySet.h"
 #include "Inventory/InventoryManagerComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "NativeGameplayTags.h"

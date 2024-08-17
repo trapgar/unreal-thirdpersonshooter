@@ -1,6 +1,6 @@
 #include "ModularPlayerController.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Ability/ModularAbilitySystemComponent.h"
+#include "GameplayAbilities/ModularAbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularPlayerController)
 

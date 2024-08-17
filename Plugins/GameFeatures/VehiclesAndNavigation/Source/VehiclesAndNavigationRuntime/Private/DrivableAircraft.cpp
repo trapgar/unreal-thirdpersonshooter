@@ -1,6 +1,6 @@
 #include "DrivableAircraft.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "ThirdPersonShooter/Ability/ModularAbilitySystemComponent.h"
+#include "ThirdPersonShooter/GameplayAbilities/ModularAbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooter/ThirdPersonShooterGameplayTags.h"
 

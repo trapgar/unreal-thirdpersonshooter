@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ability/Abilities/ModularAbilityCost.h"
+#include "GameplayAbilities/Abilities/ModularAbilityCost.h"
 #include "GameplayTagContainer.h"
 #include "ScalableFloat.h"
 

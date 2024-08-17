@@ -13,6 +13,7 @@
 class AController;
 class UAbilitySystemComponent;
 class UInputComponent;
+class UPawnHealthComponent;
 struct FGameplayTag;
 struct FGameplayTagContainer;
 
@@ -62,8 +63,30 @@ protected:
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
-// private:
-// 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", Meta = (AllowPrivateAccess = "true"))
-// 	TObjectPtr<UGameFrameworkComponent> HealthComponent;
+	// Begins the death sequence for the character (disables collision, disables movement, etc...)
+	UFUNCTION()
+	virtual void OnDeathStarted(AActor* OwningActor);
+
+	// Ends the death sequence for the character (detaches controller, destroys pawn, etc...)
+	UFUNCTION()
+	virtual void OnDeathFinished(AActor* OwningActor);
+
+	// Called when the death sequence for the character has completed
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnDeathFinished"))
+	void K2_OnDeathFinished();
+
+private:
+	void DestroyDueToDeath();
+	
+	// Health attribute set used by this actor.
+	UPROPERTY()
+	TObjectPtr<const class UPawnHealthSet> HealthSet;
+
+	// Combat attribute set used by this actor.
+	UPROPERTY()
+	TObjectPtr<const class UPawnCombatSet> CombatSet;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Health", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UPawnHealthComponent> HealthComponent;
 
 };

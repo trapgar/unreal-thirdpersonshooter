@@ -3,6 +3,7 @@
 #include "CustomLogChannels.h"
 #include "GameFramework/Actor.h"
 
+DEFINE_LOG_CATEGORY(LogMe);
 DEFINE_LOG_CATEGORY(LogExperience);
 DEFINE_LOG_CATEGORY(LogAbilities);
 DEFINE_LOG_CATEGORY(LogEquipment);

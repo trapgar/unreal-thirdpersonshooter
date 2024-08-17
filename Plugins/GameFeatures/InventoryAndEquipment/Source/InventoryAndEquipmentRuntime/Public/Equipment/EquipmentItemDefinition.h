@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Ability/ModularAbilitySet.h"
+#include "GameplayAbilities/ModularAbilitySet.h"
 
 #include "EquipmentItemDefinition.generated.h"
 

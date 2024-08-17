@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Ability/Abilities/ModularGameplayAbility.h"
+#include "GameplayAbilities/Abilities/ModularGameplayAbility.h"
 
 #include "GameplayAbility_FromEquipment.generated.h"
 

@@ -1,5 +1,7 @@
 #include "ModularGameplayAbility.h"
-#include "Ability/ModularAbilitySystemComponent.h"
+#include "GameplayAbilities/ModularAbilitySystemComponent.h"
+#include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
+#include "GameplayAbilities/ModularGameplayEffectContext.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "ModularAbilityCost.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -106,6 +108,29 @@ void UModularGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle,
 			AdditionalCost->ApplyCost(this, Handle, ActorInfo, ActivationInfo);
 		}
 	}
+}
+
+FGameplayEffectContextHandle UModularGameplayAbility::MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const
+{
+	FGameplayEffectContextHandle ContextHandle = Super::MakeEffectContext(Handle, ActorInfo);
+	FModularGameplayEffectContext* EffectContext = FModularGameplayEffectContext::ExtractEffectContext(ContextHandle);
+
+	check(EffectContext);
+	check(ActorInfo);
+
+	AActor* EffectCauser = nullptr;
+	const IModularAbilityAttenuatorInterface* Attenuator = nullptr;
+	float SourceLevel = 0.0f;
+	GetAbilitySourceAsAttenuator(Handle, ActorInfo, /*out*/ SourceLevel, /*out*/ Attenuator, /*out*/ EffectCauser);
+
+	UObject* SourceObject = GetSourceObject(Handle, ActorInfo);
+	AActor* Instigator = ActorInfo ? ActorInfo->OwnerActor.Get() : nullptr;
+
+	EffectContext->SetAbilitySource(Attenuator, SourceLevel);
+	EffectContext->AddInstigator(Instigator, EffectCauser);
+	EffectContext->AddSourceObject(SourceObject);
+
+	return ContextHandle;
 }
 
 void UModularGameplayAbility::OnAbilityFailedToActivate_Broadcast(const FGameplayTagContainer& FailedReason) const

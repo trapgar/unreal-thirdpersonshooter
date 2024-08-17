@@ -1,10 +1,14 @@
 #include "ModularCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Ability/ModularAbilitySystemComponent.h"
+#include "GameplayAbilities/ModularAbilitySystemComponent.h"
+#include "GameplayAbilities/Attributes/PawnCombatSet.h"
+#include "GameplayAbilities/Attributes/PawnHealthSet.h"
 #include "ModularCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
 #include "NativeGameplayTags.h"
+#include "Character/PawnHealthComponent.h"
 
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularCharacter)
@@ -14,13 +18,39 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_AvatarUnpossessed, "GameplayEven
 
 class UEnhancedInputLocalPlayerSubsystem;
 
+static FName NAME_CustomCharacterCollisionProfile_Capsule(TEXT("Pawn_Capsule"));
+
 AModularCharacter::AModularCharacter(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	NetCullDistanceSquared = 900000000.0f;
+
+	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+	check(CapsuleComp);
+	CapsuleComp->SetCollisionProfileName(NAME_CustomCharacterCollisionProfile_Capsule);
+
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	check(Movement);
+	Movement->bCanWalkOffLedgesWhenCrouching = true;
+	Movement->BrakingFrictionFactor = 1.0f;
+	Movement->BrakingFriction = 6.0f;
+	Movement->GroundFriction = 8.0f;
+	Movement->BrakingDecelerationWalking = 1400.0f;
+
 	AbilitySystemComponent = CreateDefaultSubobject<UModularAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 	GameplayInputComponent = CreateDefaultSubobject<UGameplayInputComponent>(TEXT("GameplayInputComponent"));
+
+	HealthSet = CreateDefaultSubobject<UPawnHealthSet>(TEXT("HealthSet"));
+	CombatSet = CreateDefaultSubobject<UPawnCombatSet>(TEXT("CombatSet"));
+
+	HealthComponent = CreateDefaultSubobject<UPawnHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent->OnDeathStarted.AddDynamic(this, &ThisClass::OnDeathStarted);
+	HealthComponent->OnDeathFinished.AddDynamic(this, &ThisClass::OnDeathFinished);
 }
 
 void AModularCharacter::PreInitializeComponents()
@@ -48,7 +78,10 @@ void AModularCharacter::PossessedBy(AController *NewController)
 
 	if (auto MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
 	{
+		// Need to call ASAP because of the GA_Interact on a timer which will call with stale values
 		MASC->HandleControllerChanged();
+		HealthComponent->InitializeWithAbilitySystem(AbilitySystemComponent);
+
 		FGameplayEventData Payload;
 		Payload.EventTag = TAG_GameplayEvent_AvatarPossessed;
 		Payload.Instigator = this;
@@ -64,6 +97,8 @@ void AModularCharacter::UnPossessed()
 	if (auto MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
 	{
 		MASC->HandleControllerChanged();
+		HealthComponent->UninitializeFromAbilitySystem();
+
 		FGameplayEventData Payload;
 		Payload.EventTag = TAG_GameplayEvent_AvatarUnpossessed;
 		Payload.Instigator = this;
@@ -136,4 +171,48 @@ bool AModularCharacter::HasAnyMatchingGameplayTags(const FGameplayTagContainer& 
 	}
 
 	return false;
+}
+
+void AModularCharacter::OnDeathStarted(AActor*)
+{
+	if (Controller)
+	{
+		Controller->SetIgnoreMoveInput(true);
+	}
+
+	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+	check(CapsuleComp);
+	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	Movement->StopMovementImmediately();
+	Movement->DisableMovement();
+}
+
+void AModularCharacter::OnDeathFinished(AActor*)
+{
+	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::DestroyDueToDeath);
+}
+
+void AModularCharacter::DestroyDueToDeath()
+{
+	K2_OnDeathFinished();
+
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		DetachFromControllerPendingDestroy();
+		SetLifeSpan(0.1f);
+	}
+
+	// Uninitialize the ASC if we're still the avatar actor (otherwise another pawn already did it when they became the avatar actor)
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		if (ASC->GetAvatarActor() == this)
+		{
+			// PawnExtComponent->UninitializeAbilitySystem();
+		}
+	}
+
+	SetActorHiddenInGame(true);
 }

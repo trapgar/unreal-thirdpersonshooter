@@ -4,10 +4,18 @@
 
 #include "GameplayTagContainer.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "NativeGameplayTags.h"
 
 #include "PhysicalMaterialWithTags.generated.h"
 
 class UObject;
+
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Zone_Appendage);
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Zone_WeakSpot);
+
+
+// --------------------------------------------------------
+
 
 /**
  * UPhysicalMaterialWithTags

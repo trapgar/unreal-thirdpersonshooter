@@ -4,6 +4,7 @@
 
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Abilities/GameplayAbility.h"
 
 #include "RangedWeaponProjectile.generated.h"
 
@@ -43,12 +44,22 @@ public:
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
 	// Maximum lifetime of the projectile.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (ForceUnits="s"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ForceUnits="s"))
 	float MaxLifeTime = 5.0f;
 
 	// Initial speed of the projectile.
-	UPROPERTY(BlueprintReadWrite, Meta = (ExposeOnSpawn = true))
-	float InitialSpeed = 0.0;
+	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
+	float InitialSpeed = 0.0f;
+
+	// Initial speed of the projectile.
+	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
+	TSubclassOf<UGameplayEffect> DamageType;
+
+	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
+	float SingleBulletDamage;
+
+	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
+	FRuntimeFloatCurve DistanceDamageFalloff;
 
 private:
 

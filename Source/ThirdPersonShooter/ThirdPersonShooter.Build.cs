@@ -31,12 +31,17 @@ public class ThirdPersonShooter : ModuleRules
 			"GameplayMessageRuntime",
 			"GameplayMessageNodes",
 			"ModularGameplay",
-			"GameFeatures"
+			"GameFeatures",
+			"Niagara",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
 			"InputCore",
+			"DeveloperSettings",
 			"UMG",
+			// "CommonUI",
+			// "CommonInput",
+			// "GameSettings",
 		});
 
 		// Uncomment if you are using Slate UI
@@ -46,5 +51,6 @@ public class ThirdPersonShooter : ModuleRules
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+		SetupIrisSupport(Target);
 	}
 }

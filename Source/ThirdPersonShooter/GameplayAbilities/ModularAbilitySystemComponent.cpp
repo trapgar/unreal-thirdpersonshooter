@@ -1,4 +1,4 @@
-#include "Ability/ModularAbilitySystemComponent.h"
+#include "GameplayAbilities/ModularAbilitySystemComponent.h"
 
 #include "CustomLogChannels.h"
 
@@ -335,9 +335,18 @@ void UModularAbilitySystemComponent::HandleControllerChanged()
 	}
 }
 
-void UModularAbilitySystemComponent::GetAbilityTargetData(const FGameplayAbilitySpecHandle AbilityHandle, FGameplayAbilityActivationInfo ActivationInfo, FGameplayAbilityTargetDataHandle& OutTargetDataHandle)
+void UModularAbilitySystemComponent::GetAbilityTargetData(const FGameplayAbilitySpecHandle AbilityHandle,
+	FGameplayAbilityActivationInfo ActivationInfo,
+	FGameplayAbilityTargetDataHandle& OutTargetDataHandle
+)
 {
-	TSharedPtr<FAbilityReplicatedDataCache> ReplicatedData = AbilityTargetDataMap.Find(FGameplayAbilitySpecHandleAndPredictionKey(AbilityHandle, ActivationInfo.GetActivationPredictionKey()));
+	TSharedPtr<FAbilityReplicatedDataCache> ReplicatedData = AbilityTargetDataMap.Find(
+		FGameplayAbilitySpecHandleAndPredictionKey(
+			AbilityHandle,
+			ActivationInfo.GetActivationPredictionKey()
+		)
+	);
+
 	if (ReplicatedData.IsValid())
 	{
 		OutTargetDataHandle = ReplicatedData->TargetData;

@@ -15,6 +15,7 @@ class AActor;
 class AController;
 class APlayerController;
 class FText;
+class IModularAbilityAttenuatorInterface;
 class UAnimMontage;
 class UModularAbilityCost;
 class UAbilitySystemComponent;
@@ -135,10 +136,29 @@ protected:
 	// virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
-	// virtual FGameplayEffectContextHandle MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const override;
+	virtual FGameplayEffectContextHandle MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const override;
 	// virtual void ApplyAbilityTagsToGameplayEffectSpec(FGameplayEffectSpec& Spec, FGameplayAbilitySpec* AbilitySpec) const override;
 	// virtual bool DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	//~End of UGameplayAbility interface
+
+protected:
+
+	virtual void GetAbilitySourceAsAttenuator(FGameplayAbilitySpecHandle Handle,
+		const FGameplayAbilityActorInfo* ActorInfo,
+		float& OutSourceLevel, const IModularAbilityAttenuatorInterface*& OutAbilitySource,
+		AActor*& OutEffectCauser) const
+	{
+		OutSourceLevel = 0.0f;
+		OutAbilitySource = nullptr;
+		OutEffectCauser = nullptr;
+
+		OutEffectCauser = ActorInfo->AvatarActor.Get();
+
+		// If we were added by something that's an ability info source, use it
+		UObject* SourceObject = GetSourceObject(Handle, ActorInfo);
+
+		OutAbilitySource = Cast<IModularAbilityAttenuatorInterface>(SourceObject);
+	};
 
 protected:
 

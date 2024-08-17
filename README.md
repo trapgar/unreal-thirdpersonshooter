@@ -6,16 +6,17 @@ Also trying to use C++ over blueprints to make source compare easier.
 
 ## Getting Started
 1. Download & install [Visual Studio Code](https://code.visualstudio.com/download) and [Unreal Engine](https://www.unrealengine.com/en-US/download)
-2. Clone the repo
-3. Launch the Unreal editor by double+clicking on the `.uproject` file in `File Explorer` or by launching the editor directly
-4. `Edit > Editor Preferences... > Source Code`
-5. Change the `Source Code Editor` to `Visual Studio Code`
-6. `Tools > Refresh Visual Studio Code Project`
-7. Close out the Unreal editor
-8. Open the newly created `.code-workspace` file in the root of the project
-9. `Ctrl+Shift+D` to show the `Run and Debug` clover
-10. Select `Launch ThirdPersonShooterEditor (Development)`
-11. `F5` to launch the Unreal editor with the VS Code debugger attached!
+2. Install Git LFS with `> git lfs install`
+3. Clone the repo
+4. Launch the Unreal editor by double+clicking on the `.uproject` file in `File Explorer` or by launching the editor directly
+5. `Edit > Editor Preferences... > Source Code`
+6. Change the `Source Code Editor` to `Visual Studio Code`
+7. `Tools > Refresh Visual Studio Code Project`
+8. Close out the Unreal editor
+9. Open the newly created `.code-workspace` file in the root of the project
+10. `Ctrl+Shift+D` to show the `Run and Debug` clover
+11. Select `Launch ThirdPersonShooterEditor (Development)`
+12. `F5` to launch the Unreal editor with the VS Code debugger attached!
 
 ### Tips and Tricks
 C++ intellisense is borderline-useless with Unreal projects. Might be size, idk. Anyways, I mainly use `Search (Ctrl+F)` to find variable references.
@@ -26,7 +27,7 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - figure out how to attach components at runtime based on Game Mode or something...
     - AbilitySystemComponent w/ default ability set for the character
 - add a silhouette to the gunrange for testing
-- spawn decals & sparks on bullet impact
+- need to add the `ContextEffectsLibrary` & `ContextEffectsComponent` to be able to play footsteps
 
 ## Developer Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file

@@ -23,19 +23,19 @@ struct INVENTORYANDEQUIPMENTRUNTIME_API FWeaponStatsChangedMessage
 	TObjectPtr<UEquipmentItemInstance> Owner = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category=Weapon)
-	float TimeLastFired;
+	float TimeLastFired = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category=Weapon)
-	float TimeLastEquipped;
+	float TimeLastEquipped = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category=Weapon)
-	float SpreadAngle;
+	float SpreadAngle = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category=Weapon)
-	float SpreadAngleMultiplier;
+	float SpreadAngleMultiplier = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category=Weapon)
-	bool bHas1InTheChamber;
+	bool bHas1InTheChamber = false;
 };
 
 

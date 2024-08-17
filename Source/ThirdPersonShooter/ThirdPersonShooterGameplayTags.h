@@ -8,7 +8,7 @@ namespace ThirdPersonShooterGameplayTags
 {
 	THIRDPERSONSHOOTER_API	FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString = false);
 
-	// Declare all of the custom native tags that Lyra will use
+	// Declare all of the custom native tags that this game will use
 	THIRDPERSONSHOOTER_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_IsDead);
 	THIRDPERSONSHOOTER_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cooldown);
 	THIRDPERSONSHOOTER_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cost);
