@@ -4,6 +4,7 @@
 
 #include "Abilities/GameplayAbility.h"
 #include "AbilitySystemComponent.h"
+#include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
 
 #include "ModularGameplayAbility.generated.h"
 

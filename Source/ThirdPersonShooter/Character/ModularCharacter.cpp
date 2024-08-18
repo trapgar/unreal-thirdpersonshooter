@@ -2,7 +2,6 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameplayAbilities/ModularAbilitySystemComponent.h"
-#include "GameplayAbilities/Attributes/PawnCombatSet.h"
 #include "GameplayAbilities/Attributes/PawnHealthSet.h"
 #include "ModularCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -19,6 +18,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_AvatarUnpossessed, "GameplayEven
 class UEnhancedInputLocalPlayerSubsystem;
 
 static FName NAME_CustomCharacterCollisionProfile_Capsule(TEXT("Pawn_Capsule"));
+static FName NAME_CustomCharacterCollisionProfile_Mesh(TEXT("Pawn_Mesh"));
 
 AModularCharacter::AModularCharacter(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -31,6 +31,10 @@ AModularCharacter::AModularCharacter(const FObjectInitializer &ObjectInitializer
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
 	check(CapsuleComp);
 	CapsuleComp->SetCollisionProfileName(NAME_CustomCharacterCollisionProfile_Capsule);
+
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	check(MeshComp);
+	MeshComp->SetCollisionProfileName(NAME_CustomCharacterCollisionProfile_Mesh);
 
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	check(Movement);
@@ -46,7 +50,6 @@ AModularCharacter::AModularCharacter(const FObjectInitializer &ObjectInitializer
 	GameplayInputComponent = CreateDefaultSubobject<UGameplayInputComponent>(TEXT("GameplayInputComponent"));
 
 	HealthSet = CreateDefaultSubobject<UPawnHealthSet>(TEXT("HealthSet"));
-	CombatSet = CreateDefaultSubobject<UPawnCombatSet>(TEXT("CombatSet"));
 
 	HealthComponent = CreateDefaultSubobject<UPawnHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->OnDeathStarted.AddDynamic(this, &ThisClass::OnDeathStarted);

@@ -23,7 +23,7 @@ THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Zone_WeakSpot
  * Physical material that lets us attach tags so we can later use it for gameplay (e.g.: `Gameplay.Zone.WeakSpot`).
  */
 UCLASS()
-class UPhysicalMaterialWithTags : public UPhysicalMaterial
+class THIRDPERSONSHOOTER_API UPhysicalMaterialWithTags : public UPhysicalMaterial
 {
 	GENERATED_BODY()
 

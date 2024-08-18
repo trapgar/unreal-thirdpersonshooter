@@ -145,16 +145,7 @@ UEquipmentManagerComponent::UEquipmentManagerComponent(const FObjectInitializer&
 	, EquipmentList(this)
 {
 	SetIsReplicatedByDefault(true);
-	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.bStartWithTickEnabled = true;
-}
-
-void UEquipmentManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	for (UEquipmentItemInstance* Instance : EquipmentList.GetAllItems())
-	{
-		Instance->Tick(DeltaTime);
-	}
+	bWantsInitializeComponent = true;
 }
 
 void UEquipmentManagerComponent::UninitializeComponent()

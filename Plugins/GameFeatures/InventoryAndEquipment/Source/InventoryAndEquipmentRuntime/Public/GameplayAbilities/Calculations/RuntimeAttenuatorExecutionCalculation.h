@@ -15,7 +15,7 @@ class UObject;
  *	Execution used by gameplay effects to apply damage to the health attributes.
  */
 UCLASS(meta=(DisplayName="Pawn Damage Calculator With Runtime Attenuation"))
-class URuntimeAttenuatorExecutionCalculation : public UGameplayEffectExecutionCalculation
+class INVENTORYANDEQUIPMENTRUNTIME_API URuntimeAttenuatorExecutionCalculation : public UGameplayEffectExecutionCalculation
 {
 	GENERATED_BODY()
 

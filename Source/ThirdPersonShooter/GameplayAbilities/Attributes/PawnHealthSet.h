@@ -27,7 +27,7 @@ struct FGameplayEffectModCallbackData;
  *	Attribute examples include: health, shields, and resistances.
  */
 UCLASS(BlueprintType)
-class UPawnHealthSet : public UPawnAttributeSet
+class THIRDPERSONSHOOTER_API UPawnHealthSet : public UPawnAttributeSet
 {
 	GENERATED_BODY()
 

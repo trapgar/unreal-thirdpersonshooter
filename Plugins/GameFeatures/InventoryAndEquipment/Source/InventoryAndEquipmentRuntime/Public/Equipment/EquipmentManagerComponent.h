@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayAbilities/Attributes/PawnCombatSet.h"
 // #include "Net/Serialization/FastArraySerializer.h"
 #include "EquipmentItemDefinition.h"
 #include "EquipmentItemInstance.h"
@@ -147,8 +149,6 @@ class INVENTORYANDEQUIPMENTRUNTIME_API UEquipmentManagerComponent : public UActo
 public:
 	UEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	// Adds an equipment item to the inventory
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Equipment)
 	UEquipmentItemInstance* AddItem(UEquipmentItemDefinition* EquipmentDefinition) { return AddItem(EquipmentDefinition, nullptr); };
@@ -175,14 +175,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
 	TArray<UEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<UEquipmentItemInstance> InstanceType) const;
 
-protected:
+public:
+	//~UActorComponent interface
+	virtual void InitializeComponent() override
+	{
+		if (IAbilitySystemInterface* WithAbilities = Cast<IAbilitySystemInterface>(GetOwner()))
+		{
+			if (UAbilitySystemComponent* ASC = WithAbilities->GetAbilitySystemComponent())
+			{
+				ASC->AddSet<UPawnCombatSet>();
+			}
+		}
+
+		Super::InitializeComponent();
+	};
+	virtual void UninitializeComponent() override;
+	virtual void ReadyForReplication() override;
+	//~End of UActorComponent interface
 
 	//~UObject interface
-	virtual void UninitializeComponent() override;
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
-	virtual void ReadyForReplication() override;
 	//~End of UObject interface
 
+protected:
 	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipmentItemAdded"))
 	void K2_OnEquipmentItemAdded(UEquipmentItemInstance* EquipmentItemInstance);
 

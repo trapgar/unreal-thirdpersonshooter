@@ -126,7 +126,7 @@ FGameplayEffectContextHandle UModularGameplayAbility::MakeEffectContext(const FG
 	UObject* SourceObject = GetSourceObject(Handle, ActorInfo);
 	AActor* Instigator = ActorInfo ? ActorInfo->OwnerActor.Get() : nullptr;
 
-	EffectContext->SetAbilitySource(Attenuator, SourceLevel);
+	EffectContext->SetAbilityAttenuator(Attenuator, SourceLevel);
 	EffectContext->AddInstigator(Instigator, EffectCauser);
 	EffectContext->AddSourceObject(SourceObject);
 

@@ -45,23 +45,3 @@ namespace UE::Net
 }
 #endif
 
-void FModularGameplayEffectContext::SetAbilitySource(const IModularAbilityAttenuatorInterface* InObject, float InSourceLevel)
-{
-	AbilitySourceObject = MakeWeakObjectPtr(Cast<const UObject>(InObject));
-	//SourceLevel = InSourceLevel;
-}
-
-const IModularAbilityAttenuatorInterface* FModularGameplayEffectContext::GetAbilitySource() const
-{
-	return Cast<IModularAbilityAttenuatorInterface>(AbilitySourceObject.Get());
-}
-
-const UPhysicalMaterial* FModularGameplayEffectContext::GetPhysicalMaterial() const
-{
-	if (const FHitResult* HitResultPtr = GetHitResult())
-	{
-		return HitResultPtr->PhysMaterial.Get();
-	}
-	return nullptr;
-}
-

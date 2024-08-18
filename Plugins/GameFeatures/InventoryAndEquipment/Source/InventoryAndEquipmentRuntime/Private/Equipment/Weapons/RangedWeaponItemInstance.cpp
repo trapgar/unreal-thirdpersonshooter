@@ -3,6 +3,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(RangedWeaponItemInstance)
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Weapon_Message_StatsChanged, "Equipment.Weapon.Message.StatsChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Weapon_MagazineSize, "Equipment.Weapon.MagazineSize");
 
 void URangedWeaponItemInstance::OnEquipped()
 {

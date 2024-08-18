@@ -5,7 +5,6 @@
 #include "Inventory/InventoryItemInstance.h"
 #include "Equipment/EquipmentItemInstance.h"
 #include "Equipment/Weapons/RangedWeaponItemInstance.h"
-#include "Equipment/EquipmentFragment_RangedWeaponStats.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(WeaponReticleWidgetBase)
 

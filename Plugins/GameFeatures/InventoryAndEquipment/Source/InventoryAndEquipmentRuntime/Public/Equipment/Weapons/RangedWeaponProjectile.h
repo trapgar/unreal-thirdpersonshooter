@@ -5,11 +5,16 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Abilities/GameplayAbility.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
+#include "GameplayAbilities/ModularGameplayEffectContext.h"
 
 #include "RangedWeaponProjectile.generated.h"
 
 class UProjectileMovementComponent;
 class UCapsuleComponent;
+class URangedWeaponItemInstance;
 
 /**
  * ARangedWeaponProjectile
@@ -28,9 +33,7 @@ public:
 public:
 
 	void OnConstruction(const FTransform& Transform) override;
-
 	void BeginPlay() override;
-
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
@@ -43,23 +46,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Projectile Movement Component"))
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
-	// Maximum lifetime of the projectile.
+	// Maximum lifetime of the projectile in seconds - actor will be destroyed after this if it hasn't hit anything yet.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ForceUnits="s"))
 	float MaxLifeTime = 5.0f;
 
-	// Initial speed of the projectile.
-	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
-	float InitialSpeed = 0.0f;
+	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn = true))
+	URangedWeaponItemInstance* Weapon;
 
-	// Initial speed of the projectile.
-	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
-	TSubclassOf<UGameplayEffect> DamageType;
-
-	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
-	float SingleBulletDamage;
-
-	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true))
-	FRuntimeFloatCurve DistanceDamageFalloff;
+public:
+	// Creates a new effect context for the projectile, where the ranged weapon is the ability source for attenuation.
+	UFUNCTION(BlueprintCallable)
+	FGameplayEffectContextHandle MakeEffectContext() const;
 
 private:
 

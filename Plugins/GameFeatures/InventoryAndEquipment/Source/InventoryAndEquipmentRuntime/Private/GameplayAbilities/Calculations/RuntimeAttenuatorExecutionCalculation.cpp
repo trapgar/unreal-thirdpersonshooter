@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "RuntimeAttenuatorExecutionCalculation.h"
+#include "GameplayAbilities/Calculations/RuntimeAttenuatorExecutionCalculation.h"
 #include "GameplayAbilities/Attributes/PawnHealthSet.h"
 #include "GameplayAbilities/Attributes/PawnCombatSet.h"
 #include "GameplayAbilities/ModularGameplayEffectContext.h"
@@ -11,11 +11,11 @@
 
 struct FDamageStatics
 {
-	FGameplayEffectAttributeCaptureDefinition BaseDamageDef;
+	FGameplayEffectAttributeCaptureDefinition DamageDef;
 
 	FDamageStatics()
 	{
-		BaseDamageDef = FGameplayEffectAttributeCaptureDefinition(UPawnCombatSet::GetBaseDamageAttribute(), EGameplayEffectAttributeCaptureSource::Source, true);
+		DamageDef = FGameplayEffectAttributeCaptureDefinition(UPawnCombatSet::GetDamageAttribute(), EGameplayEffectAttributeCaptureSource::Source, true);
 	}
 };
 
@@ -28,7 +28,7 @@ static FDamageStatics& DamageStatics()
 
 URuntimeAttenuatorExecutionCalculation::URuntimeAttenuatorExecutionCalculation()
 {
-	RelevantAttributesToCapture.Add(DamageStatics().BaseDamageDef);
+	RelevantAttributesToCapture.Add(DamageStatics().DamageDef);
 }
 
 void URuntimeAttenuatorExecutionCalculation::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -45,9 +45,7 @@ void URuntimeAttenuatorExecutionCalculation::Execute_Implementation(const FGamep
 	EvaluateParameters.SourceTags = SourceTags;
 	EvaluateParameters.TargetTags = TargetTags;
 
-	float BaseDamage = 0.0f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().BaseDamageDef, EvaluateParameters, BaseDamage);
-
+	float BaseDamage = Spec.GetLevel();
 	const AActor* EffectCauser = TypedContext->GetEffectCauser();
 	const FHitResult* HitActorResult = TypedContext->GetHitResult();
 

@@ -82,10 +82,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<const class UPawnHealthSet> HealthSet;
 
-	// Combat attribute set used by this actor.
-	UPROPERTY()
-	TObjectPtr<const class UPawnCombatSet> CombatSet;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Health", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPawnHealthComponent> HealthComponent;
 

@@ -13,7 +13,7 @@ class UObject;
 class UPhysicalMaterial;
 
 USTRUCT()
-struct FModularGameplayEffectContext : public FGameplayEffectContext
+struct THIRDPERSONSHOOTER_API FModularGameplayEffectContext : public FGameplayEffectContext
 {
 	GENERATED_BODY()
 
@@ -28,13 +28,16 @@ struct FModularGameplayEffectContext : public FGameplayEffectContext
 	}
 
 	/** Returns the wrapped FModularGameplayEffectContext from the handle, or nullptr if it doesn't exist or is the wrong type */
-	static THIRDPERSONSHOOTER_API FModularGameplayEffectContext* ExtractEffectContext(struct FGameplayEffectContextHandle Handle);
+	static FModularGameplayEffectContext* ExtractEffectContext(struct FGameplayEffectContextHandle Handle);
 
 	/** Sets the object used as the ability source */
-	void SetAbilitySource(const IModularAbilityAttenuatorInterface* InObject, float InSourceLevel);
+	void SetAbilityAttenuator(const IModularAbilityAttenuatorInterface* InObject, float InSourceLevel)
+	{
+		AbilityAttenuator = MakeWeakObjectPtr(Cast<const UObject>(InObject));
+	};
 
 	/** Returns the ability source interface associated with the source object. Only valid on the authority. */
-	const IModularAbilityAttenuatorInterface* GetAbilitySource() const;
+	const IModularAbilityAttenuatorInterface* GetAbilitySource() const { return Cast<IModularAbilityAttenuatorInterface>(AbilityAttenuator.Get());};
 
 	virtual FGameplayEffectContext* Duplicate() const override
 	{
@@ -57,7 +60,14 @@ struct FModularGameplayEffectContext : public FGameplayEffectContext
 	virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) override;
 
 	/** Returns the physical material from the hit result if there is one */
-	const UPhysicalMaterial* GetPhysicalMaterial() const;
+	const UPhysicalMaterial* GetPhysicalMaterial() const
+	{
+		if (const FHitResult* HitResultPtr = GetHitResult())
+		{
+			return HitResultPtr->PhysMaterial.Get();
+		}
+		return nullptr;
+	};
 
 public:
 	/** ID to allow the identification of multiple bullets that were part of the same cartridge */
@@ -67,7 +77,7 @@ public:
 protected:
 	/** Ability Source object (should implement IModularAbilityAttenuatorInterface). NOT replicated currently */
 	UPROPERTY()
-	TWeakObjectPtr<const UObject> AbilitySourceObject;
+	TWeakObjectPtr<const UObject> AbilityAttenuator;
 };
 
 template<>
@@ -79,4 +89,3 @@ struct TStructOpsTypeTraits<FModularGameplayEffectContext> : public TStructOpsTy
 		WithCopy = true
 	};
 };
-

@@ -1,4 +1,4 @@
-#include "Abilities/GameplayAbility_RangedWeapon_Fire.h"
+#include "GameplayAbilities/GameplayAbility_RangedWeapon_Fire.h"
 #include "Physics/CustomCollisionChannels.h"
 #include "Inventory/InventoryItemInstance.h"
 #include "Equipment/EquipmentManagerComponent.h"
@@ -25,10 +25,6 @@ void UGameplayAbility_RangedWeapon_Fire::OnGiveAbility(const FGameplayAbilityAct
 	UEquipmentItemDefinition* Definition = Equipment->GetItemDef();
 
 	check(Definition);
-
-	RangedWeaponStats = Definition->FindFragmentByClass<UEquipmentFragment_RangedWeaponStats>();
-
-	check(RangedWeaponStats);
 
 	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 
@@ -69,7 +65,8 @@ void UGameplayAbility_RangedWeapon_Fire::ActivateAbility(const FGameplayAbilityS
 
 		UInventoryItemInstance* Item = GetAssociatedItem();
 		bHas1InTheChamber = Item->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition) > 0;
-		AccumulatedSpreadAngle += RangedWeaponStats->SpreadAngleAccumulationPerShot;
+		URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
+		AccumulatedSpreadAngle += RangedWeapon->SpreadAngleAccumulationPerShot;
 
 		OnHandleUpdateWeaponStatsChanged();
 
@@ -94,6 +91,7 @@ void UGameplayAbility_RangedWeapon_Fire::EndAbility(const FGameplayAbilitySpecHa
 
 	if (!bWasCancelled)
 	{
+		URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 		UWorld* World = GetWorld();
 		// NOTE - timers are invalidated implicitly on ActivateAbility, so we need to set them again
 		World->GetTimerManager().SetTimer(TimerHandleSpread, this, &UGameplayAbility_RangedWeapon_Fire::OnHandleUpdateWeaponStatsChanged, 0.1f, true);
@@ -102,7 +100,7 @@ void UGameplayAbility_RangedWeapon_Fire::EndAbility(const FGameplayAbilitySpecHa
 			&UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay,
 			// 60s / rounds per minute (e.g.: 800rpm) * 1.2 == min time to pass before the accumulated spread decays
 			// Would *like* this to just be 60/rpm, but depending on timing the decay may occur before the activation resets the handle
-			60 / RangedWeaponStats->RoundsPerMinute * 1.2f,
+			60 / RangedWeapon->RoundsPerMinute * 1.2f,
 			false
 		);
 	}
@@ -126,7 +124,6 @@ FTransform UGameplayAbility_RangedWeapon_Fire::GetBaseProjectileSpawnTransform(f
 	FVector EndTrace = ViewLocation + UKismetMathLibrary::GetForwardVector(ViewRotation) * MaxTraceDistanceInCm;
 	ECollisionChannel TraceChannel = Custom_TraceChannel_Projectile;
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(GetBaseProjectileSpawnTransform), /*bTraceComplex=*/ true, /*IgnoreActor=*/ Pawn);
-	TraceParams.bReturnPhysicalMaterial = true;
 
 	if (Radius > 0.0f)
 	{
@@ -181,7 +178,8 @@ FRotator UGameplayAbility_RangedWeapon_Fire::GetProjectileSpreadRotator() const
 	APawn* Pawn = GetPawnFromActorInfo();
 	check(Pawn);
 
-	float BaseSpread = RangedWeaponStats->SpreadAngleBase;
+	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
+	float BaseSpread = RangedWeapon->SpreadAngleBase;
 	float Multiplier = GetSpreadAngleMultiplier();
 	float Accumulated = AccumulatedSpreadAngle;
 	float Max = (BaseSpread + Accumulated) * Multiplier;
@@ -197,6 +195,7 @@ float UGameplayAbility_RangedWeapon_Fire::GetSpreadAngleMultiplier() const
 {
 	float RunningMultiplier = 0.0f;
 
+	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 	// See if we are moving, and if so, apply the penalty
 	APawn* Pawn = GetPawnFromActorInfo();
 	UCharacterMovementComponent* CharMovementComp = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
@@ -205,18 +204,18 @@ float UGameplayAbility_RangedWeapon_Fire::GetSpreadAngleMultiplier() const
 	// TODO: want "close" to 0 speed to count as standing still, but idk what uom this is - need to check (think lyra has 80.0f?)
 	if (PawnSpeed > 10.0f)
 	{
-		RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplier_Moving;
+		RunningMultiplier += RangedWeapon->SpreadAngleMultiplier_Moving;
 	}
 
 	if (IGameplayTagAssetInterface* Taggable = Cast<IGameplayTagAssetInterface>(Pawn))
 	{
 		if (Taggable->HasMatchingGameplayTag(TAG_Movement_AimingDownSights))
 		{
-			RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplier_AimDownSight;
+			RunningMultiplier += RangedWeapon->SpreadAngleMultiplier_AimDownSight;
 		}
 		else
 		{
-			RunningMultiplier += RangedWeaponStats->SpreadAngleMultiplier_HipFire;
+			RunningMultiplier += RangedWeapon->SpreadAngleMultiplier_HipFire;
 		}
 	}
 
@@ -226,7 +225,7 @@ float UGameplayAbility_RangedWeapon_Fire::GetSpreadAngleMultiplier() const
 void UGameplayAbility_RangedWeapon_Fire::OnHandleUpdateWeaponStatsChanged()
 {
 	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
-	float CurrentSpreadAngle = RangedWeaponStats->SpreadAngleBase + AccumulatedSpreadAngle;
+	float CurrentSpreadAngle = RangedWeapon->SpreadAngleBase + AccumulatedSpreadAngle;
 	float CurrentSpreadMultiplier = GetSpreadAngleMultiplier();
 
 	const bool bNothingHasChanged = CurrentSpreadAngle == RangedWeapon->GetSpreadAngle() &&
@@ -255,9 +254,10 @@ void UGameplayAbility_RangedWeapon_Fire::OnHandleUpdateWeaponStatsChanged()
 
 void UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay()
 {
+	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 	UWorld* World = GetWorld();
 	const float DeltaSeconds = World->TimeSince(FMath::Max(TimeLastFired, TimeSinceLastDecayed));
-	const float Decay = RangedWeaponStats->SpreadAngleAccumulationDecayPerSecond;
+	const float Decay = RangedWeapon->SpreadAngleAccumulationDecayPerSecond;
 
 	AccumulatedSpreadAngle = FMath::Max(0.0f, AccumulatedSpreadAngle - Decay / DeltaSeconds);
 

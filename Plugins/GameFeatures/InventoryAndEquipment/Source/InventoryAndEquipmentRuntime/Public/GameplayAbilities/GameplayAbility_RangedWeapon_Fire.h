@@ -1,9 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayAbility_FromEquipment.h"
+#include "GameplayAbility_FromRangedWeapon.h"
 #include "Equipment/Weapons/RangedWeaponItemInstance.h"
-#include "Equipment/EquipmentFragment_RangedWeaponStats.h"
 
 #include "GameplayAbility_RangedWeapon_Fire.generated.h"
 
@@ -13,7 +12,7 @@
  * Gameplay ability that handles ranged weapon firing with spread, aiming, etc.
  */
 UCLASS()
-class INVENTORYANDEQUIPMENTRUNTIME_API UGameplayAbility_RangedWeapon_Fire : public UGameplayAbility_FromEquipment
+class INVENTORYANDEQUIPMENTRUNTIME_API UGameplayAbility_RangedWeapon_Fire : public UGameplayAbility_FromRangedWeapon
 {
 	GENERATED_BODY()
 
@@ -45,9 +44,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon|Accuracy")
 	virtual FRotator GetProjectileSpreadRotator() const;
 
-	UFUNCTION(BlueprintCallable, Category="Ability|Weapon")
-	URangedWeaponItemInstance* GetAssociatedWeapon() const { return Cast<URangedWeaponItemInstance>(GetAssociatedEquipment()); }
-
 private:
 	// Returns the spread angle multiplier that should be applied to the base spread angle
 	float GetSpreadAngleMultiplier() const;
@@ -60,8 +56,6 @@ private:
 
 	FTimerHandle TimerHandleSpread;
 	FTimerHandle TimerHandleSpreadDecay;
-
-	const UEquipmentFragment_RangedWeaponStats* RangedWeaponStats;
 
 	// World time that this weapon was last fired
 	// This is used by in the spread calculation

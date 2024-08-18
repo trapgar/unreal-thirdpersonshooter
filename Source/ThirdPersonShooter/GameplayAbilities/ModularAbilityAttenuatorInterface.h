@@ -12,12 +12,12 @@ struct FGameplayTagContainer;
 
 /** Base interface for anything acting as a ability calculation source */
 UINTERFACE()
-class UModularAbilityAttenuatorInterface : public UInterface
+class THIRDPERSONSHOOTER_API UModularAbilityAttenuatorInterface : public UInterface
 {
 	GENERATED_UINTERFACE_BODY()
 };
 
-class IModularAbilityAttenuatorInterface
+class THIRDPERSONSHOOTER_API IModularAbilityAttenuatorInterface
 {
 	GENERATED_IINTERFACE_BODY()
 
