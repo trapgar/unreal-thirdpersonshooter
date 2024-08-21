@@ -13,7 +13,9 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomAssetManager)
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 static FAutoConsoleCommand CVarDumpLoadedAssets(
 	TEXT("AssetManager.DumpLoadedAssets"),
@@ -21,12 +23,16 @@ static FAutoConsoleCommand CVarDumpLoadedAssets(
 	FConsoleCommandDelegate::CreateStatic(UCustomAssetManager::DumpLoadedAssets)
 );
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 #define STARTUP_JOB_WEIGHTED(JobFunc, JobWeight) StartupJobs.Add(FCustomAssetManagerStartupJob(#JobFunc, [this](const FCustomAssetManagerStartupJob& StartupJob, TSharedPtr<FStreamableHandle>& LoadHandle){JobFunc;}, JobWeight))
 #define STARTUP_JOB(JobFunc) STARTUP_JOB_WEIGHTED(JobFunc, 1.f)
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 UCustomAssetManager::UCustomAssetManager()
 {

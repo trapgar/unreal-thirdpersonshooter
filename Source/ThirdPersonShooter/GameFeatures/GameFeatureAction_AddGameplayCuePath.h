@@ -8,6 +8,8 @@
 
 /**
  * GameFeatureAction responsible for adding gameplay cue paths to the gameplay cue manager.
+ * 
+ * `UCustomGameplayCueManager`, `UCustomGameFeaturePolicy` & `CustomAssetManager` *must* all be utilized for this to work.
  *
  * @see UAbilitySystemGlobals::GameplayCueNotifyPaths
  */
