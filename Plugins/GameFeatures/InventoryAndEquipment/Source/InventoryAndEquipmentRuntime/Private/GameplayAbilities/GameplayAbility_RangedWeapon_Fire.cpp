@@ -144,9 +144,9 @@ FTransform UGameplayAbility_RangedWeapon_Fire::GetBaseProjectileSpawnTransform(f
 		for (FHitResult& CurHitResult : HitResults)
 		{
 			auto Pred = [&CurHitResult](const FHitResult& Other)
-				{
-					return Other.HitObjectHandle == CurHitResult.HitObjectHandle;
-				};
+			{
+				return Other.HitObjectHandle == CurHitResult.HitObjectHandle;
+			};
 
 			if (!HitResults.ContainsByPredicate(Pred))
 			{

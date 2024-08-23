@@ -3,25 +3,26 @@
 #pragma once
 
 #include "Components/GameFrameworkComponent.h"
+#include "NativeGameplayTags.h"
 
 #include "PawnHealthComponent.generated.h"
 
 class UPawnHealthComponent;
-
 class UModularAbilitySystemComponent;
 class UPawnHealthSet;
 class UObject;
 struct FFrame;
 struct FGameplayEffectSpec;
 
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_Elimination);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPawnHealth_DeathEvent, AActor*, OwningActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FPawnHealth_AttributeChanged, UPawnHealthComponent*, HealthComponent, float, OldValue, float, NewValue, AActor*, Instigator);
-
 
 /**
  * EPlayerDeathState
  *
- *	Defines current state of death.
+ * Defines current state of death.
  */
 UENUM(BlueprintType)
 enum class EPlayerDeathState : uint8
@@ -35,7 +36,7 @@ enum class EPlayerDeathState : uint8
 /**
  * UPawnHealthComponent
  *
- *	An actor component used to handle anything related to health.
+ * An actor component used to handle anything related to health.
  */
 UCLASS(Blueprintable, Meta=(BlueprintSpawnableComponent))
 class THIRDPERSONSHOOTER_API UPawnHealthComponent : public UGameFrameworkComponent

@@ -4,8 +4,6 @@
 
 #include "GameplayAbilities/Attributes/PawnAttributeSet.h"
 #include "CustomLogChannels.h"
-// #include "System/LyraAssetManager.h"
-// #include "System/LyraGameData.h"
 #include "ThirdPersonShooterGameplayTags.h"
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffectExtension.h"
@@ -19,8 +17,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PawnHealthComponent)
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Game_Elimination_Message, "Game.Elimination.Message");
-
+UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Elimination, "Gameplay.Message.Elimination");
 
 UPawnHealthComponent::UPawnHealthComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -169,7 +166,7 @@ void UPawnHealthComponent::HandleOutOfHealth(AActor* DamageInstigator, AActor* D
 		// Send a standardized verb message that other systems can observe
 		{
 			FGameplayVerbMessage Message;
-			Message.Verb = TAG_Game_Elimination_Message;
+			Message.Verb = TAG_Gameplay_Message_Elimination;
 			Message.Instigator = DamageInstigator;
 			Message.InstigatorTags = *DamageEffectSpec->CapturedSourceTags.GetAggregatedTags();
 			Message.Target = UGameplayVerbMessageHelpers::GetPlayerStateFromObject(AbilitySystemComponent->GetAvatarActor());
