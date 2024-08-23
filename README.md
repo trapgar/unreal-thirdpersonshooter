@@ -15,7 +15,7 @@ Also trying to use C++ over blueprints to make source compare easier.
 8. Close out the Unreal editor
 9. Open the newly created `.code-workspace` file in the root of the project
 10. `Ctrl+Shift+D` to show the `Run and Debug` clover
-11. Select `Launch ThirdPersonShooterEditor (Development)`
+11. Select `▶ Launch ThirdPersonShooterEditor (Development)`
 12. `F5` to launch the Unreal editor with the VS Code debugger attached!
 
 ### Tips and Tricks
@@ -24,14 +24,13 @@ Make sure that if you're doing this globally that you toggle the `Search Details
 This will prevent Code from searching the entire Unreal Engine source, which is probably not what you want.
 
 ## Backlog
-- figure out how to attach components at runtime based on Game Mode or something...
-    - AbilitySystemComponent w/ default ability set for the character
-- add a silhouette to the gunrange for testing
+- add elimination event to gunrange silhouettes
 - need to add the `ContextEffectsLibrary` & `ContextEffectsComponent` to be able to play footsteps
 
 ## Developer Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file
     - I'm sure this is important for multiplayer, so will need to address this eventually
+    - I've fixed the linker error, but need to go back and implement the removed `FFastArraySerializer` references
 - Should the `ModularAbilitySet` replace the `InputTag` with a ref to the IA?
     - How would this affect abstract abilities like `GA_Weapon_Fire_Auto`?
 - Need to figure out how to keep track of inventory items that can vs can't stack
@@ -40,9 +39,11 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
     - `UInventoryItemDefinition`
     - `UEquipmentItemDefinition`
 
-## Open Questions
+## Question and Answer
 - What is the difference between a `GameplayCue`, and a `GameplayEvent` in terms of GameplayTags?
-    - assume `GameplayCue` 'Hey, you're supposed to do X now', and `GameplayEvent` is 'Y just happened'
+    - assume `GameplayCue` is 'Hey, you're supposed to do X now', and `GameplayEvent` is 'Y just happened'
+    > `GameplayEvents` are used by the AbilitySystemComponent to track when an ability should be triggered by a certain 'event' - see `GA_WeaponFire` listening for the `InputTag.x`
+    > `GameplayCues` are typically for the server telling the client to do some VFX/SFX thing - see the `GameplayCue` for grenades
 
 ---
 
