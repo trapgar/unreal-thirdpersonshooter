@@ -45,7 +45,9 @@ void URuntimeAttenuatorExecutionCalculation::Execute_Implementation(const FGamep
 	EvaluateParameters.SourceTags = SourceTags;
 	EvaluateParameters.TargetTags = TargetTags;
 
-	float BaseDamage = Spec.GetLevel();
+	float BaseDamage = 0.0f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().DamageDef, EvaluateParameters, BaseDamage);
+
 	const AActor* EffectCauser = TypedContext->GetEffectCauser();
 	const FHitResult* HitActorResult = TypedContext->GetHitResult();
 
