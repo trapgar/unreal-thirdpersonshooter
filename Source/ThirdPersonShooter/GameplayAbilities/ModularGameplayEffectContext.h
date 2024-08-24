@@ -69,11 +69,6 @@ struct THIRDPERSONSHOOTER_API FModularGameplayEffectContext : public FGameplayEf
 		return nullptr;
 	};
 
-public:
-	/** ID to allow the identification of multiple bullets that were part of the same cartridge */
-	UPROPERTY()
-	int32 CartridgeID = -1;
-
 protected:
 	/** Ability Source object (should implement IModularAbilityAttenuatorInterface). NOT replicated currently */
 	UPROPERTY()

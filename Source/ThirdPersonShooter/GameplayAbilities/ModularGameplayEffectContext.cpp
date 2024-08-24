@@ -30,9 +30,6 @@ bool FModularGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap
 {
 	FGameplayEffectContext::NetSerialize(Ar, Map, bOutSuccess);
 
-	// Not serialized for post-activation use:
-	// CartridgeID
-
 	return true;
 }
 

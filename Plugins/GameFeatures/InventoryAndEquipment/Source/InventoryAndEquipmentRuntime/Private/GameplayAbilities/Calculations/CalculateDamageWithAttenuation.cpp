@@ -1,13 +1,13 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GameplayAbilities/Calculations/RuntimeAttenuatorExecutionCalculation.h"
+#include "GameplayAbilities/Calculations/CalculateDamageWithAttenuation.h"
 #include "GameplayAbilities/Attributes/PawnHealthSet.h"
 #include "GameplayAbilities/Attributes/PawnCombatSet.h"
 #include "GameplayAbilities/ModularGameplayEffectContext.h"
 #include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
 #include "Engine/World.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(RuntimeAttenuatorExecutionCalculation)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(CalculateDamageWithAttenuation)
 
 struct FDamageStatics
 {
@@ -26,12 +26,12 @@ static FDamageStatics& DamageStatics()
 }
 
 
-URuntimeAttenuatorExecutionCalculation::URuntimeAttenuatorExecutionCalculation()
+UCalculateDamageWithAttenuation::UCalculateDamageWithAttenuation()
 {
 	RelevantAttributesToCapture.Add(DamageStatics().DamageDef);
 }
 
-void URuntimeAttenuatorExecutionCalculation::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
+void UCalculateDamageWithAttenuation::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
 {
 #if WITH_SERVER_CODE
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();

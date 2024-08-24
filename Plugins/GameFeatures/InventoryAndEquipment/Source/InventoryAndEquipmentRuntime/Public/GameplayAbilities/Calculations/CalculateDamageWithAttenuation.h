@@ -4,24 +4,24 @@
 
 #include "GameplayEffectExecutionCalculation.h"
 
-#include "RuntimeAttenuatorExecutionCalculation.generated.h"
+#include "CalculateDamageWithAttenuation.generated.h"
 
 class UObject;
 
 
 /**
- * URuntimeAttenuatorExecutionCalculation
+ * UCalculateDamageWithAttenuation
  *
  *	Execution used by gameplay effects to apply damage to the health attributes.
  */
-UCLASS(meta=(DisplayName="Pawn Damage Calculator With Runtime Attenuation"))
-class INVENTORYANDEQUIPMENTRUNTIME_API URuntimeAttenuatorExecutionCalculation : public UGameplayEffectExecutionCalculation
+UCLASS()
+class INVENTORYANDEQUIPMENTRUNTIME_API UCalculateDamageWithAttenuation : public UGameplayEffectExecutionCalculation
 {
 	GENERATED_BODY()
 
 public:
 
-	URuntimeAttenuatorExecutionCalculation();
+	UCalculateDamageWithAttenuation();
 
 protected:
 
