@@ -83,6 +83,10 @@
 		{
 			"Name": "ContextualAnimation",
 			"Enabled": true
+		},
+		{
+			"Name": "SoundUtilities",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

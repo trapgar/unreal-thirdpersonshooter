@@ -162,6 +162,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammunition", meta=(DisplayName="Can Hold 1 in the Chamber?"))
 	bool bCanHold1InTheChamber = true;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="GameplayCue"))
+	FGameplayTag GameplayCueToExecuteOnFire;
+
 public:
 
 	/** Returns World time that this weapon was last fired (returns 0 if never fired) */

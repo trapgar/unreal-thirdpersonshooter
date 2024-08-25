@@ -47,11 +47,15 @@ public:
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
 	// Maximum lifetime of the projectile in seconds - actor will be destroyed after this if it hasn't hit anything yet.
+	// 0.0f will never expire.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ForceUnits="s"))
 	float MaxLifeTime = 5.0f;
 
 	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn = true))
 	URangedWeaponItemInstance* Weapon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="GameplayCue"))
+	FGameplayTag GameplayCueToExecuteOnImpact;
 
 public:
 	// Creates a new effect context for the projectile, where the ranged weapon is the ability source for attenuation.
