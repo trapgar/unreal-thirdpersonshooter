@@ -176,19 +176,6 @@ public:
 	TArray<UEquipmentItemInstance*> GetEquipmentInstancesOfType(TSubclassOf<UEquipmentItemInstance> InstanceType) const;
 
 public:
-	//~UActorComponent interface
-	virtual void InitializeComponent() override
-	{
-		if (IAbilitySystemInterface* WithAbilities = Cast<IAbilitySystemInterface>(GetOwner()))
-		{
-			if (UAbilitySystemComponent* ASC = WithAbilities->GetAbilitySystemComponent())
-			{
-				ASC->AddSet<UPawnCombatSet>();
-			}
-		}
-
-		Super::InitializeComponent();
-	};
 	virtual void UninitializeComponent() override;
 	virtual void ReadyForReplication() override;
 	//~End of UActorComponent interface
