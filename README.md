@@ -38,6 +38,7 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
     - `UEquipmentConfiguration`
     - `UInventoryItemDefinition`
     - `UEquipmentItemDefinition`
+- 30000.0 cm/s is a good muzzle velocity for blaster bolts
 
 ## Question and Answer
 - What is the difference between a `GameplayCue`, and a `GameplayEvent` in terms of GameplayTags?
