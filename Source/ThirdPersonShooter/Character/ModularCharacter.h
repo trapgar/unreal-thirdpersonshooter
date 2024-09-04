@@ -4,9 +4,11 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"
-#include "GameFramework/Character.h"
-#include "Abilities/GameplayAbility.h"
+#include "ThirdPersonShooterGameplayTags.h"
 #include "Input/GameplayInputComponent.h"
+#include "Abilities/GameplayAbility.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "ModularCharacter.generated.h"
 
@@ -30,9 +32,6 @@ class THIRDPERSONSHOOTER_API AModularCharacter : public ACharacter, public IAbil
 public:
 	// Sets default values for this character's properties
 	AModularCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	//~IAbilitySystemInterface interface
 	// what is this used for?
@@ -60,8 +59,34 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void UnPossessed() override;
 
-	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
-	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override
+	{
+		Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+
+		// Remove old & add new movement mode tags
+		SetMovementModeTag(PrevMovementMode, PreviousCustomMode, /*bTagEnabled=*/false);
+		SetMovementModeTag(GetCharacterMovement()->MovementMode, GetCharacterMovement()->CustomMovementMode, /*bTagEnabled=*/true);
+	}
+	void SetMovementModeTag(EMovementMode MovementMode, uint8 CustomMovementMode, bool bTagEnabled);
+
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override
+	{
+		if (auto ASC = GetAbilitySystemComponent())
+		{
+			ASC->SetLooseGameplayTagCount(ThirdPersonShooterGameplayTags::Movement_Mode_Crouching, 1);
+		}
+
+		Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	}
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override
+	{
+		if (auto ASC = GetAbilitySystemComponent())
+		{
+			ASC->SetLooseGameplayTagCount(ThirdPersonShooterGameplayTags::Movement_Mode_Crouching, 0);
+		}
+
+		Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	}
 
 	// Begins the death sequence for the character (disables collision, disables movement, etc...)
 	UFUNCTION()

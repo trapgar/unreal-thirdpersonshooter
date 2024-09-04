@@ -34,29 +34,10 @@ void UAbilityTask_GrantNearbyInteraction::Activate()
 	UWorld* World = GetWorld();
 	World->GetTimerManager().SetTimer(QueryTimerHandle, this, &ThisClass::QueryInteractables, InteractionScanRate, true);
 	
-	FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
-	Handle_AvatarPossessed = AbilitySystemComponent->GenericGameplayEventCallbacks
-		.FindOrAdd(TAG_GameplayEvent_Possessed)
-		.AddUObject(this, &UAbilityTask_GrantNearbyInteraction::AvatarPossessed);
-	FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
-	Handle_AvatarUnpossessed = AbilitySystemComponent->GenericGameplayEventCallbacks
-		.FindOrAdd(TAG_GameplayEvent_Unpossessed)
-		.AddUObject(this, &UAbilityTask_GrantNearbyInteraction::AvatarUnpossessed);
-}
-
-void UAbilityTask_GrantNearbyInteraction::OnDestroy(bool AbilityEnded)
-{
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().ClearTimer(QueryTimerHandle);
-	}
-		
-	FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
-	AbilitySystemComponent->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Possessed), Handle_AvatarPossessed);
-	FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
-	AbilitySystemComponent->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Unpossessed), Handle_AvatarUnpossessed);
-
-	Super::OnDestroy(AbilityEnded);
+	FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
+	Handle_AvatarControllerChanged = AbilitySystemComponent->GenericGameplayEventCallbacks
+		.FindOrAdd(TAG_GameplayEvent_Pawn_ControllerChanged)
+		.AddUObject(this, &UAbilityTask_GrantNearbyInteraction::AvatarControllerChanged);
 }
 
 void UAbilityTask_GrantNearbyInteraction::AvatarPossessed(const FGameplayEventData* Payload)
@@ -73,6 +54,19 @@ void UAbilityTask_GrantNearbyInteraction::AvatarUnpossessed(const FGameplayEvent
 	{
 		World->GetTimerManager().ClearTimer(QueryTimerHandle);
 	}
+}
+
+void UAbilityTask_GrantNearbyInteraction::OnDestroy(bool AbilityEnded)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(QueryTimerHandle);
+	}
+		
+	FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
+	AbilitySystemComponent->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Pawn_ControllerChanged), Handle_AvatarControllerChanged);
+
+	Super::OnDestroy(AbilityEnded);
 }
 
 void UAbilityTask_GrantNearbyInteraction::QueryInteractables()

@@ -36,14 +36,10 @@ void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::Activate()
 	
 	if (auto ASC = AbilitySystemComponent.Get())
 	{
-		FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
-		Handle_AvatarPossessed = ASC->GenericGameplayEventCallbacks
-			.FindOrAdd(TAG_GameplayEvent_Possessed)
-			.AddUObject(this, &UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarPossessed);
-		FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
-		Handle_AvatarUnpossessed = ASC->GenericGameplayEventCallbacks
-			.FindOrAdd(TAG_GameplayEvent_Unpossessed)
-			.AddUObject(this, &UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarUnpossessed);
+		FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
+		Handle_AvatarControllerChanged = ASC->GenericGameplayEventCallbacks
+			.FindOrAdd(TAG_GameplayEvent_Pawn_ControllerChanged)
+			.AddUObject(this, &UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarControllerChanged);
 	}
 }
 
@@ -56,10 +52,8 @@ void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::OnDestroy(bool Abi
 
 	if (auto ASC = AbilitySystemComponent.Get())
 	{
-		FGameplayTag TAG_GameplayEvent_Possessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
-		ASC->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Possessed), Handle_AvatarPossessed);
-		FGameplayTag TAG_GameplayEvent_Unpossessed = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
-		ASC->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Unpossessed), Handle_AvatarUnpossessed);
+		FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
+		ASC->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Pawn_ControllerChanged), Handle_AvatarControllerChanged);
 	}
 
 	Super::OnDestroy(AbilityEnded);

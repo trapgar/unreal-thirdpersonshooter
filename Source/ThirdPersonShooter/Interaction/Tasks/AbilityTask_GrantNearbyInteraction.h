@@ -30,6 +30,18 @@ class UAbilityTask_GrantNearbyInteraction : public UAbilityTask
 
 private:
 
+	void AvatarControllerChanged(const FGameplayEventData* Payload)
+	{
+		if (Payload->OptionalObject && Payload->OptionalObject.IsA<AController>())
+		{
+			AvatarPossessed(Payload);
+		}
+		else
+		{
+			AvatarUnpossessed(Payload);
+		}
+	};
+
 	void AvatarPossessed(const FGameplayEventData* Payload);
 	void AvatarUnpossessed(const FGameplayEventData* Payload);
 
@@ -41,8 +53,7 @@ private:
 	float InteractionScanRate = 0.100;
 
 	FTimerHandle QueryTimerHandle;
-	FDelegateHandle Handle_AvatarPossessed;
-	FDelegateHandle Handle_AvatarUnpossessed;
+	FDelegateHandle Handle_AvatarControllerChanged;
 
 	TMap<FObjectKey, FGameplayAbilitySpecHandle> InteractionAbilityCache;
 };

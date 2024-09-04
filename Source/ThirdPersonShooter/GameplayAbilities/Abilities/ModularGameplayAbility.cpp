@@ -5,6 +5,9 @@
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "ModularAbilityCost.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemGlobals.h"
+#include "ThirdPersonShooterGameplayTags.h"
+#include "Physics/PhysicalMaterialWithTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularGameplayAbility)
 
@@ -131,6 +134,123 @@ FGameplayEffectContextHandle UModularGameplayAbility::MakeEffectContext(const FG
 	EffectContext->AddSourceObject(SourceObject);
 
 	return ContextHandle;
+}
+
+void UModularGameplayAbility::ApplyAbilityTagsToGameplayEffectSpec(FGameplayEffectSpec& Spec, FGameplayAbilitySpec* AbilitySpec) const
+{
+	Super::ApplyAbilityTagsToGameplayEffectSpec(Spec, AbilitySpec);
+
+	if (const FHitResult* HitResult = Spec.GetContext().GetHitResult())
+	{
+		if (const UPhysicalMaterialWithTags* PhysMatWithTags = Cast<const UPhysicalMaterialWithTags>(HitResult->PhysMaterial.Get()))
+		{
+			Spec.CapturedTargetTags.GetSpecTags().AppendTags(PhysMatWithTags->Tags);
+		}
+	}
+}
+
+bool UModularGameplayAbility::DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
+{
+	// Specialized version to handle death exclusion and AbilityTags expansion via ASC
+
+	bool bBlocked = false;
+	bool bMissing = false;
+
+	UAbilitySystemGlobals& AbilitySystemGlobals = UAbilitySystemGlobals::Get();
+	const FGameplayTag& BlockedTag = AbilitySystemGlobals.ActivateFailTagsBlockedTag;
+	const FGameplayTag& MissingTag = AbilitySystemGlobals.ActivateFailTagsMissingTag;
+
+	// Check if any of this ability's tags are currently blocked
+	if (AbilitySystemComponent.AreAbilityTagsBlocked(AbilityTags))
+	{
+		bBlocked = true;
+	}
+
+	static FGameplayTagContainer AllRequiredTags;
+	static FGameplayTagContainer AllBlockedTags;
+
+	AllRequiredTags = ActivationRequiredTags;
+	AllBlockedTags = ActivationBlockedTags;
+
+	// TODO: Lyra adds additional tag relationship through their ULyraAbilityTagRelationshipMapping
+	// e.g.: `Ability.Type.Action.X` is blocked when `Status.Death.X` is active
+
+	// Check to see the required/blocked tags for this ability
+	if (AllBlockedTags.Num() || AllRequiredTags.Num())
+	{
+		static FGameplayTagContainer AbilitySystemComponentTags;
+		
+		AbilitySystemComponentTags.Reset();
+		AbilitySystemComponent.GetOwnedGameplayTags(AbilitySystemComponentTags);
+
+		if (AbilitySystemComponentTags.HasAny(AllBlockedTags))
+		{
+			if (OptionalRelevantTags && AbilitySystemComponentTags.HasTag(ThirdPersonShooterGameplayTags::Status_Death))
+			{
+				// If player is dead and was rejected due to blocking tags, give that feedback
+				OptionalRelevantTags->AddTag(ThirdPersonShooterGameplayTags::Ability_ActivateFail_IsDead);
+			}
+
+			bBlocked = true;
+		}
+
+		if (!AbilitySystemComponentTags.HasAll(AllRequiredTags))
+		{
+			bMissing = true;
+		}
+	}
+
+	// TODO: What are the source & target in this scenario?
+	if (SourceTags != nullptr)
+	{
+		if (SourceBlockedTags.Num() || SourceRequiredTags.Num())
+		{
+			if (SourceTags->HasAny(SourceBlockedTags))
+			{
+				bBlocked = true;
+			}
+
+			if (!SourceTags->HasAll(SourceRequiredTags))
+			{
+				bMissing = true;
+			}
+		}
+	}
+
+	if (TargetTags != nullptr)
+	{
+		if (TargetBlockedTags.Num() || TargetRequiredTags.Num())
+		{
+			if (TargetTags->HasAny(TargetBlockedTags))
+			{
+				bBlocked = true;
+			}
+
+			if (!TargetTags->HasAll(TargetRequiredTags))
+			{
+				bMissing = true;
+			}
+		}
+	}
+
+	if (bBlocked)
+	{
+		if (OptionalRelevantTags && BlockedTag.IsValid())
+		{
+			OptionalRelevantTags->AddTag(BlockedTag);
+		}
+		return false;
+	}
+	if (bMissing)
+	{
+		if (OptionalRelevantTags && MissingTag.IsValid())
+		{
+			OptionalRelevantTags->AddTag(MissingTag);
+		}
+		return false;
+	}
+
+	return true;
 }
 
 void UModularGameplayAbility::OnAbilityFailedToActivate_Broadcast(const FGameplayTagContainer& FailedReason) const

@@ -12,8 +12,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularCharacter)
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_AvatarPossessed, "GameplayEvent.Possessed");
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_AvatarUnpossessed, "GameplayEvent.Unpossessed");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_Pawn_ControllerChanged, "GameplayEvent.Pawn.ControllerChanged");
 
 class UEnhancedInputLocalPlayerSubsystem;
 
@@ -82,14 +81,16 @@ void AModularCharacter::PossessedBy(AController *NewController)
 	if (auto MASC = GetAbilitySystemComponent<UModularAbilitySystemComponent>())
 	{
 		// Need to call ASAP because of the GA_Interact on a timer which will call with stale values
+		// TODO: Can't the GameplayAbility listen for this event?
 		MASC->HandleControllerChanged();
 		HealthComponent->InitializeWithAbilitySystem(AbilitySystemComponent);
 
 		FGameplayEventData Payload;
-		Payload.EventTag = TAG_GameplayEvent_AvatarPossessed;
+		Payload.EventTag = TAG_GameplayEvent_Pawn_ControllerChanged;
 		Payload.Instigator = this;
 		Payload.Target = this;
-		MASC->HandleGameplayEvent(TAG_GameplayEvent_AvatarPossessed, &Payload);
+		Payload.OptionalObject = NewController;
+		MASC->HandleGameplayEvent(TAG_GameplayEvent_Pawn_ControllerChanged, &Payload);
 	}
 }
 
@@ -103,37 +104,34 @@ void AModularCharacter::UnPossessed()
 		HealthComponent->UninitializeFromAbilitySystem();
 
 		FGameplayEventData Payload;
-		Payload.EventTag = TAG_GameplayEvent_AvatarUnpossessed;
+		Payload.EventTag = TAG_GameplayEvent_Pawn_ControllerChanged;
 		Payload.Instigator = this;
 		Payload.Target = this;
-		MASC->HandleGameplayEvent(TAG_GameplayEvent_AvatarUnpossessed, &Payload);
+		MASC->HandleGameplayEvent(TAG_GameplayEvent_Pawn_ControllerChanged, &Payload);
 	}
 }
 
-void AModularCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+void AModularCharacter::SetMovementModeTag(EMovementMode MovementMode, uint8 CustomMovementMode, bool bTagEnabled)
 {
+
 	if (auto ASC = GetAbilitySystemComponent())
 	{
-		ASC->SetLooseGameplayTagCount(ThirdPersonShooterGameplayTags::Status_Crouching, 1);
+		const FGameplayTag* MovementModeTag = nullptr;
+
+		if (MovementMode == MOVE_Custom)
+		{
+			// TODO: What is a custom movement mode?
+		}
+		else
+		{
+			MovementModeTag = ThirdPersonShooterGameplayTags::MovementModeTagMap.Find(MovementMode);
+		}
+
+		if (MovementModeTag && MovementModeTag->IsValid())
+		{
+			ASC->SetLooseGameplayTagCount(*MovementModeTag, (bTagEnabled ? 1 : 0));
+		}
 	}
-
-	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-}
-
-void AModularCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
-{
-	if (auto ASC = GetAbilitySystemComponent())
-	{
-		ASC->SetLooseGameplayTagCount(ThirdPersonShooterGameplayTags::Status_Crouching, 0);
-	}
-
-	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-}
-
-// Called every frame
-void AModularCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void AModularCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const

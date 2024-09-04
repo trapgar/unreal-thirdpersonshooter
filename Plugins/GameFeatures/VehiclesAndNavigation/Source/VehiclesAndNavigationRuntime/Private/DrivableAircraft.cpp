@@ -48,9 +48,10 @@ void ADrivableAircraft::PossessedBy(AController *NewController)
 	{
 		MASC->HandleControllerChanged();
 		FGameplayEventData Payload;
-		Payload.EventTag = FGameplayTag::RequestGameplayTag("GameplayEvent.Possessed");
+		Payload.EventTag = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
 		Payload.Instigator = this;
 		Payload.Target = this;
+		Payload.OptionalObject = NewController;
 		MASC->HandleGameplayEvent(Payload.EventTag, &Payload);
 	}
 }
@@ -63,7 +64,7 @@ void ADrivableAircraft::UnPossessed()
 	{
 		MASC->HandleControllerChanged();
 		FGameplayEventData Payload;
-		Payload.EventTag = FGameplayTag::RequestGameplayTag("GameplayEvent.Unpossessed");
+		Payload.EventTag = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
 		Payload.Instigator = this;
 		Payload.Target = this;
 		MASC->HandleGameplayEvent(Payload.EventTag, &Payload);

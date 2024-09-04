@@ -147,10 +147,10 @@ void UPawnHealthComponent::HandleOutOfHealth(AActor* DamageInstigator, AActor* D
 #if WITH_SERVER_CODE
 	if (AbilitySystemComponent && DamageEffectSpec)
 	{
-		// Send the "GameplayEvent.Death" gameplay event through the owner's ability system.  This can be used to trigger a death gameplay ability.
+		// Send the "GameplayEvent.Pawn.Death" gameplay event through the owner's ability system.  This can be used to trigger a death gameplay ability.
 		{
 			FGameplayEventData Payload;
-			Payload.EventTag = ThirdPersonShooterGameplayTags::GameplayEvent_Death;
+			Payload.EventTag = ThirdPersonShooterGameplayTags::GameplayEvent_Pawn_Death;
 			Payload.Instigator = DamageInstigator;
 			Payload.Target = AbilitySystemComponent->GetAvatarActor();
 			Payload.OptionalObject = DamageEffectSpec->Def;
