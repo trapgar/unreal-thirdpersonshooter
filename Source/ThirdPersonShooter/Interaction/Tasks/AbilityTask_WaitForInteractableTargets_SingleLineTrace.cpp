@@ -1,11 +1,13 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AbilityTask_WaitForInteractableTargets_SingleLineTrace.h"
-#include "Interaction/InteractionStatics.h"
+
 #include "AbilitySystemComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Interaction/InteractionStatics.h"
+#include "Character/ModularCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AbilityTask_WaitForInteractableTargets_SingleLineTrace)
 
@@ -36,7 +38,6 @@ void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::Activate()
 	
 	if (auto ASC = AbilitySystemComponent.Get())
 	{
-		FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
 		Handle_AvatarControllerChanged = ASC->GenericGameplayEventCallbacks
 			.FindOrAdd(TAG_GameplayEvent_Pawn_ControllerChanged)
 			.AddUObject(this, &UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarControllerChanged);
@@ -52,7 +53,6 @@ void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::OnDestroy(bool Abi
 
 	if (auto ASC = AbilitySystemComponent.Get())
 	{
-		FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
 		ASC->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Pawn_ControllerChanged), Handle_AvatarControllerChanged);
 	}
 

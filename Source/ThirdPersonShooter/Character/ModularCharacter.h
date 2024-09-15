@@ -2,6 +2,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
+#include "NativeGameplayTags.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"
 #include "ThirdPersonShooterGameplayTags.h"
@@ -15,9 +16,11 @@
 class AController;
 class UAbilitySystemComponent;
 class UInputComponent;
-class UPawnHealthComponent;
+class UHealthComponent;
 struct FGameplayTag;
 struct FGameplayTagContainer;
+
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GameplayEvent_Pawn_ControllerChanged);
 
 /**
  * AModularCharacter
@@ -102,12 +105,8 @@ protected:
 
 private:
 	void DestroyDueToDeath();
-	
-	// Health attribute set used by this actor.
-	UPROPERTY()
-	TObjectPtr<const class UPawnHealthSet> HealthSet;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Health", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UPawnHealthComponent> HealthComponent;
+	TObjectPtr<UHealthComponent> HealthComponent;
 
 };

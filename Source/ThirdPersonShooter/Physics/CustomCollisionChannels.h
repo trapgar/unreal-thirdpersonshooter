@@ -10,6 +10,7 @@
 
 // Trace against Actors/Components which provide interactions (`WorldInteractable`).
 #define Custom_TraceChannel_Interaction					ECC_GameTraceChannel1
+#define Custom_TraceChannel_Projectile					ECC_GameTraceChannel2
 
 // Allocated to aim assist by the ShooterCore game feature
 // ECC_GameTraceChannel5

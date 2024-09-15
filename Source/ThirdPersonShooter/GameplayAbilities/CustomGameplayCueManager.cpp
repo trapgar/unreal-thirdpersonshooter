@@ -11,9 +11,9 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CustomGameplayCueManager)
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------
 
-enum class ELyraEditorLoadMode
+enum class EGameEditorLoadMode
 {
 	// Loads all cues upfront; longer loading speed in the editor but short PIE times and effects never fail to play
 	LoadUpfront,
@@ -30,16 +30,18 @@ enum class ELyraEditorLoadMode
 namespace CustomGameplayCueManagerCvars
 {
 	static FAutoConsoleCommand CVarDumpGameplayCues(
-		TEXT("Lyra.DumpGameplayCues"),
+		TEXT("Game.DumpGameplayCues"),
 		TEXT("Shows all assets that were loaded via CustomGameplayCueManager and are currently in memory."),
 		FConsoleCommandWithArgsDelegate::CreateStatic(UCustomGameplayCueManager::DumpGameplayCues));
 
-	static ELyraEditorLoadMode LoadMode = ELyraEditorLoadMode::LoadUpfront;
+	static EGameEditorLoadMode LoadMode = EGameEditorLoadMode::LoadUpfront;
 }
 
 const bool bPreloadEvenInEditor = true;
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 struct FGameplayCueTagThreadSynchronizeGraphTask : public FAsyncGraphTaskBase
 {
@@ -49,7 +51,9 @@ struct FGameplayCueTagThreadSynchronizeGraphTask : public FAsyncGraphTaskBase
 	ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 };
 
-//////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------
+
 
 UCustomGameplayCueManager::UCustomGameplayCueManager(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -96,9 +100,9 @@ bool UCustomGameplayCueManager::ShouldAsyncLoadRuntimeObjectLibraries() const
 {
 	switch (CustomGameplayCueManagerCvars::LoadMode)
 	{
-	case ELyraEditorLoadMode::LoadUpfront:
+	case EGameEditorLoadMode::LoadUpfront:
 		return true;
-	case ELyraEditorLoadMode::PreloadAsCuesAreReferenced_GameOnly:
+	case EGameEditorLoadMode::PreloadAsCuesAreReferenced_GameOnly:
 #if WITH_EDITOR
 		if (GIsEditor)
 		{
@@ -106,7 +110,7 @@ bool UCustomGameplayCueManager::ShouldAsyncLoadRuntimeObjectLibraries() const
 		}
 #endif
 		break;
-	case ELyraEditorLoadMode::PreloadAsCuesAreReferenced:
+	case EGameEditorLoadMode::PreloadAsCuesAreReferenced:
 		break;
 	}
 
@@ -253,9 +257,9 @@ void UCustomGameplayCueManager::ProcessTagToPreload(const FGameplayTag& Tag, UOb
 {
 	switch (CustomGameplayCueManagerCvars::LoadMode)
 	{
-	case ELyraEditorLoadMode::LoadUpfront:
+	case EGameEditorLoadMode::LoadUpfront:
 		return;
-	case ELyraEditorLoadMode::PreloadAsCuesAreReferenced_GameOnly:
+	case EGameEditorLoadMode::PreloadAsCuesAreReferenced_GameOnly:
 #if WITH_EDITOR
 		if (GIsEditor)
 		{
@@ -263,7 +267,7 @@ void UCustomGameplayCueManager::ProcessTagToPreload(const FGameplayTag& Tag, UOb
 		}
 #endif
 		break;
-	case ELyraEditorLoadMode::PreloadAsCuesAreReferenced:
+	case EGameEditorLoadMode::PreloadAsCuesAreReferenced:
 		break;
 	}
 
@@ -359,9 +363,9 @@ void UCustomGameplayCueManager::UpdateDelayLoadDelegateListeners()
 
 	switch (CustomGameplayCueManagerCvars::LoadMode)
 	{
-	case ELyraEditorLoadMode::LoadUpfront:
+	case EGameEditorLoadMode::LoadUpfront:
 		return;
-	case ELyraEditorLoadMode::PreloadAsCuesAreReferenced_GameOnly:
+	case EGameEditorLoadMode::PreloadAsCuesAreReferenced_GameOnly:
 #if WITH_EDITOR
 		if (GIsEditor)
 		{
@@ -369,7 +373,7 @@ void UCustomGameplayCueManager::UpdateDelayLoadDelegateListeners()
 		}
 #endif
 		break;
-	case ELyraEditorLoadMode::PreloadAsCuesAreReferenced:
+	case EGameEditorLoadMode::PreloadAsCuesAreReferenced:
 		break;
 	}
 

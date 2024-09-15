@@ -57,11 +57,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "InventoryAndEquipment",
+			"Name": "VehiclesAndNavigation",
 			"Enabled": true
 		},
 		{
-			"Name": "VehiclesAndNavigation",
+			"Name": "CommonUI",
 			"Enabled": true
 		},
 		{

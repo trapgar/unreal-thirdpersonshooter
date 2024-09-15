@@ -2,17 +2,14 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameplayAbilities/ModularAbilitySystemComponent.h"
-#include "GameplayAbilities/Attributes/PawnHealthSet.h"
 #include "ModularCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
-#include "NativeGameplayTags.h"
-#include "Character/PawnHealthComponent.h"
-
+#include "Components/HealthComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularCharacter)
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_GameplayEvent_Pawn_ControllerChanged, "GameplayEvent.Pawn.ControllerChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_GameplayEvent_Pawn_ControllerChanged, "GameplayEvent.Pawn.ControllerChanged");
 
 class UEnhancedInputLocalPlayerSubsystem;
 
@@ -48,9 +45,7 @@ AModularCharacter::AModularCharacter(const FObjectInitializer &ObjectInitializer
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 	GameplayInputComponent = CreateDefaultSubobject<UGameplayInputComponent>(TEXT("GameplayInputComponent"));
 
-	HealthSet = CreateDefaultSubobject<UPawnHealthSet>(TEXT("HealthSet"));
-
-	HealthComponent = CreateDefaultSubobject<UPawnHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->OnDeathStarted.AddDynamic(this, &ThisClass::OnDeathStarted);
 	HealthComponent->OnDeathFinished.AddDynamic(this, &ThisClass::OnDeathFinished);
 }

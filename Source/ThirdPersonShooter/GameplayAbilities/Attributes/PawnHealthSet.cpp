@@ -16,7 +16,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Damage, "Gameplay.Damage");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Damage_Immunity, "Gameplay.Damage.Immunity");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Damage_SelfDestruct, "Gameplay.Damage.SelfDestruct");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Damage_FellOutOfWorld, "Gameplay.Damage.FellOutOfWorld");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Damage, "Gameplay.Message.Damage");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Damaged, "Gameplay.Message.Damaged");
 
 UPawnHealthSet::UPawnHealthSet()
 	: Health(100.0f)
@@ -111,7 +111,7 @@ void UPawnHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 		if (Data.EvaluatedData.Magnitude > 0.0f)
 		{
 			FGameplayVerbMessage Message;
-			Message.Verb = TAG_Gameplay_Message_Damage;
+			Message.Verb = TAG_Gameplay_Message_Damaged;
 			Message.Instigator = Data.EffectSpec.GetEffectContext().GetEffectCauser();
 			Message.InstigatorTags = *Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
 			Message.Target = GetOwningActor();

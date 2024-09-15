@@ -11,6 +11,7 @@
 #include "Interaction/InteractionStatics.h"
 #include "Physics/CustomCollisionChannels.h"
 #include "TimerManager.h"
+#include "Character/ModularCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AbilityTask_GrantNearbyInteraction)
 
@@ -34,7 +35,6 @@ void UAbilityTask_GrantNearbyInteraction::Activate()
 	UWorld* World = GetWorld();
 	World->GetTimerManager().SetTimer(QueryTimerHandle, this, &ThisClass::QueryInteractables, InteractionScanRate, true);
 	
-	FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
 	Handle_AvatarControllerChanged = AbilitySystemComponent->GenericGameplayEventCallbacks
 		.FindOrAdd(TAG_GameplayEvent_Pawn_ControllerChanged)
 		.AddUObject(this, &UAbilityTask_GrantNearbyInteraction::AvatarControllerChanged);
@@ -63,8 +63,10 @@ void UAbilityTask_GrantNearbyInteraction::OnDestroy(bool AbilityEnded)
 		World->GetTimerManager().ClearTimer(QueryTimerHandle);
 	}
 		
-	FGameplayTag TAG_GameplayEvent_Pawn_ControllerChanged = FGameplayTag::RequestGameplayTag("GameplayEvent.Pawn.ControllerChanged");
-	AbilitySystemComponent->RemoveGameplayEventTagContainerDelegate(FGameplayTagContainer(TAG_GameplayEvent_Pawn_ControllerChanged), Handle_AvatarControllerChanged);
+	AbilitySystemComponent->RemoveGameplayEventTagContainerDelegate(
+		FGameplayTagContainer(TAG_GameplayEvent_Pawn_ControllerChanged),
+		Handle_AvatarControllerChanged
+	);
 
 	Super::OnDestroy(AbilityEnded);
 }
