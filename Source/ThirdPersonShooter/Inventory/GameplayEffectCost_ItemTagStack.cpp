@@ -1,4 +1,4 @@
-#include "Equipment/GameplayEffectCost_ItemTagStack.h"
+#include "Inventory/GameplayEffectCost_ItemTagStack.h"
 
 #include "GameplayAbilities/GameplayAbility_FromEquipment.h"
 #include "Inventory/InventoryItemInstance.h"
@@ -31,9 +31,11 @@ bool UGameplayEffectCost_ItemTagStack::CheckCost(const UModularGameplayAbility* 
 			{
 				OptionalRelevantTags->AddTag(FailureTag);
 			}
+
 			return bCanApplyCost;
 		}
 	}
+
 	return false;
 }
 

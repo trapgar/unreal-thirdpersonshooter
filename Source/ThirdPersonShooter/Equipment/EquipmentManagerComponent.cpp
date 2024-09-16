@@ -18,8 +18,7 @@
 class FLifetimeProperty;
 struct FReplicationFlags;
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Message_StackChanged, "Equipment.Message.StackChanged");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Message_ActiveIndexChanged, "Equipment.Message.ActiveIndexChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Equipment_StackChanged, "Gameplay.Message.Equipment.StackChanged");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Weapon_Ammunition, "Equipment.Weapon.Ammunition");
 
 // --------------------------------------------------------
@@ -39,7 +38,7 @@ void FEquipmentList::BroadcastChangeMessage(UEquipmentItemInstance* Instance, in
 	Message.Delta = NewCount - OldCount;
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(OwnerComponent->GetWorld());
-	MessageSystem.BroadcastMessage(TAG_Equipment_Message_StackChanged, Message);
+	MessageSystem.BroadcastMessage(TAG_Gameplay_Message_Equipment_StackChanged, Message);
 }
 
 UEquipmentItemInstance* FEquipmentList::AddEntry(UEquipmentItemDefinition* EquipmentDef, UInventoryItemInstance* Source)
@@ -85,7 +84,6 @@ UEquipmentItemInstance* FEquipmentList::AddEntry(UEquipmentItemDefinition* Equip
 	}
 
 	// MarkItemDirty(NewEntry);
-	// BroadcastChangeMessage(Result, /*OldCount=*/0, /*NewCount=*/StackCount);
 
 	return Result;
 }

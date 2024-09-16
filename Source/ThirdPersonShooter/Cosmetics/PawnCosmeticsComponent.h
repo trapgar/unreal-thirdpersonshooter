@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Components/PawnComponent.h"
-#include "GameFramework/GameplayMessageSubsystem.h"
-#include "Equipment/QuickBarComponent.h"
 
 #include "PawnCosmeticsComponent.generated.h"
 
@@ -17,9 +15,4 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-private:
-	FGameplayMessageListenerHandle Handle_QuickbarSlotsChanged;
-
-	void OnQuickbarSlotsChanged(const FGameplayTag Channel, const FQuickBarSlotsChangedMessage& Payload);
 };

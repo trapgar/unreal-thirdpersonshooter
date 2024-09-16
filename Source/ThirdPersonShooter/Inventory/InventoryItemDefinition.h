@@ -45,8 +45,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display)
 	TObjectPtr<UMaterialInterface> Icon;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default)
+	bool bStackable = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Display, Instanced)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default, Instanced)
 	TArray<TObjectPtr<UInventoryItemFragment>> Fragments;
 
 public:

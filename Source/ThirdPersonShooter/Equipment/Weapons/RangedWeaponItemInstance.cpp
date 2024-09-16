@@ -2,7 +2,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(RangedWeaponItemInstance)
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Weapon_Message_StatsChanged, "Equipment.Weapon.Message.StatsChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Equipment_StatsChanged, "Gameplay.Message.Equipment.StatsChanged");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Weapon_MagazineSize, "Equipment.Weapon.MagazineSize");
 
 void URangedWeaponItemInstance::OnEquipped()
@@ -10,7 +10,7 @@ void URangedWeaponItemInstance::OnEquipped()
 	if (UWorld* World = GetWorld())
 	{
 		UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(World);
-		Handle_WeaponStatsChanged = MessageSystem.RegisterListener(TAG_Weapon_Message_StatsChanged, this, &ThisClass::OnWeaponStatsChanged);
+		Handle_WeaponStatsChanged = MessageSystem.RegisterListener(TAG_Gameplay_Message_Equipment_StatsChanged, this, &ThisClass::OnWeaponStatsChanged);
 	}
 
 	Super::OnEquipped();

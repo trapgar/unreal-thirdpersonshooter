@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NativeGameplayTags.h"
 #include "Components/ActorComponent.h"
 // #include "Net/Serialization/FastArraySerializer.h"
 #include "InventoryItemDefinition.h"
@@ -10,6 +11,8 @@
 
 class UInventoryItemInstance;
 struct FInventoryList;
+
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_Inventory_StackChanged);
 
 /** A message when an item is added to the inventory */
 USTRUCT(BlueprintType)
@@ -50,6 +53,7 @@ private:
 	friend UInventoryManagerComponent;
 
 	// Total count of the item
+	// TODO: Currently not used - need to link to item def bStackable
 	UPROPERTY()
 	int32 StackCount = 0;
 
@@ -81,7 +85,6 @@ public:
 	TArray<UInventoryItemInstance *> GetAllItems() const;
 
 	UInventoryItemInstance* AddEntry(UInventoryItemDefinition* ItemDef, int32 StackCount);
-	// UInventoryItemInstance* AddEntry(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 StackCount);
 	void RemoveEntry(UInventoryItemInstance *Instance);
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo &DeltaParms)
@@ -150,6 +153,7 @@ public:
 
 	// Returns the total number of items in the inventory that matches the given definition
 	int32 GetTotalItemCountByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
+	bool ConsumeItemsByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 NumToConsume);
 
 protected:
 	//~UObject interface

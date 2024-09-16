@@ -5,14 +5,13 @@
 #include "Inventory/InventoryItemDefinition.h"
 #include "Inventory/InventoryItemInstance.h"
 #include "Net/UnrealNetwork.h"
-#include "NativeGameplayTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InventoryManagerComponent)
 
 class FLifetimeProperty;
 struct FReplicationFlags;
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Inventory_Message_StackChanged, "Inventory.Message.StackChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Inventory_StackChanged, "Gameplay.Message.Inventory.StackChanged");
 
 // --------------------------------------------------------
 // FInventoryEntry
@@ -40,7 +39,7 @@ void FInventoryList::BroadcastChangeMessage(UInventoryItemInstance* Instance, in
 	Message.Delta = NewCount - OldCount;
 
 	UGameplayMessageSubsystem &MessageSystem = UGameplayMessageSubsystem::Get(OwnerComponent->GetWorld());
-	MessageSystem.BroadcastMessage(TAG_Inventory_Message_StackChanged, Message);
+	MessageSystem.BroadcastMessage(TAG_Gameplay_Message_Inventory_StackChanged, Message);
 }
 
 UInventoryItemInstance *FInventoryList::AddEntry(UInventoryItemDefinition* ItemDef, int32 StackCount)
@@ -83,8 +82,15 @@ void FInventoryList::RemoveEntry(UInventoryItemInstance *Instance)
 		FInventoryEntry& Entry = *EntryIt;
 		if (Entry.Instance == Instance)
 		{
-			EntryIt.RemoveCurrent();
+			Entry.StackCount -= 1;
+
+			if (Entry.StackCount <= 0)
+			{
+				EntryIt.RemoveCurrent();
+			}
+
 			// MarkArrayDirty();
+			BroadcastChangeMessage(Instance, /*OldCount=*/Entry.StackCount + 1, /*NewCount=*/Entry.StackCount);
 		}
 	}
 }
@@ -226,6 +232,32 @@ int32 UInventoryManagerComponent::GetTotalItemCountByDefinition(TSubclassOf<UInv
 	}
 
 	return TotalCount;
+}
+
+bool UInventoryManagerComponent::ConsumeItemsByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 NumToConsume)
+{
+	AActor* OwningActor = GetOwner();
+	if (!OwningActor || !OwningActor->HasAuthority())
+	{
+		return false;
+	}
+
+	//@TODO: N squared right now as there's no acceleration structure
+	int32 TotalConsumed = 0;
+	while (TotalConsumed < NumToConsume)
+	{
+		if (UInventoryItemInstance* Instance = FindFirstItemStackByDefinition(ItemDef))
+		{
+			InventoryList.RemoveEntry(Instance);
+			++TotalConsumed;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return TotalConsumed == NumToConsume;
 }
 
 void UInventoryManagerComponent::ReadyForReplication()

@@ -249,7 +249,7 @@ void UGameplayAbility_RangedWeapon_Fire::OnHandleUpdateWeaponStatsChanged()
 	Message.bHas1InTheChamber = bHas1InTheChamber;
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
-	MessageSystem.BroadcastMessage(TAG_Weapon_Message_StatsChanged, Message);
+	MessageSystem.BroadcastMessage(TAG_Gameplay_Message_Equipment_StatsChanged, Message);
 }
 
 void UGameplayAbility_RangedWeapon_Fire::OnHandleSpreadDecay()

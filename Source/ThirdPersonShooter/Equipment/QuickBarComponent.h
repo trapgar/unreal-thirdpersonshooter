@@ -15,8 +15,8 @@ class UEquipmentManagerComponent;
 class UObject;
 struct FFrame;
 
-THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_QuickBar_Message_SlotsChanged);
-THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_QuickBar_Message_ActiveIndexChanged);
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_QuickBar_SlotsChanged);
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_QuickBar_ActiveIndexChanged);
 
 
 // --------------------------------------------------------

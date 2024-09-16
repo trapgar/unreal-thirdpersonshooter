@@ -12,7 +12,7 @@
 #include "RangedWeaponItemInstance.generated.h"
 
 
-THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Weapon_Message_StatsChanged);
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_Equipment_StatsChanged);
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Weapon_MagazineSize);
 
 

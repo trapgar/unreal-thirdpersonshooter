@@ -1,30 +1,32 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 #pragma once
 
 #include "GameplayAbilities/Abilities/ModularAbilityCost.h"
-#include "GameplayTagContainer.h"
 #include "ScalableFloat.h"
+#include "Templates/SubclassOf.h"
 
-#include "GameplayEffectCost_ItemTagStack.generated.h"
+#include "GameplayEffectCost_InventoryItem.generated.h"
 
 struct FGameplayAbilityActivationInfo;
 struct FGameplayAbilitySpecHandle;
 
 class UModularGameplayAbility;
+class UInventoryItemDefinition;
 class UObject;
 struct FGameplayAbilityActorInfo;
+struct FGameplayTagContainer;
 
 /**
- * UGameplayEffectCost_ItemTagStack
- * 
- * Represents a cost that requires expending a quantity of a tag stack on the associated item instance
+ * Represents a cost that requires expending a quantity of an inventory item
  */
-UCLASS(Blueprintable, DefaultToInstanced, EditInlineNew, Const, meta=(DisplayName="Item Tag Stack"))
-class THIRDPERSONSHOOTER_API UGameplayEffectCost_ItemTagStack : public UModularAbilityCost
+UCLASS(meta=(DisplayName="Inventory Item"))
+class UGameplayEffectCost_InventoryItem : public UModularAbilityCost
 {
 	GENERATED_BODY()
 
 public:
-	UGameplayEffectCost_ItemTagStack();
+	UGameplayEffectCost_InventoryItem();
 
 	//~UModularAbilityCost interface
 	virtual bool CheckCost(const UModularGameplayAbility* Ability, const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const override;
@@ -32,15 +34,11 @@ public:
 	//~End of UModularAbilityCost interface
 
 protected:
-	/** How much of the tag to spend (keyed on ability level) */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	/** How much of the item to spend (keyed on ability level) */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=AbilityCost)
 	FScalableFloat Quantity;
 
-	/** Which tag to spend some of */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FGameplayTag Tag;
-
-	/** Which tag to send back as a response if this cost cannot be applied */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FGameplayTag FailureTag;
+	/** Which item to consume */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=AbilityCost)
+	TSubclassOf<UInventoryItemDefinition> ItemDefinition;
 };
