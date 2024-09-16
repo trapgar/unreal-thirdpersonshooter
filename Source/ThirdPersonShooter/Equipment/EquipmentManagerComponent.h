@@ -60,6 +60,10 @@ struct FEquipmentEntry
 
 	FString GetDebugString() const;
 
+	// Authority-only list of granted handles
+	UPROPERTY(NotReplicated)
+	FModularAbilitySet_GrantedHandles GrantedHandles;
+
 private:
 	friend FEquipmentList;
 	friend UEquipmentManagerComponent;
@@ -102,10 +106,6 @@ public:
 
 private:
 	void BroadcastChangeMessage(UEquipmentItemInstance* Entry, int32 OldCount, int32 NewCount);
-
-	// Authority-only list of granted handles
-	UPROPERTY(NotReplicated)
-	FModularAbilitySet_GrantedHandles GrantedHandles;
 
 private:
 

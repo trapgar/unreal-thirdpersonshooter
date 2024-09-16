@@ -75,7 +75,7 @@ UEquipmentItemInstance* FEquipmentList::AddEntry(UEquipmentItemDefinition* Equip
 	{
 		for (auto AbilitySet : EquipmentDef->AbilitySetsToGrant)
 		{
-			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &GrantedHandles, Result);
+			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &NewEntry.GrantedHandles, Result);
 		}
 	}
 	else
@@ -97,7 +97,7 @@ void FEquipmentList::RemoveEntry(UEquipmentItemInstance* Instance)
 		{
 			if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
 			{
-				GrantedHandles.TakeFromAbilitySystem(ASC);
+				Entry.GrantedHandles.TakeFromAbilitySystem(ASC);
 			}
 			else
 			{
