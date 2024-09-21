@@ -24,7 +24,7 @@ UQuickBarComponent::UQuickBarComponent(const FObjectInitializer& ObjectInitializ
 	SetIsReplicatedByDefault(true);
 }
 
-void UQuickBarComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+void UQuickBarComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 

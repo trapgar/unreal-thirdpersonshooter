@@ -72,6 +72,10 @@ void UAbilityTask_WaitForInteractableTargets_SingleLineTrace::AvatarUnpossessed(
 	if (UWorld* World = GetWorld())
 	{
 		World->GetTimerManager().ClearTimer(TimerHandle);
+
+		// Clear out any interaction targets
+		TArray<TScriptInterface<IInteractableTarget>> InteractableTargets;
+		UpdateInteractableOptions(InteractionQuery, InteractableTargets);
 	}
 }
 
