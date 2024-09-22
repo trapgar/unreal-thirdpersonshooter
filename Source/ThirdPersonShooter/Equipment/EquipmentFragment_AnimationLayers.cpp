@@ -46,3 +46,5 @@ TSubclassOf<UAnimInstance> UEquipmentFragment_AnimationLayers::PickBestAnimation
 
 	return DefaultLayer;
 }
+
+#undef LOCTEXT_NAMESPACE

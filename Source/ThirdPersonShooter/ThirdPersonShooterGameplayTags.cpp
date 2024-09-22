@@ -45,6 +45,8 @@ namespace ThirdPersonShooterGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement_Mode_Swimming, "Movement.Mode.Swimming", "Default Character movement tag");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement_Mode_Flying, "Movement.Mode.Flying", "Default Character movement tag");
 
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayCue_Projectile_Impact, "GameplayCue.Projectile.Impact", "Burst cue tag for when a projectile has hit something");
+
 	// Unreal Movement Modes
 	const TMap<uint8, FGameplayTag> MovementModeTagMap =
 	{

@@ -45,3 +45,5 @@ void UInventoryFragment_QuickbarCosmeticInfo::OnInstanceAdded(UInventoryItemInst
 		Instance->AddSpawnedActor(NewActor);
 	}
 }
+
+#undef LOCTEXT_NAMESPACE
