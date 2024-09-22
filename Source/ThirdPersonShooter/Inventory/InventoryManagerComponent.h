@@ -37,9 +37,25 @@ struct FInventoryChangedMessage
 
 // --------------------------------------------------------
 
+USTRUCT(BlueprintType)
+struct FReadOnlyInventoryEntry
+{
+public:
+	GENERATED_BODY()
+
+	FReadOnlyInventoryEntry() {}
+
+public:
+	UPROPERTY(BlueprintReadOnly)
+	int32 StackCount = 0;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UInventoryItemInstance> Instance;
+};
+
 
 /** A single inventory stack */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FInventoryEntry
 {
 	GENERATED_BODY()
@@ -53,7 +69,6 @@ private:
 	friend UInventoryManagerComponent;
 
 	// Total count of the item
-	// TODO: Currently not used - need to link to item def bStackable
 	UPROPERTY()
 	int32 StackCount = 0;
 
@@ -82,7 +97,7 @@ struct FInventoryList
 	}
 
 public:
-	TArray<UInventoryItemInstance *> GetAllItems() const;
+	TArray<FReadOnlyInventoryEntry> GetAllItems() const;
 
 	UInventoryItemInstance* AddEntry(UInventoryItemDefinition* ItemDef, int32 StackCount);
 	void RemoveEntry(UInventoryItemInstance *Instance);
@@ -90,6 +105,11 @@ public:
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo &DeltaParms)
 	{
 		return false;
+	}
+
+	int32 Num() const
+	{
+		return Entries.Num();
 	}
 
 private:
@@ -144,15 +164,17 @@ public:
 	void RemoveItem(UInventoryItemInstance* ItemInstance);
 
 	// Returns a list of all items in the inventory
-	UFUNCTION(BlueprintCallable, Category=Inventory, BlueprintPure=false)
-	TArray<UInventoryItemInstance*> GetAllItems() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category=Inventory)
+	TArray<FReadOnlyInventoryEntry> GetAllItems() const;
 
 	// Returns the first item in the inventory that matches the given definition
-	UFUNCTION(BlueprintCallable, Category=Inventory, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category=Inventory)
 	UInventoryItemInstance* FindFirstItemStackByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
 
-	// Returns the total number of items in the inventory that matches the given definition
+	// Returns the aggregated stack count of all the items matching the given item definition
 	int32 GetTotalItemCountByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
+
+	// Removes the specified number of inventory items that match the given item def
 	bool ConsumeItemsByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef, int32 NumToConsume);
 
 protected:

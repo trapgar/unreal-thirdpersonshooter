@@ -52,25 +52,50 @@ UInventoryItemInstance *FInventoryList::AddEntry(UInventoryItemDefinition* ItemD
 	AActor* OwningActor = OwnerComponent->GetOwner();
 	check(OwningActor->HasAuthority());
 
-	TSubclassOf<UInventoryItemInstance> InstanceType = UInventoryItemInstance::StaticClass();
-
-	FInventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.Instance = NewObject<UInventoryItemInstance>(OwnerComponent->GetOwner()); //@TODO: Using the actor instead of component as the outer due to UE-127172
-	NewEntry.Instance->SetItemDef(ItemDef);
-
-	for (UInventoryItemFragment* Fragment : ItemDef->Fragments)
+	// Item is stackable - check to see if we already have items in the inv of the same class
+	if (ItemDef->MaxStackCount > 1)
 	{
-		if (Fragment != nullptr)
+		for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
 		{
-			Fragment->OnInstanceCreated(NewEntry.Instance);
+			FInventoryEntry& Entry = *EntryIt;
+			// Don't care about MaxStackCount yet, as that's a display problem, not a functional one
+			// All we care about here is IF it's stackable, as stackable items indicate they are all identical,
+			//   so we don't really about preserving instance-data
+			if (Entry.Instance->GetItemDef()->GetClass() == ItemDef->GetClass())
+			{
+				Result = Entry.Instance;
+				Entry.StackCount += StackCount;
+
+				// MarkArrayDirty();
+				BroadcastChangeMessage(Entry.Instance, /*OldCount=*/Entry.StackCount - StackCount, /*NewCount=*/Entry.StackCount);
+				break;
+			}
 		}
 	}
 
-	NewEntry.StackCount = StackCount;
-	Result = NewEntry.Instance;
+	// Either not stackable, or we didn't find any matches
+	if (Result == nullptr)
+	{
+		TSubclassOf<UInventoryItemInstance> InstanceType = UInventoryItemInstance::StaticClass();
 
-	// MarkItemDirty(NewEntry);
-	BroadcastChangeMessage(Result, /*OldCount=*/0, /*NewCount=*/StackCount);
+		FInventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();
+		NewEntry.Instance = NewObject<UInventoryItemInstance>(OwnerComponent->GetOwner()); //@TODO: Using the actor instead of component as the outer due to UE-127172
+		NewEntry.Instance->SetItemDef(ItemDef);
+
+		for (UInventoryItemFragment* Fragment : ItemDef->Fragments)
+		{
+			if (Fragment != nullptr)
+			{
+				Fragment->OnInstanceCreated(NewEntry.Instance);
+			}
+		}
+
+		NewEntry.StackCount = StackCount;
+		Result = NewEntry.Instance;
+
+		// MarkItemDirty(NewEntry);
+		BroadcastChangeMessage(Result, /*OldCount=*/0, /*NewCount=*/StackCount);
+	}
 
 	return Result;
 }
@@ -95,16 +120,19 @@ void FInventoryList::RemoveEntry(UInventoryItemInstance *Instance)
 	}
 }
 
-TArray<UInventoryItemInstance *> FInventoryList::GetAllItems() const
+TArray<FReadOnlyInventoryEntry> FInventoryList::GetAllItems() const
 {
-	TArray<UInventoryItemInstance *> Results;
+	TArray<FReadOnlyInventoryEntry> Results;
 	Results.Reserve(Entries.Num());
 
 	for (const FInventoryEntry &Entry : Entries)
 	{
 		if (Entry.Instance != nullptr) //@TODO: Would prefer to not deal with this here and hide it further?
 		{
-			Results.Add(Entry.Instance);
+			FReadOnlyInventoryEntry CopiedEntry;
+			CopiedEntry.Instance= Entry.Instance;
+			CopiedEntry.StackCount = Entry.StackCount;
+			Results.Add(CopiedEntry);
 		}
 	}
 
@@ -175,7 +203,7 @@ void UInventoryManagerComponent::RemoveItem(UInventoryItemInstance* ItemInstance
 	}
 }
 
-TArray<UInventoryItemInstance*> UInventoryManagerComponent::GetAllItems() const
+TArray<FReadOnlyInventoryEntry> UInventoryManagerComponent::GetAllItems() const
 {
 	return InventoryList.GetAllItems();
 }
@@ -226,7 +254,7 @@ int32 UInventoryManagerComponent::GetTotalItemCountByDefinition(TSubclassOf<UInv
 		{
 			if (Instance->GetItemDef()->IsA(ItemDef))
 			{
-				++TotalCount;
+				TotalCount += Entry.StackCount;
 			}
 		}
 	}

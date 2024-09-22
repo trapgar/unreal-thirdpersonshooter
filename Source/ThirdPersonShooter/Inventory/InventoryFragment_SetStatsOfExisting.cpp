@@ -25,17 +25,17 @@ void UInventoryFragment_SetStatsOfExisting::OnInstanceCreated(UInventoryItemInst
 	// Find the 1st item in the inventory that matches the item definition
 	if (UInventoryManagerComponent* Inventory = Owner->GetComponentByClass<UInventoryManagerComponent>())
 	{
-		for (UInventoryItemInstance* Item : Inventory->GetAllItems())
+		for (FReadOnlyInventoryEntry Entry : Inventory->GetAllItems())
 		{
-			if (Item->GetItemDef()->IsA(ItemDefinition))
+			if (Entry.Instance->GetItemDef()->IsA(ItemDefinition))
 			{
 				// And transfer all the stats
 				// This way, collected items where we don't find any matching item will be retained until one is added
 				for (const auto& KVP : AdditionalItemStats)
 				{
 					// TODO: Check for a max stack count
-					int32 StackCount = Item->GetStatTagStackCount(KVP.Key);
-					Item->AddStatTagStack(KVP.Key, StackCount + KVP.Value);
+					int32 StackCount = Entry.Instance->GetStatTagStackCount(KVP.Key);
+					Entry.Instance->AddStatTagStack(KVP.Key, StackCount + KVP.Value);
 					Instance->RemoveStatTagStack(KVP.Key, KVP.Value);
 				}
 

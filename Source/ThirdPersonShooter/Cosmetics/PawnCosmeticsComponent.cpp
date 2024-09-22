@@ -27,9 +27,9 @@ void UPawnCosmeticsComponent::GetSpawnedActors(TArray<AActor*>& Cosmetics)
 {
 	if (UInventoryManagerComponent* IMC = GetOwner()->GetComponentByClass<UInventoryManagerComponent>())
 	{
-		for (UInventoryItemInstance* Item : IMC->GetAllItems())
+		for (FReadOnlyInventoryEntry Entry : IMC->GetAllItems())
 		{
-			for (AActor* Actor : Item->GetSpawnedActors())
+			for (AActor* Actor : Entry.Instance->GetSpawnedActors())
 			{
 				Cosmetics.Emplace(Actor);
 			}

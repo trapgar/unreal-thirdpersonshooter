@@ -9,7 +9,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayAbility_RangedWeapon_Fire)
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Movement_AimingDownSights, "Event.Movement.ADS");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Movement_AimingDownSights, "Movement.Mode.ADS");
 
 void UGameplayAbility_RangedWeapon_Fire::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
