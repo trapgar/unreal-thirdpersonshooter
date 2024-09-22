@@ -107,6 +107,7 @@ void FInventoryList::RemoveEntry(UInventoryItemInstance *Instance)
 		FInventoryEntry& Entry = *EntryIt;
 		if (Entry.Instance == Instance)
 		{
+			int32 OldCount = Entry.StackCount;
 			Entry.StackCount -= 1;
 
 			if (Entry.StackCount <= 0)
@@ -115,7 +116,7 @@ void FInventoryList::RemoveEntry(UInventoryItemInstance *Instance)
 			}
 
 			// MarkArrayDirty();
-			BroadcastChangeMessage(Instance, /*OldCount=*/Entry.StackCount + 1, /*NewCount=*/Entry.StackCount);
+			BroadcastChangeMessage(Instance, /*OldCount=*/OldCount, /*NewCount=*/OldCount - 1);
 		}
 	}
 }
