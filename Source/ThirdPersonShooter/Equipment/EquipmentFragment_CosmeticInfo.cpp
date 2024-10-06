@@ -10,7 +10,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EquipmentFragment_CosmeticInfo)
 
-#define LOCTEXT_NAMESPACE "Equipment"
+#define LOCTEXT_NAMESPACE "Cosmetics"
 
 #if WITH_EDITOR
 EDataValidationResult UEquipmentFragment_CosmeticInfo::IsDataValid(FDataValidationContext& Context) const
@@ -54,3 +54,5 @@ void UEquipmentFragment_CosmeticInfo::OnInstanceDestroyed(UEquipmentItemInstance
 		Actor->Destroy();
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

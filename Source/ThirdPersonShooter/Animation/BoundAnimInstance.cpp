@@ -2,8 +2,8 @@
 
 #include "BoundAnimInstance.h"
 #include "AbilitySystemGlobals.h"
-#include "Character/ModularCharacter.h"
-#include "Character/ModularCharacterMovementComponent.h"
+#include "ModularCharacter.h"
+#include "ModularCharacterMovementComponent.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"

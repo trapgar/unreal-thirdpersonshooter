@@ -181,6 +181,7 @@ public:
 
 };
 
+// My attempt at making anim asset migrations from Lyra not break... does not work smh
 UCLASS(const, hidecategories=Object, CollapseCategories, Config = Game, meta=(DisplayName="TEMP Play Context Effects"))
 class THIRDPERSONSHOOTER_API UAnimNotify_LyraContextEffects : public UAnimNotify_ContextEffects
 {

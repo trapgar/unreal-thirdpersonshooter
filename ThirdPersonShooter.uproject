@@ -16,7 +16,19 @@
 	],
 	"Plugins": [
 		{
+			"Name": "AESGCMHandlerComponent",
+			"Enabled": true
+		},
+		{
+			"Name": "DTLSHandlerComponent",
+			"Enabled": true
+		},
+		{
 			"Name": "GameplayMessageRouter",
+			"Enabled": true
+		},
+		{
+			"Name": "UIExtension",
 			"Enabled": true
 		},
 		{
@@ -62,6 +74,14 @@
 		},
 		{
 			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUser",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonGame",
 			"Enabled": true
 		},
 		{

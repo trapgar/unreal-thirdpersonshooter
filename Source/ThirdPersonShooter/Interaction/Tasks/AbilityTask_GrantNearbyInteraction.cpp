@@ -11,7 +11,7 @@
 #include "Interaction/InteractionStatics.h"
 #include "Physics/CustomCollisionChannels.h"
 #include "TimerManager.h"
-#include "Character/ModularCharacter.h"
+#include "Character/ThirdPersonShooterCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AbilityTask_GrantNearbyInteraction)
 

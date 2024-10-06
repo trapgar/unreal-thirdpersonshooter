@@ -7,7 +7,7 @@
 #include "Interaction/InteractionStatics.h"
 #include "Interaction/Tasks/AbilityTask_GrantNearbyInteraction.h"
 #include "NativeGameplayTags.h"
-#include "Character/ModularPlayerController.h"
+#include "ModularPlayerController.h"
 // #include "UI/IndicatorSystem/IndicatorDescriptor.h"
 // #include "UI/IndicatorSystem/LyraIndicatorManagerComponent.h"
 

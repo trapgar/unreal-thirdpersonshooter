@@ -24,8 +24,14 @@ Make sure that if you're doing this globally that you toggle the `Search Details
 This will prevent Code from searching the entire Unreal Engine source, which is probably not what you want.
 
 ## Backlog
-- add elimination event to gunrange silhouettes
 - need to add the `ContextEffectsLibrary` & `ContextEffectsComponent` to be able to play footsteps
+- finish swap to use W_HUD_Layout instead of a normal widget
+- swap to anim mm & get assets for flying
+- figure out why the jetpack vfx doesn't turn on right away
+- enable camera-collision for the vehicle parts
+- move loose vehicle collision settings to presets
+- add armor w/damage reduction
+- look at lyra for the camera component
 
 ## Developer Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file
@@ -55,8 +61,6 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - Figure out how to use AssetManager w/cosmetics etc. (Data registries?)
 - Add the NotifyName for post `Activate Anim Layer and Play Paired Montage` to listen for animation notify event
 - Lyra has the `AbilitySystemComponent` off the PlayerState, not the Pawn, where is the best location?
-- `ADrivableSpaceVehicle` doesn't hear input events (IA or otherwise)
-    - Lyra uses `GA_Collectable` which grants an Interaction Ability
 - Make sure I'm using ALevelInstance right with `GameFeatureAction_AddLevelInstance` (streaming, etc)
     - [World Partition in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition-in-unreal-engine)
     - [Level Instancing in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/level-instancing-in-unreal-engine)

@@ -51,3 +51,5 @@ void UEquipmentItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 void UEquipmentItemInstance::OnRep_Instigator()
 {
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -57,3 +57,5 @@ void UEquipmentFragment_TransformQuickbarCosmeticInfo::OnInstanceCreated(UEquipm
 // void UEquipmentFragment_TransformQuickbarCosmeticInfo::OnInstanceDestroyed(UEquipmentItemInstance* Instance) const
 // {
 // }
+
+#undef LOCTEXT_NAMESPACE

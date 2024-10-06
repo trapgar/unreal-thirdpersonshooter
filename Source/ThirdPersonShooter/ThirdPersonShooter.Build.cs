@@ -28,22 +28,29 @@ public class ThirdPersonShooter : ModuleRules
 			"GameplayTags",
 			"GameplayTasks",
 			"GameplayAbilities",
-			"GameplayMessageRuntime",
-			"GameplayMessageNodes",
+			// "GameplayMessageNodes",
 			"ModularGameplay",
+			"ModularGameplayActors",
 			"GameFeatures",
 			"Niagara",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
 			"InputCore",
+			"Slate",
+			"SlateCore",
 			"DeveloperSettings",
 			"UMG",
 			"CommonUI",
-			// "CommonInput",
+			"CommonInput",
 			// "GameSettings",
-			"Slate",
-			"SlateCore"
+			"CommonGame",
+			"CommonUser",
+			"GameplayMessageRuntime",
+			"AudioMixer",
+			"UIExtension",
+			"AudioModulation",
+			"DTLSHandlerComponent",
 		});
 
 		// Uncomment if you are using online features
