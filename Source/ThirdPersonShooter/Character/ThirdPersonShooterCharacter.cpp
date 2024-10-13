@@ -37,6 +37,7 @@ AThirdPersonShooterCharacter::AThirdPersonShooterCharacter(const FObjectInitiali
 	check(Movement);
 	Movement->GetNavAgentPropertiesRef().bCanCrouch = true;
 	Movement->bCanWalkOffLedgesWhenCrouching = true;
+	Movement->CrouchedHalfHeight = 65.0f;
 	Movement->BrakingFrictionFactor = 1.0f;
 	Movement->BrakingFriction = 6.0f;
 	Movement->GroundFriction = 8.0f;
