@@ -6,7 +6,7 @@
 #include "GameFeatureAction_WorldActionBase.h"
 #include "UIExtensionSystem.h"
 
-#include "GameFeatureAction_AddWidget.generated.h"
+#include "GameFeatureAction_AddWidgets.generated.h"
 
 struct FWorldContext;
 struct FComponentRequestHandle;

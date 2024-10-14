@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GameFeatureAction_AddWidget.h"
+#include "GameFeatureAction_AddWidgets.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/GameInstance.h"
 #include "GameFeatures/GameFeatureAction_WorldActionBase.h"
@@ -12,7 +12,7 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddWidget)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddWidgets)
 
 #define LOCTEXT_NAMESPACE "GameFeatures"
 
