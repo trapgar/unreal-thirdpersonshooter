@@ -56,6 +56,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Attributes, Instanced)
 	TArray<TObjectPtr<UEquipmentItemFragment>> Fragments;
 
+	// Gameplay-related tags associated with this equipment (e.g.: "Primary", "Secondary", "Belt", etc.)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Equipment, meta=(Categories="Equipment.Classification"))
+	FGameplayTagContainer StaticGameplayTags;
+
 public:
 	const UEquipmentItemFragment* FindFragmentByClass(TSubclassOf<UEquipmentItemFragment> FragmentClass) const;
 

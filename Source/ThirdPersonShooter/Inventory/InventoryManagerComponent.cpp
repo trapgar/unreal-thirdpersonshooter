@@ -226,7 +226,7 @@ bool UInventoryManagerComponent::ReplicateSubobjects(UActorChannel* Channel, cla
 	return WroteSomething;
 }
 
-UInventoryItemInstance* UInventoryManagerComponent::FindFirstItemStackByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const
+UInventoryItemInstance* UInventoryManagerComponent::FindFirstItemByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const
 {
 	for (const FInventoryEntry& Entry : InventoryList.Entries)
 	{
@@ -275,7 +275,7 @@ bool UInventoryManagerComponent::ConsumeItemsByDefinition(TSubclassOf<UInventory
 	int32 TotalConsumed = 0;
 	while (TotalConsumed < NumToConsume)
 	{
-		if (UInventoryItemInstance* Instance = FindFirstItemStackByDefinition(ItemDef))
+		if (UInventoryItemInstance* Instance = FindFirstItemByDefinition(ItemDef))
 		{
 			InventoryList.RemoveEntry(Instance);
 			++TotalConsumed;

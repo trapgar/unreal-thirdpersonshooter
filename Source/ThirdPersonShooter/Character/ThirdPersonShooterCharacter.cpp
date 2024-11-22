@@ -5,7 +5,7 @@
 #include "ModularCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
-#include "Components/HealthComponent.h"
+#include "Combat/HealthComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ThirdPersonShooterCharacter)
 
@@ -43,6 +43,7 @@ AThirdPersonShooterCharacter::AThirdPersonShooterCharacter(const FObjectInitiali
 	Movement->GroundFriction = 8.0f;
 	Movement->BrakingDecelerationWalking = 1400.0f;
 	Movement->RotationRate = FRotator(0.0f, 0.0f, 720.0f);
+	Movement->MaxFlySpeed = 3200.0f; // 32 m/s
 
 	AbilitySystemComponent = CreateDefaultSubobject<UModularAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AbilitySystemComponent->SetIsReplicated(true);
@@ -112,16 +113,11 @@ void AThirdPersonShooterCharacter::UnPossessed()
 
 void AThirdPersonShooterCharacter::SetMovementModeTag(EMovementMode MovementMode, uint8 CustomMovementMode, bool bTagEnabled)
 {
-
 	if (auto ASC = GetAbilitySystemComponent())
 	{
 		const FGameplayTag* MovementModeTag = nullptr;
 
-		if (MovementMode == MOVE_Custom)
-		{
-			// TODO: What is a custom movement mode?
-		}
-		else
+		if (MovementMode != MOVE_Custom)
 		{
 			MovementModeTag = ThirdPersonShooterGameplayTags::MovementModeTagMap.Find(MovementMode);
 		}

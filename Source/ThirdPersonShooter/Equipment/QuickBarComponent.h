@@ -28,7 +28,7 @@ struct THIRDPERSONSHOOTER_API FQuickBarSlotsChangedMessage
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category=Inventory)
-	TObjectPtr<AActor> Owner = nullptr;
+	UQuickBarComponent* Source = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category=Inventory)
 	TArray<TObjectPtr<UInventoryItemInstance>> Slots;
@@ -44,7 +44,7 @@ struct THIRDPERSONSHOOTER_API FQuickBarActiveIndexChangedMessage
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category=Inventory)
-	TObjectPtr<AActor> Owner = nullptr;
+	UQuickBarComponent* Source = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category=Inventory)
 	int32 ActiveIndex = 0;
@@ -54,6 +54,11 @@ struct THIRDPERSONSHOOTER_API FQuickBarActiveIndexChangedMessage
 // --------------------------------------------------------
 
 
+/**
+ * Component that lets the player cycle through a list of equipment items.
+ * 
+ * Equipping a new item will automatically unequip the currently equipped item.
+ */
 UCLASS(Blueprintable, HideCategories=("Component Tick", "Component Replication"), meta=(BlueprintSpawnableComponent))
 class THIRDPERSONSHOOTER_API UQuickBarComponent : public UControllerComponent
 {

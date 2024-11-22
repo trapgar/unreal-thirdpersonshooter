@@ -36,8 +36,6 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file
     - I'm sure this is important for multiplayer, so will need to address this eventually
     - I've fixed the linker error, but need to go back and implement the removed `FFastArraySerializer` references
-- Should the `ModularAbilitySet` replace the `InputTag` with a ref to the IA?
-    - How would this affect abstract abilities like `GA_Weapon_Fire_Auto`?
 - Need to figure out how to keep track of inventory items that can vs can't stack
 - Research asset manager registrations for:
     - `UEquipmentConfiguration`

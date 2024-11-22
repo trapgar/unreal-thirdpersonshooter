@@ -207,7 +207,7 @@ UInventoryItemInstance* UQuickBarComponent::RemoveItemFromSlot(int32 SlotIndex)
 void UQuickBarComponent::OnRep_Slots()
 {
 	FQuickBarSlotsChangedMessage Message;
-	Message.Owner = GetOwner();
+	Message.Source = this;
 	Message.Slots = Slots;
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);
@@ -217,7 +217,7 @@ void UQuickBarComponent::OnRep_Slots()
 void UQuickBarComponent::OnRep_ActiveSlotIndex()
 {
 	FQuickBarActiveIndexChangedMessage Message;
-	Message.Owner = GetOwner();
+	Message.Source = this;
 	Message.ActiveIndex = ActiveSlotIndex;
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(this);

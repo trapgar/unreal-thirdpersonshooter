@@ -28,9 +28,7 @@ struct FGameFeatureDeactivatingContext;
 
 #define LOCTEXT_NAMESPACE "GameFeatures"
 
-// --------------------------------------------------------
-// UGameFeatureAction_AddLevelInstance
-
+// TODO: load async instead
 void UGameFeatureAction_AddLevelInstance::OnGameFeatureLoading()
 {
 	Super::OnGameFeatureLoading();
@@ -62,16 +60,6 @@ void UGameFeatureAction_AddLevelInstance::OnGameFeatureLoading()
 			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.TargetWorld` '%s'. Level instance will not be added."), *AssetPath.ToString());
 		}
 	}
-}
-
-void UGameFeatureAction_AddLevelInstance::OnGameFeatureActivating(FGameFeatureActivatingContext &Context)
-{
-	Super::OnGameFeatureActivating(Context);
-}
-
-void UGameFeatureAction_AddLevelInstance::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
-{
-	Super::OnGameFeatureDeactivating(Context);
 }
 
 #if WITH_EDITOR

@@ -60,8 +60,6 @@ class UGameFeatureAction_AddLevelInstance final : public UGameFeatureAction_Worl
 public:
 	//~ Begin UGameFeatureAction interface
 	virtual void OnGameFeatureLoading() override;
-	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
-	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 	//~ End UGameFeatureAction interface
 
 	//~ Begin UObject interface

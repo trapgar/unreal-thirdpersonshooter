@@ -43,24 +43,21 @@ public:
 
 		UGameFeatureAction_AddInputBinding* Action_AddInputBinding = NewObject<UGameFeatureAction_AddInputBinding>();
 		Action_AddInputBinding->InputConfigs.Emplace(
-			// E:/source/repos/.unreal/ThirdPersonShooter/Content/Input/InputBindings_Character.uasset
-			TSoftObjectPtr<UInputActionToGameplayTagBindings>(FSoftObjectPath("/Game/ThirdPersonShooter/Input/InputBindings_Character.InputBindings_Character"))
+			TSoftObjectPtr<UInputActionToGameplayTagBindings>(FSoftObjectPath("/Game/Input/InputBindings_Character"))
 		);
 		Action_AddInputBinding->InputConfigs.Emplace(
-			// E:/source/repos/.unreal/ThirdPersonShooter/Content/Input/InputBindings_InventoryAndEquipment.uasset
-			TSoftObjectPtr<UInputActionToGameplayTagBindings>(FSoftObjectPath("/Game/ThirdPersonShooter/Input/InputBindings_InventoryAndEquipment.InputBindings_InventoryAndEquipment"))
+			TSoftObjectPtr<UInputActionToGameplayTagBindings>(FSoftObjectPath("/Game/Input/InputBindings_InventoryAndEquipment"))
 		);
 
 		UGameFeatureAction_AddInputContextMapping* Action_AddInputContextMapping = NewObject<UGameFeatureAction_AddInputContextMapping>();
 		FInputMappingContextAndPriority IMC_Character;
-		IMC_Character.InputMapping = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/Game/ThirdPersonShooter/Input/IMC_Character.IMC_Character"));
+		IMC_Character.InputMapping = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/Game/Input/IMC_Character"));
 		IMC_Character.Priority = 0;
 		IMC_Character.bRegisterWithSettings = true;
 		Action_AddInputContextMapping->InputMappings.Emplace(IMC_Character);
 
-		// E:/source/repos/.unreal/ThirdPersonShooter/Content/Input/IMC_InventoryAndEquipment.uasset
 		FInputMappingContextAndPriority IMC_InventoryAndEquipment;
-		IMC_InventoryAndEquipment.InputMapping = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/Game/ThirdPersonShooter/Input/IMC_InventoryAndEquipment.IMC_InventoryAndEquipment"));
+		IMC_InventoryAndEquipment.InputMapping = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/Game/Input/IMC_InventoryAndEquipment"));
 		IMC_InventoryAndEquipment.Priority = 0;
 		IMC_InventoryAndEquipment.bRegisterWithSettings = true;
 		Action_AddInputContextMapping->InputMappings.Emplace(IMC_InventoryAndEquipment);
@@ -68,10 +65,8 @@ public:
 		UGameFeatureAction_AddAbilities* Action_AddAbilities = NewObject<UGameFeatureAction_AddAbilities>();
 		FGameFeatureAbilitiesEntry AbilitySet_Hero;
 		AbilitySet_Hero.ActorClass = TSoftClassPtr<AActor>(AThirdPersonShooterCharacter::StaticClass());
-		// E:/source/repos/.unreal/ThirdPersonShooter/Content/Characters/Abilities/AbilitySet_Hero.uasset
-		AbilitySet_Hero.GrantedAbilitySets.Add(TSoftObjectPtr<UModularAbilitySet>(FSoftObjectPath("/Game/ThirdPersonShooter/Characters/Abilities/AbilitySet_Hero.AbilitySet_Hero")));
-		// E:/source/repos/.unreal/ThirdPersonShooter/Content/Items/Weapons/AbilitySet_InventoryAndEquipment.uasset
-		AbilitySet_Hero.GrantedAbilitySets.Add(TSoftObjectPtr<UModularAbilitySet>(FSoftObjectPath("/Game/ThirdPersonShooter/Items/Weapons/AbilitySet_InventoryAndEquipment.AbilitySet_InventoryAndEquipment")));
+		AbilitySet_Hero.GrantedAbilitySets.Add(TSoftObjectPtr<UModularAbilitySet>(FSoftObjectPath("/Game/Characters/Abilities/AbilitySet_Hero")));
+		AbilitySet_Hero.GrantedAbilitySets.Add(TSoftObjectPtr<UModularAbilitySet>(FSoftObjectPath("/Game/Items/Weapons/AbilitySet_InventoryAndEquipment")));
 		Action_AddAbilities->AbilitiesList.Emplace(AbilitySet_Hero);
 
 		Actions.Emplace(Action_AddComponents);

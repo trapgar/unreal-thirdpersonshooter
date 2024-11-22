@@ -53,6 +53,7 @@ class UGameFeatureAction_AddWidgets final : public UGameFeatureAction_WorldActio
 
 public:
 	//~ Begin UGameFeatureAction interface
+	virtual void OnGameFeatureLoading() override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 #if WITH_EDITORONLY_DATA
 	virtual void AddAdditionalAssetBundleData(FAssetBundleData& AssetBundleData) override;

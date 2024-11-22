@@ -16,8 +16,43 @@
 
 #define LOCTEXT_NAMESPACE "GameFeatures"
 
-// --------------------------------------------------------
-// UGameFeatureAction_AddWidgets
+// TODO: change to load async
+void UGameFeatureAction_AddWidgets::OnGameFeatureLoading()
+{
+	Super::OnGameFeatureLoading();
+
+	for (const FHUDLayoutRequest& Entry : Layout)
+	{
+		const FSoftObjectPath& AssetPath = Entry.LayoutClass.ToSoftObjectPath();
+		if (AssetPath.IsValid())
+		{
+			if (!Entry.LayoutClass.IsValid())
+			{
+				Entry.LayoutClass.LoadSynchronous();
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.LayoutClass` '%s'. Layouts will not be added."), *AssetPath.ToString());
+		}
+	}
+
+	for (const FHUDElementEntry& Entry : Widgets)
+	{
+		const FSoftObjectPath& AssetPath = Entry.WidgetClass.ToSoftObjectPath();
+		if (AssetPath.IsValid())
+		{
+			if (!Entry.WidgetClass.IsValid())
+			{
+				Entry.WidgetClass.LoadSynchronous();
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameFeatures, Error, TEXT("Failed to load soft object reference `Entry.WidgetClass` '%s'. Widgets will not be added."), *AssetPath.ToString());
+		}
+	}
+}
 
 void UGameFeatureAction_AddWidgets::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {

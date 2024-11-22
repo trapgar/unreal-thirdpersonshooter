@@ -225,19 +225,19 @@ protected:
 	 * that they can look at to determine if it's for whatever they consider their player.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "UI Extension", meta = (DisplayName = "Register Extension (Widget For Context)"))
-	FUIExtensionHandle K2_RegisterExtensionAsWidgetForContext(UPARAM(meta = (Categories = "UI.Layer")) FGameplayTag ExtensionPointTag, TSubclassOf<UUserWidget> WidgetClass, UObject* ContextObject, int32 Priority = -1);
+	FUIExtensionHandle K2_RegisterExtensionAsWidgetForContext(UPARAM(meta = (Categories = "HUD.Slot")) FGameplayTag ExtensionPointTag, TSubclassOf<UUserWidget> WidgetClass, UObject* ContextObject, int32 Priority = -1);
 
 	/**
 	 * Registers the extension as data for any extension point that can make use of it.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category="UI Extension", meta = (DisplayName = "Register Extension (Data)"))
-	FUIExtensionHandle K2_RegisterExtensionAsData(UPARAM(meta = (Categories = "UI.Layer"))  FGameplayTag ExtensionPointTag, UObject* Data, int32 Priority = -1);
+	FUIExtensionHandle K2_RegisterExtensionAsData(UPARAM(meta = (Categories = "HUD.Slot"))  FGameplayTag ExtensionPointTag, UObject* Data, int32 Priority = -1);
 
 	/**
 	 * Registers the extension as data for any extension point that can make use of it.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category="UI Extension", meta = (DisplayName = "Register Extension (Data For Context)"))
-	FUIExtensionHandle K2_RegisterExtensionAsDataForContext(UPARAM(meta = (Categories = "UI.Layer"))  FGameplayTag ExtensionPointTag, UObject* ContextObject, UObject* Data, int32 Priority = -1);
+	FUIExtensionHandle K2_RegisterExtensionAsDataForContext(UPARAM(meta = (Categories = "HUD.Slot"))  FGameplayTag ExtensionPointTag, UObject* ContextObject, UObject* Data, int32 Priority = -1);
 
 	FUIExtensionRequest CreateExtensionRequest(const TSharedPtr<FUIExtension>& Extension);
 
