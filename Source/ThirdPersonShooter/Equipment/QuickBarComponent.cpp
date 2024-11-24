@@ -175,6 +175,13 @@ void UQuickBarComponent::AddItemToSlot(int32 SlotIndex, UInventoryItemInstance* 
 			}
 
 			OnRep_Slots();
+
+			// Item in active slot ran out of charges etc, but was just restocked - re-equip
+			if (ActiveSlotIndex == SlotIndex)
+			{
+				UnequipItemInSlot();
+				EquipItemInSlot();
+			}
 		}
 	}
 }
@@ -186,7 +193,6 @@ UInventoryItemInstance* UQuickBarComponent::RemoveItemFromSlot(int32 SlotIndex)
 	if (ActiveSlotIndex == SlotIndex)
 	{
 		UnequipItemInSlot();
-		ActiveSlotIndex = -1;
 	}
 
 	if (Slots.IsValidIndex(SlotIndex))

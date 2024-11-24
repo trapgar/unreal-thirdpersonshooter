@@ -244,6 +244,19 @@ UInventoryItemInstance* UInventoryManagerComponent::FindFirstItemByDefinition(TS
 	return nullptr;
 }
 
+int32 UInventoryManagerComponent::GetItemStackCount(UInventoryItemInstance* ItemInstance) const
+{
+	for (const FInventoryEntry& Entry : InventoryList.Entries)
+	{
+		if (Entry.Instance == ItemInstance)
+		{
+			return Entry.StackCount;
+		}
+	}
+
+	return 0;
+}
+
 int32 UInventoryManagerComponent::GetTotalItemCountByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const
 {
 	int32 TotalCount = 0;

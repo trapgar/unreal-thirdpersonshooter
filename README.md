@@ -47,6 +47,7 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - What is the difference between a `GameplayCue`, and a `GameplayEvent` in terms of GameplayTags?
     - assume `GameplayCue` is 'Hey, you're supposed to do X now', and `GameplayEvent` is 'Y just happened'
     > `GameplayEvents` are used by the AbilitySystemComponent to track when an ability should be triggered by a certain 'event' - see `GA_WeaponFire` listening for the `InputTag.x`
+    - Is it though? Removing the InputTag from the GA_ doesn't affect functionality... InputTag_Bindings holds the link between the 2...
     > `GameplayCues` are typically for the server telling the client to do some VFX/SFX thing - see the `GameplayCue` for grenades
 
 ---

@@ -6,7 +6,28 @@
 #include "Inventory/InventoryManagerComponent.h"
 #include "Inventory/InventoryFragment_EquippableItem.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InventoryFragment_SetStatsOfExisting)
+
+#define LOCTEXT_NAMESPACE "Inventory"
+
+#if WITH_EDITOR
+EDataValidationResult UInventoryFragment_SetStatsOfExisting::IsDataValid(FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+
+	if (ItemDefinition == nullptr)
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(LOCTEXT("EntryHasNullActor", "Null ItemDefinition"));
+	}
+
+	return Result;
+}
+#endif
 
 void UInventoryFragment_SetStatsOfExisting::OnInstanceCreated(UInventoryItemInstance* Instance) const
 {
@@ -44,3 +65,5 @@ void UInventoryFragment_SetStatsOfExisting::OnInstanceCreated(UInventoryItemInst
 		}
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

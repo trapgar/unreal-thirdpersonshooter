@@ -22,7 +22,7 @@ class UNiagaraComponent;
  * 
  * Projectile fire from a ranged weapon.
  */
-UCLASS(Abstract, Blueprintable, HideCategories=("Actor Tick", "Component Tick", "Replication", "Input", "HLOD"))
+UCLASS(Abstract, Blueprintable, HideCategories=("Actor Tick", "Component Tick", "Input", "HLOD"))
 class THIRDPERSONSHOOTER_API ARangedWeaponProjectile : public AActor
 {
 	GENERATED_BODY()

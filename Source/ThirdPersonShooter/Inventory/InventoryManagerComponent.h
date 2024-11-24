@@ -173,6 +173,10 @@ public:
 
 	// Returns the aggregated stack count of all the items matching the given item definition
 	UFUNCTION(BlueprintCallable, Category=Inventory)
+	int32 GetItemStackCount(UInventoryItemInstance* ItemInstance) const;
+
+	// Returns the aggregated stack count of all the items matching the given item definition
+	UFUNCTION(BlueprintCallable, Category=Inventory)
 	int32 GetTotalItemCountByDefinition(TSubclassOf<UInventoryItemDefinition> ItemDef) const;
 
 	// Removes the specified number of inventory items that match the given item def
