@@ -161,7 +161,7 @@ bool UModularGameplayAbility::DoesAbilitySatisfyTagRequirements(const UAbilitySy
 	const FGameplayTag& MissingTag = AbilitySystemGlobals.ActivateFailTagsMissingTag;
 
 	// Check if any of this ability's tags are currently blocked
-	if (AbilitySystemComponent.AreAbilityTagsBlocked(AbilityTags))
+	if (AbilitySystemComponent.AreAbilityTagsBlocked(GetAssetTags()))
 	{
 		bBlocked = true;
 	}
@@ -265,10 +265,8 @@ void UModularGameplayAbility::OnAbilityFailedToActivate_Broadcast(const FGamepla
 
 void UModularGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const
 {
-	const bool bIsPredicting = (Spec.ActivationInfo.ActivationMode == EGameplayAbilityActivationMode::Predicting);
-
 	// Try to activate if activation policy is on spawn.
-	if (ActorInfo && !Spec.IsActive() && !bIsPredicting && (ActivationPolicy == EModularAbilityActivationPolicy::OnSpawn))
+	if (ActorInfo && !Spec.IsActive() && (ActivationPolicy == EModularAbilityActivationPolicy::OnSpawn))
 	{
 		UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 		const AActor* AvatarActor = ActorInfo->AvatarActor.Get();

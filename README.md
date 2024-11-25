@@ -24,13 +24,13 @@ Make sure that if you're doing this globally that you toggle the `Search Details
 This will prevent Code from searching the entire Unreal Engine source, which is probably not what you want.
 
 ## Backlog
-- finish swap to use W_HUD_Layout instead of a normal widget
 - swap to anim mm & get assets for flying
-- figure out why the jetpack vfx doesn't turn on right away
 - enable camera-collision for the vehicle parts
 - move loose vehicle collision settings to presets
 - add armor w/damage reduction
 - look at lyra for the camera component
+- shotgun crashes the engine if you shoot 2 silhouettes in quick succession
+    - Tracked this down to GCNL_Character_Damaged for the Select & Queue Admin - think the multiple hits so close are breaking something?
 
 ## Developer Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file

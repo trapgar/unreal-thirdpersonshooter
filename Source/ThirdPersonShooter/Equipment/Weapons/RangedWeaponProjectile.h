@@ -53,12 +53,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FGameplayEffectContextHandle MakeEffectContext() const;
 
-public:
 	/** Function called when projectile hits something */
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-public:
 	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="Default")
 	TObjectPtr<UNiagaraComponent> ImpactDecal;
@@ -66,5 +64,8 @@ public:
 	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="Components")
 	TObjectPtr<UNiagaraComponent> ImpactSystem;
+
+private:
+	FVector StartingLocation;
 
 };

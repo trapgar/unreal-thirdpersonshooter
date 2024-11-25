@@ -96,7 +96,7 @@ void UModularAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* ASC, FModu
 
 		FGameplayAbilitySpec AbilitySpec(AbilityCDO, AbilityToGrant.AbilityLevel);
 		AbilitySpec.SourceObject = SourceObject;
-		AbilitySpec.DynamicAbilityTags.AddTag(AbilityToGrant.InputTag);
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(AbilityToGrant.InputTag);
 
 		const FGameplayAbilitySpecHandle AbilitySpecHandle = ASC->GiveAbility(AbilitySpec);
 

@@ -7,6 +7,7 @@
 #include "ThirdPersonShooterGameplayTags.h"
 #include "GameplayCueFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "CoreMinimal.h"
 
 static FName NAME_ProjectileCollisionProfile(TEXT("Projectile"));
 
@@ -34,6 +35,8 @@ void ARangedWeaponProjectile::OnConstruction(const FTransform & Transform)
 {
 	Super::OnConstruction(Transform);
 
+	StartingLocation = Transform.GetLocation();
+
 	if (Weapon)
 	{
 		ProjectileMovementComponent->InitialSpeed = Weapon->MuzzleVelocity;
@@ -59,6 +62,7 @@ FGameplayEffectContextHandle ARangedWeaponProjectile::MakeEffectContext() const
 
 	EffectContext->AddInstigator(AsInstigator, AsInstigator);
 	EffectContext->AddSourceObject(Source);
+	EffectContext->AddOrigin(StartingLocation);
 
 	if (const IModularAbilityAttenuatorInterface* Attenuator = Cast<const IModularAbilityAttenuatorInterface>(Source))
 	{
@@ -123,5 +127,12 @@ void ARangedWeaponProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherA
 	{
 		// TODO: calculate force based on mass & velocity, keeping in mind it will probably just tear right through the obj
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 0.5f, GetActorLocation());
+	}
+	else if (OtherActor != nullptr && OtherActor->CanBeDamaged())
+	{
+		if (HasAuthority())
+		{
+			UGameplayStatics::ApplyDamage(OtherActor, Weapon->SingleBulletDamage, GetInstigatorController(), this, UDamageType::StaticClass());
+		}
 	}
 }

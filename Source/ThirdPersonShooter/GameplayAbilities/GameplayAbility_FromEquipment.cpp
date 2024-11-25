@@ -41,7 +41,9 @@ EDataValidationResult UGameplayAbility_FromEquipment::IsDataValid(FDataValidatio
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	if (InstancingPolicy == EGameplayAbilityInstancingPolicy::NonInstanced)
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	{
 		Context.AddError(NSLOCTEXT("Abilities", "EquipmentAbilityMustBeInstanced", "Equipment ability must be instanced"));
 		Result = EDataValidationResult::Invalid;

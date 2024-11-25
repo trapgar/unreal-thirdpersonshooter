@@ -28,7 +28,9 @@ void UModularAbilitySystemComponent::CancelAbilitiesByFunc(TShouldCancelAbilityF
 
 		UModularGameplayAbility* ModularAbilityCDO = CastChecked<UModularGameplayAbility>(AbilitySpec.Ability);
 
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 		if (ModularAbilityCDO->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
 		{
 			// Cancel all the spawned instances, not the CDO.
 			TArray<UGameplayAbility*> Instances = AbilitySpec.GetAbilityInstances();
@@ -70,8 +72,13 @@ void UModularAbilitySystemComponent::AbilitySpecInputPressed(FGameplayAbilitySpe
 	// Use replicated events instead so that the WaitInputPress ability task works.
 	if (Spec.IsActive())
 	{
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+		const UGameplayAbility* Instance = Spec.GetPrimaryInstance();
+		FPredictionKey OriginalPredictionKey = Instance ? Instance->GetCurrentActivationInfo().GetActivationPredictionKey() : Spec.ActivationInfo.GetActivationPredictionKey();
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
 		// Invoke the InputPressed event. This is not replicated here. If someone is listening, they may replicate the InputPressed event to the server.
-		InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, Spec.Handle, Spec.ActivationInfo.GetActivationPredictionKey());
+		InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, Spec.Handle, OriginalPredictionKey);
 	}
 }
 
@@ -83,8 +90,13 @@ void UModularAbilitySystemComponent::AbilitySpecInputReleased(FGameplayAbilitySp
 	// Use replicated events instead so that the WaitInputRelease ability task works.
 	if (Spec.IsActive())
 	{
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+		const UGameplayAbility* Instance = Spec.GetPrimaryInstance();
+		FPredictionKey OriginalPredictionKey = Instance ? Instance->GetCurrentActivationInfo().GetActivationPredictionKey() : Spec.ActivationInfo.GetActivationPredictionKey();
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
 		// Invoke the InputReleased event. This is not replicated here. If someone is listening, they may replicate the InputReleased event to the server.
-		InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, Spec.Handle, Spec.ActivationInfo.GetActivationPredictionKey());
+		InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, Spec.Handle, OriginalPredictionKey);
 	}
 }
 
@@ -191,7 +203,7 @@ void UModularAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& 
 	{
 		for (const FGameplayAbilitySpec& AbilitySpec : ActivatableAbilities.Items)
 		{
-			if (AbilitySpec.Ability && (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)))
+			if (AbilitySpec.Ability && (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag)))
 			{
 				InputPressedSpecHandles.AddUnique(AbilitySpec.Handle);
 				InputHeldSpecHandles.AddUnique(AbilitySpec.Handle);
@@ -206,7 +218,7 @@ void UModularAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag&
 	{
 		for (const FGameplayAbilitySpec& AbilitySpec : ActivatableAbilities.Items)
 		{
-			if (AbilitySpec.Ability && (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)))
+			if (AbilitySpec.Ability && (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag)))
 			{
 				InputReleasedSpecHandles.AddUnique(AbilitySpec.Handle);
 				InputHeldSpecHandles.Remove(AbilitySpec.Handle);

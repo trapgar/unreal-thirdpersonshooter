@@ -5,6 +5,7 @@
 #include "GameplayAbilities/Attributes/PawnCombatSet.h"
 #include "GameplayAbilities/ModularGameplayEffectContext.h"
 #include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
+#include "CustomLogChannels.h"
 #include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ExecutionCalculationDamage)
@@ -84,7 +85,6 @@ void UExecutionCalculationDamage::Execute_Implementation(const FGameplayEffectCu
 		}
 	}
 
-	// Apply rules for team damage/self damage/etc...
 	float DamageInteractionAllowedMultiplier = 1.0f;
 
 	// Determine distance
@@ -116,6 +116,17 @@ void UExecutionCalculationDamage::Execute_Implementation(const FGameplayEffectCu
 		DistanceAttenuation = AbilitySource->GetDistanceAttenuation(Distance, SourceTags, TargetTags);
 	}
 	DistanceAttenuation = FMath::Max(DistanceAttenuation, 0.0f);
+
+	UE_LOG(LogAbilities,
+		Log,
+		TEXT("ExecutionCalculationDamage: BaseDamage[%f] * DistanceAttenuation[%f] * PhysicalMaterialAttenuation[%f] * DamageInteractionAllowedMultiplier[%f] = %f at %fm"),
+		BaseDamage,
+		DistanceAttenuation,
+		PhysicalMaterialAttenuation,
+		DamageInteractionAllowedMultiplier,
+		FMath::Max(BaseDamage * DistanceAttenuation * PhysicalMaterialAttenuation * DamageInteractionAllowedMultiplier, 0.0f),
+		Distance / 100.0f
+	);
 
 	// Clamping is done when damage is converted to -health
 	const float DamageDone = FMath::Max(BaseDamage * DistanceAttenuation * PhysicalMaterialAttenuation * DamageInteractionAllowedMultiplier, 0.0f);

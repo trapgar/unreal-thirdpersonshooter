@@ -19,10 +19,11 @@ static FName NAME_CustomCharacterCollisionProfile_Mesh(TEXT("Pawn_Mesh"));
 AThirdPersonShooterCharacter::AThirdPersonShooterCharacter(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Avoid ticking characters if possible.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
-	NetCullDistanceSquared = 900000000.0f;
+
+	SetNetCullDistanceSquared(900000000.0f);
 
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
 	check(CapsuleComp);
