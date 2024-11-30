@@ -2,7 +2,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameplayAbilities/ModularAbilitySystemComponent.h"
-#include "ModularCharacterMovementComponent.h"
+#include "ThirdPersonShooterCharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
 #include "Combat/HealthComponent.h"
@@ -17,7 +17,7 @@ static FName NAME_CustomCharacterCollisionProfile_Capsule(TEXT("Pawn_Capsule"));
 static FName NAME_CustomCharacterCollisionProfile_Mesh(TEXT("Pawn_Mesh"));
 
 AThirdPersonShooterCharacter::AThirdPersonShooterCharacter(const FObjectInitializer &ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UThirdPersonShooterCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Avoid ticking characters if possible.
 	PrimaryActorTick.bCanEverTick = false;

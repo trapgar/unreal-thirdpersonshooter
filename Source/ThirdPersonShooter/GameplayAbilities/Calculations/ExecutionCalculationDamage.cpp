@@ -100,7 +100,7 @@ void UExecutionCalculationDamage::Execute_Implementation(const FGameplayEffectCu
 	}
 	else
 	{
-		ensureMsgf(false, TEXT("Damage Calculation cannot deduce a source location for damage coming from %s; Falling back to WORLD_MAX dist!"), *GetPathNameSafe(Spec.Def));
+		UE_LOG(LogAbilities, Error, TEXT("Damage Calculation cannot deduce a source location for damage coming from %s; Falling back to WORLD_MAX dist!"), *GetPathNameSafe(Spec.Def));
 	}
 
 	// Apply ability source modifiers

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Common/GameplayTagStack.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "InventoryItemDefinition.generated.h"
@@ -50,6 +51,10 @@ public:
 	// Max number of items in a single inventory stack
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default, meta=(ClampMin=1, UIMin=1))
 	int32 MaxStackCount = 1;
+
+	// Gameplay-related tags associated with this inventory item (e.g.: "Primary", "Secondary", "Utility", etc.)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Default, meta=(Categories="Item.Classification"))
+	FGameplayTagContainer StaticGameplayTags;
 
 	// List of fragments for the item
 	// @see `UInventoryItemFragment` for what fragments do

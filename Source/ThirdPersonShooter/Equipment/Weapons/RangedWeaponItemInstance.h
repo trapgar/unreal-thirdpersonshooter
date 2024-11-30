@@ -6,6 +6,7 @@
 #include "Physics/PhysicalMaterialWithTags.h"
 #include "Equipment/EquipmentItemInstance.h"
 #include "RangedWeaponProjectile.h"
+#include "UI/Equipment/WeaponReticleWidgetBase.h"
 #include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 
@@ -52,6 +53,8 @@ class THIRDPERSONSHOOTER_API URangedWeaponItemInstance : public UEquipmentItemIn
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="HUD")
+	TSubclassOf<UWeaponReticleWidgetBase> ReticleWidgetClass;
 
 	// Initial velocity of the projectile on spawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm/s"))

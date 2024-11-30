@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CommonUserWidget.h"
+#include "GameplayTagContainer.h"
 
 #include "WeaponReticleWidgetBase.generated.h"
 
@@ -19,24 +20,32 @@ class UWeaponReticleWidgetBase : public UCommonUserWidget
 public:
 	UWeaponReticleWidgetBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UFUNCTION(BlueprintCallable)
+	void InitializeFromEquipment(UEquipmentItemInstance* InEquipment);
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnEquipmentInitialized();
 
-	UFUNCTION(BlueprintCallable)
-	void InitializeFromEquipment(UEquipmentItemInstance* InEquipment);
+	// Called when the current player either starts or stops aiming down sights
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, meta=(DisplayName="OnAimDownSight"))
+	void K2_OnAimDownSight(bool bAimDownSight);
+
+	// Called when the current player has damaged another player
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, meta=(DisplayName="OnDamage"))
+	void K2_OnDamage(float Amount, FGameplayTagContainer AssociatedTags);
+
+	// Called when the current player has eliminated another player
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, meta=(DisplayName="OnEliminate"))
+	void K2_OnEliminate();
 
 	/** Returns the current weapon's diametrical spread angle, in degrees */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Equipment|UI")
 	float ComputeSpreadAngle() const;
 
 	/** Returns the current weapon's maximum spread radius in screenspace units (pixels) */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Equipment|UI")
 	float ComputeMaxScreenspaceSpreadRadius() const;
 
-protected:
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UEquipmentItemInstance> EquipmentInstance;
-
-	// UPROPERTY(BlueprintReadOnly)
-	// TObjectPtr<ULyraInventoryItemInstance> InventoryInstance;
+private:
+	TObjectPtr<UEquipmentItemInstance> EquipmentItemInstance;
 };

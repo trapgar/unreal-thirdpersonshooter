@@ -10,7 +10,7 @@ public class VehiclesAndNavigationRuntime : ModuleRules
 
 		PublicIncludePaths.AddRange(
 			new string[] {
-				"VehiclesAndNavigationRuntime/Public"
+				// "VehiclesAndNavigationRuntime/Public"
 			}
 		);
 

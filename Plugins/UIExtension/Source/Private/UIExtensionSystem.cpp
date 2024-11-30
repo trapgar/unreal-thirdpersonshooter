@@ -36,7 +36,7 @@ bool FUIExtensionPoint::DoesExtensionPassContract(const FUIExtension* Extension)
 {
 	if (UObject* DataPtr = Extension->Data)
 	{
-		const bool bMatchesContext = 
+		const bool bMatchesContext =
 			(ContextObject.IsExplicitlyNull() && Extension->ContextObject.IsExplicitlyNull()) ||
 			ContextObject == Extension->ContextObject;
 
@@ -62,6 +62,8 @@ bool FUIExtensionPoint::DoesExtensionPassContract(const FUIExtension* Extension)
 
 void UUIExtensionSubsystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector)
 {
+	Super::AddReferencedObjects(InThis, Collector);
+
 	if (UUIExtensionSubsystem* ExtensionSubsystem = Cast<UUIExtensionSubsystem>(InThis))
 	{
 		for (auto MapIt = ExtensionSubsystem->ExtensionPointMap.CreateIterator(); MapIt; ++MapIt)
@@ -227,7 +229,7 @@ void UUIExtensionSubsystem::NotifyExtensionPointsOfExtension(EUIExtensionAction 
 				}
 			}
 		}
-		
+
 		bOnInitialTag = false;
 	}
 }
@@ -253,7 +255,7 @@ void UUIExtensionSubsystem::UnregisterExtension(const FUIExtensionHandle& Extens
 			NotifyExtensionPointsOfExtension(EUIExtensionAction::Removed, Extension);
 
 			ListPtr->RemoveSwap(Extension);
-			
+
 			if (ListPtr->Num() == 0)
 			{
 				ExtensionMap.Remove(Extension->ExtensionPointTag);
@@ -306,7 +308,7 @@ FUIExtensionPointHandle UUIExtensionSubsystem::K2_RegisterExtensionPoint(FGamepl
 {
 	return RegisterExtensionPoint(ExtensionPointTag, ExtensionPointTagMatchType, AllowedDataClasses, FExtendExtensionPointDelegate::CreateWeakLambda(ExtensionCallback.GetUObject(), [this, ExtensionCallback](EUIExtensionAction Action, const FUIExtensionRequest& Request) {
 		ExtensionCallback.ExecuteIfBound(Action, Request);
-	}));
+		}));
 }
 
 FUIExtensionHandle UUIExtensionSubsystem::K2_RegisterExtensionAsWidget(FGameplayTag ExtensionPointTag, TSubclassOf<UUserWidget> WidgetClass, int32 Priority)

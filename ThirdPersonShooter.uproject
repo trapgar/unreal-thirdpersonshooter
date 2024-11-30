@@ -111,6 +111,18 @@
 		{
 			"Name": "AudioModulation",
 			"Enabled": true
+		},
+		{
+			"Name": "ChaosModularVehicleExamples",
+			"Enabled": true
+		},
+		{
+			"Name": "ChaosModularVehicle",
+			"Enabled": true
+		},
+		{
+			"Name": "ChaosVehiclesPlugin",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

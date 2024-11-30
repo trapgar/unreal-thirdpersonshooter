@@ -4,8 +4,8 @@
 
 #include "Equipment/EquipmentItemDefinition.h"
 #include "Equipment/EquipmentItemInstance.h"
-#include "Inventory/InventoryFragment_EquippableItem.h"
-#include "Inventory/InventoryFragment_QuickbarCosmeticInfo.h"
+#include "Inventory/Fragments/InventoryFragment_EquippableItem.h"
+#include "Inventory/Fragments/InventoryFragment_QuickbarCosmeticInfo.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"

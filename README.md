@@ -30,7 +30,9 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - add armor w/damage reduction
 - look at lyra for the camera component
 - shotgun crashes the engine if you shoot 2 silhouettes in quick succession
-    - Tracked this down to GCNL_Character_Damaged for the Select & Queue Admin - think the multiple hits so close are breaking something?
+    - Tracked this down to `GCNL_Character_Damaged` for the `Select & Queue Admin` func - think the multiple hits so close are breaking something?
+- `AModularCharacter::EndPlay` throws an error saying that the `UGameFrameworkComponentManager` is being unregistered without ever being registered
+- Exiting the editor will cause an `Access violation executing location 0xFFFFFFFFFFFFFFFF` to be thrown with no source or context available
 
 ## Developer Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file

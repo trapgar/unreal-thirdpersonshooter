@@ -71,10 +71,6 @@ private:
 	// The current spread angle accumulated by automatic fire
 	float AccumulatedSpreadAngle = 0.0f;
 
-	// Do we currently have first shot accuracy?
-	// TODO: Not used - pull from RangedWeaponStats if/when actually implemented
-	bool bHasFirstShotAccuracy = false;
-
 	// Whether or not the weapon has a bullet in the chamber
 	bool bHas1InTheChamber = false;
 	

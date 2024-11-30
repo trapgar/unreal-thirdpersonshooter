@@ -14,25 +14,26 @@ public class CommonUser : ModuleRules
 			new string[] {
 				// ... add public include paths required here ...
 			}
-			);
-				
-		
+		);
+
+
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
 			}
-			);
-			
-		
+		);
+
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
 				"CoreOnline",
 				"GameplayTags",
+				"OnlineSubsystemUtils",
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
+		);
 
 		if (bUseOnlineSubsystemV1)
 		{
@@ -42,7 +43,7 @@ public class CommonUser : ModuleRules
 		{
 			PublicDependencyModuleNames.Add("OnlineServicesInterface");
 		}
-		PrivateDependencyModuleNames.Add("OnlineSubsystemUtils");
+
 		PublicDefinitions.Add("COMMONUSER_OSSV1=" + (bUseOnlineSubsystemV1 ? "1" : "0"));
 
 		PrivateDependencyModuleNames.AddRange(
@@ -57,14 +58,14 @@ public class CommonUser : ModuleRules
 				"InputCore",
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
-		
-		
+		);
+
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...
 			}
-			);
+		);
 	}
 }

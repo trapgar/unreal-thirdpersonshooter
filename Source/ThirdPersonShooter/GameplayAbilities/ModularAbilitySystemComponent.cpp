@@ -26,11 +26,11 @@ void UModularAbilitySystemComponent::CancelAbilitiesByFunc(TShouldCancelAbilityF
 			continue;
 		}
 
-		UModularGameplayAbility* ModularAbilityCDO = CastChecked<UModularGameplayAbility>(AbilitySpec.Ability);
-
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
-		if (ModularAbilityCDO->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
+		ensureMsgf(AbilitySpec.Ability->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced, TEXT("CancelAbilitiesByFunc: All Abilities should be Instanced (NonInstanced is being deprecated due to usability issues)."));
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+		if (UModularGameplayAbility* ModularAbilityCDO = Cast<UModularGameplayAbility>(AbilitySpec.Ability))
 		{
 			// Cancel all the spawned instances, not the CDO.
 			TArray<UGameplayAbility*> Instances = AbilitySpec.GetAbilityInstances();
@@ -53,13 +53,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 		}
 		else
 		{
-			// Cancel the non-instanced ability CDO.
-			if (ShouldCancelFunc(ModularAbilityCDO, AbilitySpec.Handle))
-			{
-				// Non-instanced abilities can always be canceled.
-				check(ModularAbilityCDO->CanBeCanceled());
-				ModularAbilityCDO->CancelAbility(AbilitySpec.Handle, AbilityActorInfo.Get(), FGameplayAbilityActivationInfo(), bReplicateCancelAbility);
-			}
+			UE_LOG(LogAbilities, Error, TEXT("CancelAbilitiesByFunc: Non-ModularGameplayAbility %s was Granted to ASC. Skipping."), *AbilitySpec.Ability.GetName());
 		}
 	}
 }

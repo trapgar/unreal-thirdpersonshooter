@@ -181,6 +181,12 @@ FRotator UGameplayAbility_RangedWeapon_Fire::GetProjectileSpreadRotator() const
 	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
 	float BaseSpread = RangedWeapon->SpreadAngleBase;
 	float Multiplier = GetSpreadAngleMultiplier();
+
+	if (AccumulatedSpreadAngle == 0.0f && RangedWeapon->bHasFirstShotAccuracy)
+	{
+		Multiplier = 0.0f;
+	}
+
 	float Accumulated = AccumulatedSpreadAngle;
 	float Max = (BaseSpread + Accumulated) * Multiplier;
 	float Min = Max * -1;

@@ -165,7 +165,7 @@ public:
 	TArray<UEquipmentItemInstance*> GetAllItems() const;
 
 	/** Returns the first equipped instance of a given type, or nullptr if none are found */
-	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure)
+	UFUNCTION(BlueprintCallable, Category=Equipment, BlueprintPure, meta=(DeterminesOutputType=InstanceType))
 	UEquipmentItemInstance* GetFirstInstanceOfType(TSubclassOf<UEquipmentItemInstance> InstanceType);
 	template <typename T>
 	T* GetFirstInstanceOfType() { return (T*)GetFirstInstanceOfType(T::StaticClass()); }

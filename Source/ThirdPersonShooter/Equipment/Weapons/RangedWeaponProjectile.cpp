@@ -27,6 +27,7 @@ ARangedWeaponProjectile::ARangedWeaponProjectile()
 	ProjectileMovementComponent->bShouldBounce = false;
 
 	InitialLifeSpan = 3.0f;
+	bReplicates = true;
 
 	CollisionVolume->OnComponentHit.AddDynamic(this, &ARangedWeaponProjectile::OnHit);
 }
@@ -74,6 +75,8 @@ FGameplayEffectContextHandle ARangedWeaponProjectile::MakeEffectContext() const
 
 void ARangedWeaponProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	K2_OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+
 	FGameplayEffectContextHandle GE_Handle_Damage = MakeEffectContext();
 
 	// is damageable - add the GameplayEffect
@@ -81,13 +84,17 @@ void ARangedWeaponProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherA
 	{
 		GE_Handle_Damage.AddHitResult(Hit, /*bReset=*/true);
 
-		if (HasAuthority())
+		// May not have a value if it doesn't apply direct damage (e.g.: grenade launcher)
+		if (Weapon->DamageType)
 		{
-			UAbilitySystemComponent* MyASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetInstigator());
-			FGameplayEffectSpecHandle GE_Spec_Handle = MyASC->MakeOutgoingSpec(Weapon->DamageType, /*Level=*/0.0f, GE_Handle_Damage);
-			GE_Spec_Handle.Data.Get()->SetSetByCallerMagnitude(ThirdPersonShooterGameplayTags::SetByCaller_Damage, Weapon->SingleBulletDamage);
+			if (HasAuthority())
+			{
+				UAbilitySystemComponent* MyASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetInstigator());
+				FGameplayEffectSpecHandle GE_Spec_Handle = MyASC->MakeOutgoingSpec(Weapon->DamageType, /*Level=*/0.0f, GE_Handle_Damage);
+				GE_Spec_Handle.Data.Get()->SetSetByCallerMagnitude(ThirdPersonShooterGameplayTags::SetByCaller_Damage, Weapon->SingleBulletDamage);
 
-			MyASC->ApplyGameplayEffectSpecToTarget(*GE_Spec_Handle.Data.Get(), ASC);
+				MyASC->ApplyGameplayEffectSpecToTarget(*GE_Spec_Handle.Data.Get(), ASC);
+			}
 		}
 	}
 

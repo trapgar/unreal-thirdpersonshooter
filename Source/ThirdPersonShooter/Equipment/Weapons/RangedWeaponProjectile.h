@@ -48,7 +48,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn = true))
 	URangedWeaponItemInstance* Weapon;
 
-public:
 	// Creates a new effect context for the projectile, where the ranged weapon is the ability source for attenuation.
 	UFUNCTION(BlueprintCallable)
 	FGameplayEffectContextHandle MakeEffectContext() const;
@@ -64,6 +63,11 @@ public:
 	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="Components")
 	TObjectPtr<UNiagaraComponent> ImpactSystem;
+
+public:
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void K2_OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
 	FVector StartingLocation;

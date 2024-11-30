@@ -37,7 +37,7 @@ struct THIRDPERSONSHOOTER_API FAnimNotifyGameplayCueTraceSettings
 /**
  * 
  */
-UCLASS(const, hidecategories=Object, CollapseCategories, Config = Game, meta=(DisplayName="Execute GameplayCue"))
+UCLASS(const, HideCategories=Object, CollapseCategories, Config = Game, meta=(DisplayName="Execute GameplayCue"))
 class THIRDPERSONSHOOTER_API UAnimNotify_ExecuteGameplayCue : public UAnimNotify
 {
 	GENERATED_BODY()

@@ -9,6 +9,7 @@
 #include "GameplayEffectExtension.h"
 #include "Messages/GameplayVerbMessage.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
+#include "Physics/PhysicalMaterialWithTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PawnHealthSet)
 
@@ -119,6 +120,14 @@ void UPawnHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 			//@TODO: Fill out context tags, and any non-ability-system source/instigator tags
 			//@TODO: Determine if it's an opposing team kill, self-own, team kill, etc...
 			Message.Magnitude = Data.EvaluatedData.Magnitude;
+
+			if (const FHitResult* Hit = EffectContext.GetHitResult())
+			{
+				if (UPhysicalMaterialWithTags* PhysMatWithTags = Cast<UPhysicalMaterialWithTags>(Hit->PhysMaterial))
+				{
+					Message.ContextTags = PhysMatWithTags->Tags;
+				}
+			}
 
 			UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());
 			MessageSystem.BroadcastMessage(Message.Verb, Message);

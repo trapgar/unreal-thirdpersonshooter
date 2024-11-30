@@ -2,8 +2,8 @@
 
 #include "BoundAnimInstance.h"
 #include "AbilitySystemGlobals.h"
-#include "ModularCharacter.h"
-#include "ModularCharacterMovementComponent.h"
+#include "Character/ThirdPersonShooterCharacter.h"
+#include "Character/ThirdPersonShooterCharacterMovementComponent.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -52,14 +52,16 @@ void UBoundAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	const AModularCharacter* Character = Cast<AModularCharacter>(GetOwningActor());
-	if (!Character)
+	if (const AThirdPersonShooterCharacter* Character = Cast<AThirdPersonShooterCharacter>(GetOwningActor()))
 	{
-		return;
+		if (UCharacterMovementComponent* CharMoveComp = Character->GetCharacterMovement())
+		{
+			if (UThirdPersonShooterCharacterMovementComponent* CharMoveCompWithGroundInfo = Cast<UThirdPersonShooterCharacterMovementComponent>(CharMoveComp))
+			{
+				const FModularCharacterGroundInfo& GroundInfo = CharMoveCompWithGroundInfo->GetGroundInfo();
+				GroundDistance = GroundInfo.GroundDistance;
+			}
+		}
 	}
-
-	UModularCharacterMovementComponent* CharMoveComp = CastChecked<UModularCharacterMovementComponent>(Character->GetCharacterMovement());
-	const FModularCharacterGroundInfo& GroundInfo = CharMoveComp->GetGroundInfo();
-	GroundDistance = GroundInfo.GroundDistance;
 }
 

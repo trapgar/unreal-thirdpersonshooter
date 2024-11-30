@@ -6,7 +6,7 @@
 #include "Engine/ActorChannel.h"
 #include "Equipment/EquipmentItemDefinition.h"
 #include "Equipment/EquipmentItemInstance.h"
-#include "Inventory/InventoryFragment_EquippableItem.h"
+#include "Inventory/Fragments/InventoryFragment_EquippableItem.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "NativeGameplayTags.h"

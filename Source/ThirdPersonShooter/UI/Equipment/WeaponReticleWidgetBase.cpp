@@ -15,13 +15,13 @@ UWeaponReticleWidgetBase::UWeaponReticleWidgetBase(const FObjectInitializer& Obj
 
 void UWeaponReticleWidgetBase::InitializeFromEquipment(UEquipmentItemInstance* InEquipment)
 {
-	EquipmentInstance = InEquipment;
+	EquipmentItemInstance = InEquipment;
 	OnEquipmentInitialized();
 }
 
 float UWeaponReticleWidgetBase::ComputeSpreadAngle() const
 {
-	if (const URangedWeaponItemInstance* RangedWeapon = Cast<const URangedWeaponItemInstance>(EquipmentInstance))
+	if (const URangedWeaponItemInstance* RangedWeapon = Cast<const URangedWeaponItemInstance>(EquipmentItemInstance))
 	{
 		const float BaseSpreadAngle = RangedWeapon->GetSpreadAngle();
 		const float SpreadAngleMultiplier = RangedWeapon->GetSpreadAngleMultiplier();
