@@ -117,10 +117,9 @@ void UPawnHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 			Message.InstigatorTags = *Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
 			Message.Target = GetOwningActor();
 			Message.TargetTags = *Data.EffectSpec.CapturedTargetTags.GetAggregatedTags();
-			//@TODO: Fill out context tags, and any non-ability-system source/instigator tags
-			//@TODO: Determine if it's an opposing team kill, self-own, team kill, etc...
 			Message.Magnitude = Data.EvaluatedData.Magnitude;
 
+			// @TODO: can add other context tags like damage type, friendly fire, etc
 			if (const FHitResult* Hit = EffectContext.GetHitResult())
 			{
 				if (UPhysicalMaterialWithTags* PhysMatWithTags = Cast<UPhysicalMaterialWithTags>(Hit->PhysMaterial))
