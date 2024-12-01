@@ -37,26 +37,29 @@ void UInventoryFragment_SetStatsOfExisting::OnInstanceCreated(UInventoryItemInst
 	AActor* Owner = Cast<AActor>(Outer);
 	check(Owner);
 
-	// Set the stats on the item (ammo box, etc.)
+	// Set the stats on the inventory item (ammo box, etc.)
 	for (const auto& KVP : AdditionalItemStats)
 	{
 		Instance->AddStatTagStack(KVP.Key, KVP.Value);
 	}
 
-	// Find the 1st item in the inventory that matches the item definition
+	// Then look through all the items in the inventory
 	if (UInventoryManagerComponent* Inventory = Owner->GetComponentByClass<UInventoryManagerComponent>())
 	{
 		for (FReadOnlyInventoryEntry Entry : Inventory->GetAllItems())
 		{
+			// Find the 1st item in the inventory that matches the item definition off this fragment
 			if (Entry.Instance->GetItemDef()->IsA(ItemDefinition))
 			{
 				// And transfer all the stats
 				// This way, collected items where we don't find any matching item will be retained until one is added
+				// ---
+				// The B_InventoryManagerComponent listens for new inventory items and scrubs empty ammo boxes by gameplay tag
 				for (const auto& KVP : AdditionalItemStats)
 				{
-					// TODO: Check for a max stack count
-					int32 StackCount = Entry.Instance->GetStatTagStackCount(KVP.Key);
-					Entry.Instance->AddStatTagStack(KVP.Key, StackCount + KVP.Value);
+					// @TODO: Check for a max stack count
+					// @TODO: If the player has more than 1 item of this type, which one should we set stats of?
+					Entry.Instance->AddStatTagStack(KVP.Key, KVP.Value);
 					Instance->RemoveStatTagStack(KVP.Key, KVP.Value);
 				}
 
