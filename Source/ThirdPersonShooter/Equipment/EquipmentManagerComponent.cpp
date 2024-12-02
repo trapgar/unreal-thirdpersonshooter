@@ -19,7 +19,6 @@ class FLifetimeProperty;
 struct FReplicationFlags;
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Equipment_StackChanged, "Gameplay.Message.Equipment.StackChanged");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Weapon_Ammunition, "Equipment.Weapon.Ammunition");
 
 // --------------------------------------------------------
 // FEquipmentEntry

@@ -17,7 +17,7 @@ class AController;
 class UAbilitySystemComponent;
 class UInputComponent;
 class UHealthComponent;
-class UCustomCameraComponent;
+class UDynamicCameraComponent;
 struct FGameplayTag;
 struct FGameplayTagContainer;
 
@@ -109,5 +109,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Health", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UHealthComponent> HealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UDynamicCameraComponent> CameraComponent;
 
 };

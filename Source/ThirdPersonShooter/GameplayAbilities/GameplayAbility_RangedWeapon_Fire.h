@@ -6,6 +6,8 @@
 
 #include "GameplayAbility_RangedWeapon_Fire.generated.h"
 
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_Weapon_Fired);
+
 /**
  * UAbility_RangedWeapon_Fire
  * 
@@ -45,34 +47,6 @@ public:
 	virtual FRotator GetProjectileSpreadRotator() const;
 
 private:
-	// Returns the spread angle multiplier that should be applied to the base spread angle
-	float GetSpreadAngleMultiplier() const;
-
-	// Tells the associated weapon to what the current spread angle & multiplier is
-	void OnHandleUpdateWeaponStatsChanged();
-
-	// Decays the spread accumulated by automatic fire
-	void OnHandleSpreadDecay();
-
-	FTimerHandle TimerHandleSpread;
-	FTimerHandle TimerHandleSpreadDecay;
-
-	// World time that this weapon was last fired
-	// This is used by in the spread calculation
-	float TimeLastFired = 0.0f;
-
-	// World time that this weapon was last equipped
-	// This is used by the auto reload GameplayAbility
-	float TimeLastEquipped = 0.0f;
-
-	// World seconds that the decay tick was last called
-	float TimeSinceLastDecayed = 0.0f;
-
-	// The current spread angle accumulated by automatic fire
-	float AccumulatedSpreadAngle = 0.0f;
-
-	// Whether or not the weapon has a bullet in the chamber
-	bool bHas1InTheChamber = false;
 	
 	// Weapon root scene component, used to get the muzzle transform on fire
 	USceneComponent* WeaponComponent;

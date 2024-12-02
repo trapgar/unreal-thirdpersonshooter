@@ -23,7 +23,6 @@ struct FEquipmentList;
 
 
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_Equipment_StackChanged);
-THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Weapon_Ammunition);
 
 // --------------------------------------------------------
 

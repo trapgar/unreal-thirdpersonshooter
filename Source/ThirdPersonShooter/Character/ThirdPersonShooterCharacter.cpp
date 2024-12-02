@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "ThirdPersonShooterGameplayTags.h"
 #include "Combat/HealthComponent.h"
+#include "Camera/DynamicCameraComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ThirdPersonShooterCharacter)
 
@@ -54,6 +55,9 @@ AThirdPersonShooterCharacter::AThirdPersonShooterCharacter(const FObjectInitiali
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->OnDeathStarted.AddDynamic(this, &ThisClass::OnDeathStarted);
 	HealthComponent->OnDeathFinished.AddDynamic(this, &ThisClass::OnDeathFinished);
+
+	CameraComponent = CreateDefaultSubobject<UDynamicCameraComponent>(TEXT("CameraComponent"));
+	CameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
 }
 
 void AThirdPersonShooterCharacter::PreInitializeComponents()

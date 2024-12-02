@@ -9,12 +9,14 @@
 #include "UI/Equipment/WeaponReticleWidgetBase.h"
 #include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
+#include "Messages/GameplayVerbMessage.h"
 
 #include "RangedWeaponItemInstance.generated.h"
 
 
-THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_Equipment_StatsChanged);
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Weapon_Ammunition);
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Weapon_MagazineSize);
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_AimingDownSights);
 
 
 // --------------------------------------------------------
@@ -121,7 +123,15 @@ public:
 
 	// Spread angle penalty multiplier while moving
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
+	float SpreadAngleMultiplier_Crouching = 0.85f;
+
+	// Spread angle penalty multiplier while moving
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
 	float SpreadAngleMultiplier_Moving = 1.1667f;
+
+	// Spread angle penalty multiplier while moving
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
+	float SpreadAngleMultiplier_Falling = 2.0f;
 
 	// Angle in degrees to increase the spread by on every shot
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Spread", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="deg"))
@@ -167,6 +177,13 @@ public:
 
 public:
 
+	void Fire()
+	{
+		TimeLastFired = GetWorld()->GetTimeSeconds();
+		AccumulatedSpreadAngle += SpreadAngleAccumulationPerShot;
+		bHas1InTheChamber = GetAssociatedItem()->GetStatTagStackCount(TAG_Equipment_Weapon_Ammunition) > 0;
+	};
+
 	/** Returns World time that this weapon was last fired (returns 0 if never fired) */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Timing")
 	float GetTimeLastFired() const { return TimeLastFired; }
@@ -179,20 +196,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon|Ammunition", meta=(DisplayName="Has 1 in the Chamber?"))
 	bool GetHas1InTheChamber() const { return bHas1InTheChamber; }
 
-	/** Returns whether or not the weapon has a bullet in the chamber */
+	/** Returns the current spread angle (0.0f = no spread) */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Spread")
-	float GetSpreadAngle() const { return SpreadAngle; }
+	float GetSpreadAngle() const { return SpreadAngleBase + AccumulatedSpreadAngle; }
 
-	/** Returns whether or not the weapon has a bullet in the chamber */
 	UFUNCTION(BlueprintCallable, Category="Weapon|Spread")
-	float GetSpreadAngleMultiplier() const { return SpreadAngleMultiplier; }
+	bool HasFirstShotAccuracy() const { return bApplyFirstShotAccuracy; }
 
-	virtual float GetDistanceAttenuation(float Distance, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr ) const override
+	/** Returns the spread angle multiplier that should be applied to the base spread angle (1.0f = no spread) */
+	UFUNCTION(BlueprintCallable, Category="Weapon|Spread")
+	float GetSpreadAngleMultiplier() const { return bApplyFirstShotAccuracy ? 0.0f : AccumulatedSpreadAngleMultiplier; }
+
+	// Returns a multiplier between 0 and 1 based on the distance from the target
+	virtual float GetDistanceAttenuation(float Distance,
+		const FGameplayTagContainer* SourceTags = nullptr,
+		const FGameplayTagContainer* TargetTags = nullptr
+	) const override
 	{
 		const FRichCurve* Curve = DistanceDamageFalloff.GetRichCurveConst();
 		return Curve->HasAnyData() ? Curve->Eval(Distance) : 1.0f;
 	};
-	virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial* PhysicalMaterial, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr ) const override
+	// Returns a multiplier between 0 and 1 based on the physical material (e.g.: weak point etc)
+	virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial* PhysicalMaterial,
+		const FGameplayTagContainer* SourceTags = nullptr,
+		const FGameplayTagContainer* TargetTags = nullptr
+	) const override
 	{
 		float CombinedMultiplier = 1.0f;
 		if (const UPhysicalMaterialWithTags* PhysMatWithTags = Cast<const UPhysicalMaterialWithTags>(PhysicalMaterial))
@@ -211,6 +239,7 @@ public:
 
 public:
 
+	void Tick(float DeltaSeconds);
 	virtual void OnEquipped() override;
 	virtual void OnUnequipped() override;
 
@@ -225,14 +254,22 @@ public:
 	};
 
 private:
-	float TimeLastFired = 0.0f;
-	float TimeLastEquipped = 0.0f;
-	float SpreadAngle = 0.0f;
-	float SpreadAngleMultiplier = 1.0f;
-	bool bHas1InTheChamber = false;
+
+	// Updates the spread and returns true if the spread is at minimum
+	bool UpdateSpread(float DeltaSeconds);
+
+	// Updates the multipliers and returns true if they are at minimum
+	bool UpdateMultipliers(float DeltaSeconds);
 
 private:
-	FGameplayMessageListenerHandle Handle_WeaponStatsChanged;
-
-	void OnWeaponStatsChanged(const FGameplayTag Channel, const FWeaponStatsChangedMessage& Payload);
+	float TimeLastFired = 0.0f;
+	float TimeLastEquipped = 0.0f;
+	// The current spread angle accumulated by automatic fire
+	float AccumulatedSpreadAngle = 0.0f;
+	float AccumulatedSpreadAngleMultiplier = 1.0f;
+	bool bHas1InTheChamber = false;
+	bool bApplyFirstShotAccuracy = false;
+	float CurrentMultiplier_StandingStill = 1.0f;
+	float CurrentMultiplier_Crouching = 1.0f;
+	float CurrentMultiplier_Falling = 1.0f;
 };
