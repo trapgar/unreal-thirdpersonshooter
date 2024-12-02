@@ -33,6 +33,10 @@ public:
 				ASC->AddSet<UPawnCombatSet>();
 			}
 		}
+		else if (UAbilitySystemComponent* ASC = GetOwner()->GetComponentByClass<UAbilitySystemComponent>())
+		{
+			ASC->AddSet<UPawnCombatSet>();
+		}
 
 		Super::InitializeComponent();
 	};

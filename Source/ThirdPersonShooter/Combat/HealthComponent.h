@@ -18,6 +18,7 @@ struct FFrame;
 struct FGameplayEffectSpec;
 
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_Elimination);
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Damaged);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPawnHealth_DeathEvent, AActor*, OwningActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FPawnHealth_AttributeChanged, UHealthComponent*, HealthComponent, float, OldValue, float, NewValue, AActor*, Instigator);
@@ -115,6 +116,10 @@ public:
 			{
 				ASC->AddSet<UPawnHealthSet>();
 			}
+		}
+		else if (UAbilitySystemComponent* ASC = GetOwner()->GetComponentByClass<UAbilitySystemComponent>())
+		{
+			ASC->AddSet<UPawnHealthSet>();
 		}
 
 		Super::InitializeComponent();

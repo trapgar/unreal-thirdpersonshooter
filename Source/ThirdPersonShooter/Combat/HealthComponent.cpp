@@ -18,6 +18,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(HealthComponent)
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_Elimination, "Gameplay.Message.Elimination");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Damaged, "Status.Damaged");
 
 UHealthComponent::UHealthComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -135,6 +136,11 @@ float UHealthComponent::GetHealthNormalized() const
 
 void UHealthComponent::HandleHealthChanged(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayEffectSpec* DamageEffectSpec, float DamageMagnitude, float OldValue, float NewValue)
 {
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Status_Damaged, NewValue < GetMaxHealth());
+	}
+
 	OnHealthChanged.Broadcast(this, OldValue, NewValue, DamageInstigator);
 }
 
