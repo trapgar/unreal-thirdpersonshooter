@@ -39,7 +39,7 @@ public:
 	//~ End UObject interface
 
 	// List of Gameplay input actions to bind
-	UPROPERTY(EditAnywhere, Category="Input", meta=(AssetBundles="Client,Server"), meta=(DisplayName="Input Bindings"))
+	UPROPERTY(EditAnywhere, Category="Input", meta=(AssetBundles="Client,Server"), meta=(DisplayName="Input Binding List"))
 	TArray<TSoftObjectPtr<const UInputActionToGameplayTagBindings>> InputConfigs;
 
 private:

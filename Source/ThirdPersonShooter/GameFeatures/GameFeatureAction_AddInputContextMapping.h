@@ -40,7 +40,7 @@ struct FInputMappingContextAndPriority
  * Adds an InputMappingContext to local players' EnhancedInput system.
  * Expects that local players are set up to use the EnhancedInput system.
  */
-UCLASS(MinimalAPI, meta = (DisplayName = "Add Input Mapping"))
+UCLASS(MinimalAPI, meta = (DisplayName = "Add Input Mapping Contexts"))
 class UGameFeatureAction_AddInputContextMapping final : public UGameFeatureAction_WorldActionBase
 {
 	GENERATED_BODY()
@@ -57,10 +57,10 @@ public:
 	//~UObject interface
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
+#endif 
 	//~End of UObject interface
 
-	UPROPERTY(EditAnywhere, Category="Input")
+	UPROPERTY(EditAnywhere, Category="Input", meta=(DisplayName="Input Mapping List"))
 	TArray<FInputMappingContextAndPriority> InputMappings;
 
 private:

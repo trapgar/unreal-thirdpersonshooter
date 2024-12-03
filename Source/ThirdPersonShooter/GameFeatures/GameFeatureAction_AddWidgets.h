@@ -68,11 +68,11 @@ public:
 
 private:
 	// Layout to add to the HUD
-	UPROPERTY(EditAnywhere, Category=UI, meta=(TitleProperty="{LayerID} -> {LayoutClass}"))
+	UPROPERTY(EditAnywhere, Category="HUD", meta=(TitleProperty="{LayerID} -> {LayoutClass}"))
 	TArray<FHUDLayoutRequest> Layout;
 
 	// Widgets to add to the HUD
-	UPROPERTY(EditAnywhere, Category=UI, meta=(TitleProperty="{SlotID} -> {WidgetClass}"))
+	UPROPERTY(EditAnywhere, Category="HUD", meta=(TitleProperty="{SlotID} -> {WidgetClass}"))
 	TArray<FHUDElementEntry> Widgets;
 
 private:

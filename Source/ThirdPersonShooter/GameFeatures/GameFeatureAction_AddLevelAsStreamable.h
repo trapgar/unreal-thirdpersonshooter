@@ -74,7 +74,7 @@ public:
 	//~ End UObject interface
 
 	/** List of levels to dynamically load when this game feature is enabled */
-	UPROPERTY(EditAnywhere, Category="Level Instances", meta=(TitleProperty="Level", ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, Category="Levels", meta=(TitleProperty="Level", ShowOnlyInnerProperties))
 	TArray<FGameFeatureLevelAsStreamableEntry> LevelInstanceList;
 
 private:

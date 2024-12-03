@@ -14,7 +14,7 @@ class UModularGameplayAbility;
  *
  * Base class for costs that a ModularGameplayAbility has (e.g., ammo or charges)
  */
-UCLASS(DefaultToInstanced, EditInlineNew, Abstract, HideCategories = (Status, Duration, GameplayEffect, GameplayCues, Stacking))
+UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
 class THIRDPERSONSHOOTER_API UModularAbilityCost : public UGameplayEffect
 {
 	GENERATED_BODY()

@@ -97,7 +97,7 @@ public:
  * 
  * The default `Triggers` category is still used when the trigger is a GameplayEvent (triggered programmatically).
  */
-UCLASS(Abstract, Meta = (ShortTooltip = "The base gameplay ability class used by this project."))
+UCLASS(Abstract, HideCategories = Input, Meta = (ShortTooltip = "The base gameplay ability class used by this project."))
 class THIRDPERSONSHOOTER_API UModularGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()

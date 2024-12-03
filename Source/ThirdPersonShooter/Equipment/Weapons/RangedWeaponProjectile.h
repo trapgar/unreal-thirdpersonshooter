@@ -61,7 +61,7 @@ public:
 	TObjectPtr<UNiagaraComponent> ImpactDecal;
 
 	/** Please add a variable description */
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="Components")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="Default")
 	TObjectPtr<UNiagaraComponent> ImpactSystem;
 
 public:

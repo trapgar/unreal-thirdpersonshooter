@@ -11,7 +11,7 @@
  * @see UQuickBarComponent
  * @example NextItem = Slots[(GetActiveSlotIndex() + 1) % Slots.Num()]
  */
-UCLASS(Blueprintable, HideCategories=("Component Tick", "Component Replication"), meta=(BlueprintSpawnableComponent))
+UCLASS(Blueprintable, meta=(BlueprintSpawnableComponent))
 class THIRDPERSONSHOOTER_API UBeltComponent : public UQuickBarComponent
 {
 	GENERATED_BODY()
