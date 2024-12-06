@@ -169,6 +169,8 @@ bool FPawnCosmeticList::SpawnActorForEntry(FAppliedPawnCosmeticEntry& Entry)
 
 				if (AActor* SpawnedActor = PartComponent->GetChildActor())
 				{
+					SpawnedActor->SetOwner(ComponentToAttachTo->GetOwner());
+
 					switch (Entry.Part.CollisionMode)
 					{
 					case ECharacterCustomizationCollisionMode::UseCollisionFromCharacterPart:

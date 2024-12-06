@@ -63,19 +63,16 @@ AThirdPersonShooterCharacter::AThirdPersonShooterCharacter(const FObjectInitiali
 void AThirdPersonShooterCharacter::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
-	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
 // Called when the game starts or when spawned
 void AThirdPersonShooterCharacter::BeginPlay()
 {
-	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, UGameFrameworkComponentManager::NAME_GameActorReady);
 	Super::BeginPlay();
 }
 
 void AThirdPersonShooterCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -129,7 +126,7 @@ void AThirdPersonShooterCharacter::SetMovementModeTag(EMovementMode MovementMode
 
 		if (MovementModeTag && MovementModeTag->IsValid())
 		{
-			ASC->SetLooseGameplayTagCount(*MovementModeTag, (bTagEnabled ? 1 : 0));
+			ASC->SetLooseGameplayTagCount(*MovementModeTag, (bTagEnabled ? 1 : 0)); 
 		}
 	}
 }
