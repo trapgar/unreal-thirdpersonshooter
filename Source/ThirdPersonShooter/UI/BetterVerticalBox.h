@@ -3,14 +3,21 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 
-#include "VerticalBoxWidget.generated.h"
+#include "BetterVerticalBox.generated.h"
 
 UCLASS()
-class THIRDPERSONSHOOTER_API UVerticalBoxWidget : public UVerticalBox
+class THIRDPERSONSHOOTER_API UBetterVerticalBox : public UVerticalBox
 {
 	GENERATED_BODY()
 
 public:
+	/** The list of positions/orientations to draw the markers at. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Panel")
+	TEnumAsByte<EHorizontalAlignment> DefaultChildHorizontalAlignment;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Panel")
+	TEnumAsByte<EVerticalAlignment> DefaultChildVerticalAlignment;
+
 	UFUNCTION(BlueprintCallable, Category="Panel", meta=(DisplayName="Insert Child At"))
 	UVerticalBoxSlot* K2_InsertChildAt(int32 Index, UWidget* Content)
 	{
@@ -39,5 +46,17 @@ public:
 		}
 
 		return NewPanelSlot;
+	};
+
+protected:
+	virtual void OnSlotAdded(UPanelSlot* NewSlot) override
+	{
+		Super::OnSlotAdded(NewSlot);
+
+		if (UVerticalBoxSlot* VBoxSlot = Cast<UVerticalBoxSlot>(NewSlot))
+		{
+			VBoxSlot->SetHorizontalAlignment(DefaultChildHorizontalAlignment);
+			VBoxSlot->SetVerticalAlignment(DefaultChildVerticalAlignment);
+		}
 	};
 };

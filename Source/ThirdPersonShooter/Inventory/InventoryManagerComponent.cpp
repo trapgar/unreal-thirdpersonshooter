@@ -53,25 +53,25 @@ UInventoryItemInstance *FInventoryList::AddEntry(UInventoryItemDefinition* ItemD
 	check(OwningActor->HasAuthority());
 
 	// Item is stackable - check to see if we already have items in the inv of the same class
-	if (ItemDef->MaxStackCount > 1)
-	{
-		for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
-		{
-			FInventoryEntry& Entry = *EntryIt;
-			// Don't care about MaxStackCount yet, as that's a display problem, not a functional one
-			// All we care about here is IF it's stackable, as stackable items indicate they are all identical,
-			//   so we don't really about preserving instance-data
-			if (Entry.Instance->GetItemDef()->GetClass() == ItemDef->GetClass())
-			{
-				Result = Entry.Instance;
-				Entry.StackCount += StackCount;
+	// if (ItemDef->MaxStackCount > 1)
+	// {
+	// 	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
+	// 	{
+	// 		FInventoryEntry& Entry = *EntryIt;
+	// 		// Don't care about MaxStackCount yet, as that's a display problem, not a functional one
+	// 		// All we care about here is IF it's stackable, as stackable items indicate they are all identical,
+	// 		//   so we don't really about preserving instance-data
+	// 		if (Entry.Instance->GetItemDef()->GetClass() == ItemDef->GetClass())
+	// 		{
+	// 			Result = Entry.Instance;
+	// 			Entry.StackCount += StackCount;
 
-				// MarkArrayDirty();
-				BroadcastChangeMessage(Entry.Instance, /*OldCount=*/Entry.StackCount - StackCount, /*NewCount=*/Entry.StackCount);
-				break;
-			}
-		}
-	}
+	// 			// MarkArrayDirty();
+	// 			BroadcastChangeMessage(Entry.Instance, /*OldCount=*/Entry.StackCount - StackCount, /*NewCount=*/Entry.StackCount);
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
 	// Either not stackable, or we didn't find any matches
 	if (Result == nullptr)
