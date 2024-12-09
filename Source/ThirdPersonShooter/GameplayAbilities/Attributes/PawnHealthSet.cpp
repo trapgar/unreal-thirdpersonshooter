@@ -1,7 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PawnHealthSet.h"
-#include "GameplayAbilities/Attributes/PawnAttributeSet.h"
+
+#include "PawnAttributeSet.h"
 #include "ThirdPersonShooterGameplayTags.h"
 #include "Net/UnrealNetwork.h"
 #include "GameplayAbilities/ModularAbilitySystemComponent.h"
@@ -86,7 +87,18 @@ bool UPawnHealthSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData &Da
 				Data.EvaluatedData.Magnitude = 0.0f;
 				return false;
 			}
+
+			// Don't apply any damage if the pawn is out of health
+			if (GetHealth() <= 0.0f)
+			{
+				return false;
+			}
 		}
+	}
+	// Don't apply any healing if the pawn is already at max health
+	else if (Data.EvaluatedData.Attribute == GetHealingAttribute() && Data.EvaluatedData.Magnitude > 0.0f && GetHealth() >= GetMaxHealth())
+	{
+		return false;
 	}
 
 	// Save the current health

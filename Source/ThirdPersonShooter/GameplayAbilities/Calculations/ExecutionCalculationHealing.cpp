@@ -9,11 +9,11 @@
 
 struct FHealingStatics
 {
-	FGameplayEffectAttributeCaptureDefinition HealDef;
+	FGameplayEffectAttributeCaptureDefinition BaseHealingAppliedDef;
 
 	FHealingStatics()
 	{
-		HealDef = FGameplayEffectAttributeCaptureDefinition(UPawnCombatSet::GetHealAttribute(), EGameplayEffectAttributeCaptureSource::Source, true);
+		BaseHealingAppliedDef = FGameplayEffectAttributeCaptureDefinition(UPawnCombatSet::GetBaseHealingAppliedAttribute(), EGameplayEffectAttributeCaptureSource::Source, true);
 	}
 };
 
@@ -26,7 +26,7 @@ static FHealingStatics& HealingStatics()
 
 UExecutionCalculationHealing::UExecutionCalculationHealing()
 {
-	RelevantAttributesToCapture.Add(HealingStatics().HealDef);
+	RelevantAttributesToCapture.Add(HealingStatics().BaseHealingAppliedDef);
 }
 
 void UExecutionCalculationHealing::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -41,10 +41,10 @@ void UExecutionCalculationHealing::Execute_Implementation(const FGameplayEffectC
 	EvaluateParameters.SourceTags = SourceTags;
 	EvaluateParameters.TargetTags = TargetTags;
 
-	float BaseHeal = 0.0f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(HealingStatics().HealDef, EvaluateParameters, BaseHeal);
+	float HealingApplied = 0.0f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(HealingStatics().BaseHealingAppliedDef, EvaluateParameters, HealingApplied);
 
-	const float HealingDone = FMath::Max(0.0f, BaseHeal);
+	const float HealingDone = FMath::Max(0.0f, HealingApplied);
 
 	if (HealingDone > 0.0f)
 	{

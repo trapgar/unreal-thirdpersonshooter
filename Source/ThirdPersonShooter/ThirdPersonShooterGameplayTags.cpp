@@ -30,6 +30,7 @@ namespace ThirdPersonShooterGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayEvent_Pawn_Death, "GameplayEvent.Pawn.Death", "Event that fires on death. This event only fires on the server.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayEvent_Pawn_Reset, "GameplayEvent.Pawn.Reset", "Event that fires once a player reset is executed.");
 
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(SetByCaller_StackCount, "SetByCaller.StackCount", "SetByCaller tag used by different gameplay effects for ammo stack count.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(SetByCaller_Damage, "SetByCaller.Damage", "SetByCaller tag used by damage gameplay effects.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(SetByCaller_Healing, "SetByCaller.Healing", "SetByCaller tag used by healing gameplay effects.");
 

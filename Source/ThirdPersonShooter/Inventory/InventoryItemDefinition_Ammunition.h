@@ -4,7 +4,11 @@
 
 #include "InventoryItemDefinition.h"
 #include "InventoryManagerComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "NativeGameplayTags.h"
+#include "GameplayAbilities/Attributes/PawnCombatSet.h"
+#include "Kismet/GameplayStatics.h"
+#include "ThirdPersonShooterGameplayTags.h"
 
 #include "InventoryItemDefinition_Ammunition.generated.h"
 
@@ -28,9 +32,15 @@ public:
 		StaticGameplayTags.AddTag(TAG_Inventory_Item_Classification_Ammunition);
 	}
 
-	// Definition of the inventory item to find & set stats for
+	// Gameplay tag of the weapon this ammo is for
 	UPROPERTY(EditDefaultsOnly, Category = Inventory, meta = (Categories = "Item.Classification"))
 	FGameplayTag WeaponClassification;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Inventory)
+	TSubclassOf<UGameplayEffect> AmmunitionRefillOrSpendEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Inventory)
+	int32 StackCount = 1;
 };
 
 
@@ -43,35 +53,53 @@ class UWeaponAmmunitionFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	// Returns the first matching item fragment based on class
-	// @TODO: this is called every tick by the AmmoCounter widget, can probably improve
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory|Ammunition")
-	static const UInventoryItemInstance* FindAmmunitionItemInstance(UInventoryItemInstance* ItemInstance)
+	// @TODO: Don't like that this is off the InventoryItemInstance class, but the ID_Ammunition instance doesn't have a reference to the Instigator
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Inventory)
+	static const FGameplayEffectSpecHandle MakeOutgoingAmmunitionSpec(UInventoryItemInstance* ItemInstance)
 	{
-		if (const AActor* Instigator = ItemInstance->GetInstigator())
+		if (ItemInstance != nullptr)
 		{
-			if (const UInventoryManagerComponent* InventoryManager = Instigator->FindComponentByClass<UInventoryManagerComponent>())
+			if (UInventoryItemDefinition_Ammunition* ItemDef = Cast<UInventoryItemDefinition_Ammunition>(ItemInstance->GetItemDef()))
 			{
-				FGameplayTagContainer ItemClassification;
-				ItemClassification.AddTag(TAG_Inventory_Item_Classification);
-				FGameplayTagContainer WeaponTags = ItemInstance->GetItemDef()->StaticGameplayTags.Filter(ItemClassification);
-
-				for (const FReadOnlyInventoryEntry Entry : InventoryManager->GetAllItems())
+				if (const AActor* Instigator = ItemInstance->GetInstigator())
 				{
-					if (const UInventoryItemDefinition_Ammunition* ID_Ammunition = Cast<UInventoryItemDefinition_Ammunition>(Entry.Instance->GetItemDef()))
+					if (const UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Instigator))
 					{
-						if (WeaponTags.HasTag(ID_Ammunition->WeaponClassification))
+						FGameplayEffectContextHandle GE_RefillOrSpend = ASC->MakeEffectContext();
+						FGameplayEffectSpecHandle GE_Spec_Handle = ASC->MakeOutgoingSpec(ItemDef->AmmunitionRefillOrSpendEffect, /*Level=*/0.0f, GE_RefillOrSpend);
+
+						if (FGameplayEffectSpec* Spec = GE_Spec_Handle.Data.Get())
 						{
-							return Entry.Instance;
+							Spec->AddDynamicAssetTag(ItemDef->WeaponClassification);
 						}
+
+						GE_Spec_Handle.Data.Get()->SetSetByCallerMagnitude(ThirdPersonShooterGameplayTags::SetByCaller_StackCount, ItemDef->StackCount);
+
+						return GE_Spec_Handle;
+						// ASC->ApplyGameplayEffectSpecToTarget(*GE_Spec_Handle.Data.Get(), ASC);
 					}
 				}
 			}
 		}
 
-		return nullptr;
+		return FGameplayEffectSpecHandle();
 	};
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory|Ammunition")
+	static const int32 GetAmmunitionStackCount(UInventoryItemInstance* ItemInstance)
+	{
+		if (const AActor* Instigator = ItemInstance->GetInstigator())
+		{
+			if (const UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Instigator))
+			{
+				return ASC->GetNumericAttribute(UPawnCombatSet::GetAttributeFromContainer(ItemInstance->GetItemDef()->StaticGameplayTags));
+			}
+		}
+
+		return 0;
+	}
+
+	// @TODO: might be able to re-work this for general use instead of just ammunition
 	UFUNCTION(BlueprintCallable, Category = "Inventory|Ammunition")
 	static void ConsolidateAmmoStacks(UInventoryManagerComponent* InventoryManager)
 	{

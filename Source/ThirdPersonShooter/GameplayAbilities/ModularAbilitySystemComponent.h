@@ -22,7 +22,7 @@ THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_AbilityInputB
  * 
  * <i>PlayerController is used by some abilities, so must be set on Possess to prevent errors.</i>
  */
-UCLASS()
+UCLASS(meta=(DisplayName = "Ability System Component With GameplayTag to Input Binding"))
 class THIRDPERSONSHOOTER_API UModularAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()

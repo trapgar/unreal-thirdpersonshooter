@@ -12,11 +12,11 @@
 
 struct FDamageStatics
 {
-	FGameplayEffectAttributeCaptureDefinition DamageDef;
+	FGameplayEffectAttributeCaptureDefinition BaseDamageAppliedDef;
 
 	FDamageStatics()
 	{
-		DamageDef = FGameplayEffectAttributeCaptureDefinition(UPawnCombatSet::GetDamageAttribute(), EGameplayEffectAttributeCaptureSource::Source, true);
+		BaseDamageAppliedDef = FGameplayEffectAttributeCaptureDefinition(UPawnCombatSet::GetBaseDamageAppliedAttribute(), EGameplayEffectAttributeCaptureSource::Source, true);
 	}
 };
 
@@ -29,7 +29,7 @@ static FDamageStatics& DamageStatics()
 
 UExecutionCalculationDamage::UExecutionCalculationDamage()
 {
-	RelevantAttributesToCapture.Add(DamageStatics().DamageDef);
+	RelevantAttributesToCapture.Add(DamageStatics().BaseDamageAppliedDef);
 }
 
 void UExecutionCalculationDamage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -46,8 +46,8 @@ void UExecutionCalculationDamage::Execute_Implementation(const FGameplayEffectCu
 	EvaluateParameters.SourceTags = SourceTags;
 	EvaluateParameters.TargetTags = TargetTags;
 
-	float BaseDamage = 0.0f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().DamageDef, EvaluateParameters, BaseDamage);
+	float DamageApplied = 0.0f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().BaseDamageAppliedDef, EvaluateParameters, DamageApplied);
 
 	const AActor* EffectCauser = TypedContext->GetEffectCauser();
 	const FHitResult* HitActorResult = TypedContext->GetHitResult();
@@ -119,17 +119,17 @@ void UExecutionCalculationDamage::Execute_Implementation(const FGameplayEffectCu
 
 	UE_LOG(LogAbilities,
 		Log,
-		TEXT("ExecutionCalculationDamage: BaseDamage[%f] * DistanceAttenuation[%f] * PhysicalMaterialAttenuation[%f] * DamageInteractionAllowedMultiplier[%f] = %f at %fm"),
-		BaseDamage,
+		TEXT("ExecutionCalculationDamage: DamageApplied[%f] * DistanceAttenuation[%f] * PhysicalMaterialAttenuation[%f] * DamageInteractionAllowedMultiplier[%f] = %f at %fm"),
+		DamageApplied,
 		DistanceAttenuation,
 		PhysicalMaterialAttenuation,
 		DamageInteractionAllowedMultiplier,
-		FMath::Max(BaseDamage * DistanceAttenuation * PhysicalMaterialAttenuation * DamageInteractionAllowedMultiplier, 0.0f),
+		FMath::Max(DamageApplied * DistanceAttenuation * PhysicalMaterialAttenuation * DamageInteractionAllowedMultiplier, 0.0f),
 		Distance / 100.0f
 	);
 
 	// Clamping is done when damage is converted to -health
-	const float DamageDone = FMath::Max(BaseDamage * DistanceAttenuation * PhysicalMaterialAttenuation * DamageInteractionAllowedMultiplier, 0.0f);
+	const float DamageDone = FMath::Max(DamageApplied * DistanceAttenuation * PhysicalMaterialAttenuation * DamageInteractionAllowedMultiplier, 0.0f);
 
 	if (DamageDone > 0.0f)
 	{
