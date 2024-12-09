@@ -14,7 +14,6 @@
 
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Inventory_Item_Classification);
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Inventory_Item_Classification_Ammunition);
-THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Inventory_Weapon_Ammunition);
 
 /**
  * Definition type of an inventory item
@@ -99,53 +98,4 @@ class UWeaponAmmunitionFunctionLibrary : public UBlueprintFunctionLibrary
 		return 0;
 	}
 
-	// @TODO: might be able to re-work this for general use instead of just ammunition
-	UFUNCTION(BlueprintCallable, Category = "Inventory|Ammunition")
-	static void ConsolidateAmmoStacks(UInventoryManagerComponent* InventoryManager)
-	{
-		TArray<UInventoryItemInstance*> AmmoItems;
-
-		// Get all ammo items in the inventory
-		for (const FReadOnlyInventoryEntry Entry : InventoryManager->GetAllItems())
-		{
-			if (const UInventoryItemDefinition_Ammunition* ID_Ammunition = Cast<UInventoryItemDefinition_Ammunition>(Entry.Instance->GetItemDef()))
-			{
-				AmmoItems.Add(Entry.Instance);
-			}
-		}
-
-		// Consolidate ammo items with the same type def
-		for (int32 i = 0; i < AmmoItems.Num(); i++)
-		{
-			UInventoryItemInstance* CurrentItem = AmmoItems[i];
-			int32 MaxStackCount = CurrentItem->GetItemDef()->MaxStackCount;
-			int32 AmountInMyStack = CurrentItem->GetStatTagStackCount(TAG_Inventory_Weapon_Ammunition);
-
-			if (AmountInMyStack < MaxStackCount)
-			{
-				for (int32 j = i + 1; j < AmmoItems.Num(); j++)
-				{
-					UInventoryItemInstance* OtherItem = AmmoItems[j];
-
-					if (OtherItem->GetItemDef()->GetClass() == CurrentItem->GetItemDef()->GetClass())
-					{
-						int32 AmountAvailableToAdd = OtherItem->GetStatTagStackCount(TAG_Inventory_Weapon_Ammunition);
-
-						if (AmountAvailableToAdd > 0)
-						{
-							int32 AmountToAdd = FMath::Min(MaxStackCount - AmountInMyStack, AmountAvailableToAdd);
-							CurrentItem->AddStatTagStack(TAG_Inventory_Weapon_Ammunition, AmountToAdd);
-							OtherItem->RemoveStatTagStack(TAG_Inventory_Weapon_Ammunition, AmountToAdd);
-						}
-
-						// Remove empty ammo stacks
-						if (OtherItem->GetStatTagStackCount(TAG_Inventory_Weapon_Ammunition) <= 0)
-						{
-							InventoryManager->RemoveItem(OtherItem);
-						}
-					}
-				}
-			}
-		}
-	}
 };

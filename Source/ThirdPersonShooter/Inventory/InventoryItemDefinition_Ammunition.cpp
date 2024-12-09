@@ -4,4 +4,3 @@
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Inventory_Item_Classification, "Item.Classification");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Inventory_Item_Classification_Ammunition, "Item.Classification.Ammunition");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Inventory_Weapon_Ammunition, "Inventory.Weapon.Ammunition");
