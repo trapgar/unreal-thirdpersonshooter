@@ -31,18 +31,17 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - shotgun crashes the engine if you shoot 2 silhouettes in quick succession
     - Tracked this down to `GCNL_Character_Damaged` for the `Select & Queue Admin` func - think the multiple hits so close are breaking something?
 - Exiting the editor will cause an `Access violation executing location 0xFFFFFFFFFFFFFFFF` to be thrown with no source or context available
-- should probably move the MaxStackCount for ammo to an ASC AttributeSet
+- Add a check for IsPlayingAnim for the Feed Widgets before the queue up a new one
 
 ## Developer Notes
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file
     - I'm sure this is important for multiplayer, so will need to address this eventually
     - I've fixed the linker error, but need to go back and implement the removed `FFastArraySerializer` references
-- Need to figure out how to keep track of inventory items that can vs can't stack
 - Research asset manager registrations for:
-    - `UEquipmentConfiguration`
     - `UInventoryItemDefinition`
     - `UEquipmentItemDefinition`
 - 30000.0 cm/s is a good muzzle velocity for blaster bolts
+- Need to go back and rename a bunch of classes from ModularX to something more descriptive
 
 ## Question and Answer
 - What is the difference between a `GameplayCue`, and a `GameplayEvent` in terms of GameplayTags?
