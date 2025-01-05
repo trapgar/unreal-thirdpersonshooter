@@ -1,7 +1,8 @@
 Binaries
 DerivedDataCache
 Intermediate
-Saved
+Saved/*
+!Saved/Config/WindowsEditor/EditorPerProjectUserSettings.ini
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
