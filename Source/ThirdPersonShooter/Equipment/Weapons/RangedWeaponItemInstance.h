@@ -55,8 +55,18 @@ class THIRDPERSONSHOOTER_API URangedWeaponItemInstance : public UEquipmentItemIn
 	GENERATED_BODY()
 
 public:
+	// The class of the widget to use for the reticle
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="HUD")
 	TSubclassOf<UWeaponReticleWidgetBase> ReticleWidgetClass;
+
+	// The sound to play when the weapon is fired
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
+	// USoundBase* SoundToPlayOnFire = nullptr;
+
+	// The sound to play when the weapon magazine is spent
+	// @TODO: this may already be set by an AnimMontage notify
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
+	// USoundBase* SoundToPlayOnSpent = nullptr;
 
 	// Initial velocity of the projectile on spawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm/s"))
@@ -239,7 +249,9 @@ public:
 
 public:
 
+	// Need to override the tick function to update the spread decay
 	void Tick(float DeltaSeconds);
+	// Keep track of when the weapon is equipped for... reload purposes?
 	virtual void OnEquipped() override;
 	virtual void OnUnequipped() override;
 

@@ -32,6 +32,6 @@ public:
 
 protected:
 
-	UPROPERTY(EditAnywhere, meta=(DisplayName="Options"))
+	UPROPERTY(EditAnywhere, Category = Default, meta=(DisplayName="Options"))
 	FInteractionOption Option;
 };

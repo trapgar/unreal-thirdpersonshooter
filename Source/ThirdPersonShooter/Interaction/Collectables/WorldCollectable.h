@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Interaction/WorldInteractable.h"
 #include "Inventory/IPickupable.h"
+#include "Inventory/InventoryItemDefinition.h"
 
 #include "WorldCollectable.generated.h"
 
@@ -12,9 +13,9 @@ class UObject;
 struct FInteractionQuery;
 
 /**
- * Allows an actor to be picked up by a user and added to an inventory / grant abilities.
+ * AWorldCollectable
  * 
- * TODO: Should this inherit from AWorldInteractable? Guess it depends on what we're going for ('E to Pickup' vs auto pickup)
+ * Allows an actor to be picked up by a user and added to an inventory / grant abilities.
  */
 UCLASS(Abstract, Blueprintable)
 class THIRDPERSONSHOOTER_API AWorldCollectable : public AWorldInteractable, public IPickupable
@@ -23,12 +24,25 @@ class THIRDPERSONSHOOTER_API AWorldCollectable : public AWorldInteractable, publ
 
 public:
 
-	AWorldCollectable();
+	AWorldCollectable()
+	{
+		// Set default subtext if there is only 1 item in the box
+		if (StaticInventory.Instances.Num() <= 0 && StaticInventory.Templates.Num() == 1)
+		{
+			FPickupTemplate Template = StaticInventory.Templates[0];
+			UInventoryItemDefinition* ItemDef = Template.ItemDef->GetDefaultObject<UInventoryItemDefinition>();
 
-	virtual FInventoryPickup GetPickupInventory() const override;
+			Option.SubText = ItemDef->DisplayName;
+		}
+	};
+
+	virtual FInventoryPickup GetPickupInventory() const override
+	{
+		return StaticInventory;
+	};
 
 protected:
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Default)
 	FInventoryPickup StaticInventory;
 };

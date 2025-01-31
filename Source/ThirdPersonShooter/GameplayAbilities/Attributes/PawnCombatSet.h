@@ -17,6 +17,8 @@ THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Item_Classification_Pr
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Item_Classification_Primary_Heavy);
 THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Item_Classification_Primary_Sidearm);
 
+THIRDPERSONSHOOTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_Message_AmmoStackCountChanged);
+
 /**
  * UPawnCombatSet
  *
@@ -38,7 +40,6 @@ public:
 	ATTRIBUTE_ACCESSORS(UPawnCombatSet, AmmunitionRefill);
 	ATTRIBUTE_ACCESSORS(UPawnCombatSet, AmmunitionSpend);
 
-	ATTRIBUTE_ACCESSORS(UPawnCombatSet, AmmoStackCount);
 	ATTRIBUTE_ACCESSORS(UPawnCombatSet, AmmoStackCount_Rifle);
 	ATTRIBUTE_ACCESSORS(UPawnCombatSet, MaxAmmoStackCount_Rifle);
 	ATTRIBUTE_ACCESSORS(UPawnCombatSet, AmmoStackCount_Shotgun);
@@ -51,6 +52,17 @@ public:
 	ATTRIBUTE_ACCESSORS(UPawnCombatSet, MaxAmmoStackCount_Sidearm);
 
 	ATTRIBUTE_ACCESSORS(UPawnCombatSet, SpreadAngleMultiplier_HipFire);
+
+	mutable FPawnAttributeEvent OnAmmoStackCountChanged_Rifle;
+	mutable FPawnAttributeEvent OnMaxAmmoStackCountChanged_Rifle;
+	mutable FPawnAttributeEvent OnAmmoStackCountChanged_Shotgun;
+	mutable FPawnAttributeEvent OnMaxAmmoStackCountChanged_Shotgun;
+	mutable FPawnAttributeEvent OnAmmoStackCountChanged_Marksman;
+	mutable FPawnAttributeEvent OnMaxAmmoStackCountChanged_Marksman;
+	mutable FPawnAttributeEvent OnAmmoStackCountChanged_Heavy;
+	mutable FPawnAttributeEvent OnMaxAmmoStackCountChanged_Heavy;
+	mutable FPawnAttributeEvent OnAmmoStackCountChanged_Sidearm;
+	mutable FPawnAttributeEvent OnMaxAmmoStackCountChanged_Sidearm;
 
 protected:
 
@@ -69,9 +81,6 @@ protected:
 	void OnRep_AmmunitionSpend(const FGameplayAttributeData& OldValue);
 
 	// ---
-
-	UFUNCTION()
-	void OnRep_AmmoStackCount(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
 	void OnRep_AmmoStackCount_Rifle(const FGameplayAttributeData& OldValue);
@@ -142,10 +151,6 @@ private:
 	FGameplayAttributeData AmmunitionSpend;
 
 	// ---
-
-	// @TODO: is this even used?
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_AmmoStackCount, Category = "Pawn|Ability|Combat|Ranged Weapon", Meta = (AllowPrivateAccess = true))
-	FGameplayAttributeData AmmoStackCount;
 
 	// Current amount of rifle ammo
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_AmmoStackCount_Rifle, Category = "Pawn|Ability|Combat|Ranged Weapon", Meta = (AllowPrivateAccess = true))
@@ -218,6 +223,32 @@ public:
 			return UPawnCombatSet::GetAmmoStackCount_SidearmAttribute();
 		}
 
-		return UPawnCombatSet::GetAmmoStackCountAttribute();
+		return FGameplayAttribute();
+	};
+
+	static FGameplayAttribute GetMaxAttributeFromContainer(const FGameplayTagContainer Container)
+	{
+		if (Container.HasTagExact(TAG_Item_Classification_Primary_Rifle))
+		{
+			return UPawnCombatSet::GetMaxAmmoStackCount_RifleAttribute();
+		}
+		else if (Container.HasTagExact(TAG_Item_Classification_Primary_Shotgun))
+		{
+			return UPawnCombatSet::GetMaxAmmoStackCount_ShotgunAttribute();
+		}
+		else if (Container.HasTagExact(TAG_Item_Classification_Primary_Marksman))
+		{
+			return UPawnCombatSet::GetMaxAmmoStackCount_MarksmanAttribute();
+		}
+		else if (Container.HasTagExact(TAG_Item_Classification_Primary_Heavy))
+		{
+			return UPawnCombatSet::GetMaxAmmoStackCount_HeavyAttribute();
+		}
+		else if (Container.HasTagExact(TAG_Item_Classification_Primary_Sidearm))
+		{
+			return UPawnCombatSet::GetMaxAmmoStackCount_SidearmAttribute();
+		}
+
+		return FGameplayAttribute();
 	};
 };

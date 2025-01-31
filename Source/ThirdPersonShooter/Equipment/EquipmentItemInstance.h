@@ -83,6 +83,7 @@ public:
 	template <typename TResultClass>
 	const TResultClass* FindFragmentByClass() const { return (TResultClass*)FindFragmentByClass(TResultClass::StaticClass()); }
 
+	// @TODO: InventoryItemInstance already has this function, should remove?
 	UFUNCTION(BlueprintCallable, BlueprintPure=true, Category=Equipment)
 	TArray<AActor*> GetSpawnedActors() { return SpawnedActors; }
 

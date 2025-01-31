@@ -77,7 +77,7 @@ class IPickupable
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Inventory"))
 	virtual FInventoryPickup GetPickupInventory() const = 0;
 };
 

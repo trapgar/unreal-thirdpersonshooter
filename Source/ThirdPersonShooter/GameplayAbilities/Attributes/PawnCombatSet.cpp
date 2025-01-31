@@ -6,6 +6,9 @@
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 #include "CustomLogChannels.h"
+#include "GameplayEffectExtension.h"
+#include "Messages/GameplayVerbMessage.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PawnCombatSet)
 
@@ -16,6 +19,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Item_Classification_Primary_Shotgun, "Item.Classifica
 UE_DEFINE_GAMEPLAY_TAG(TAG_Item_Classification_Primary_Marksman, "Item.Classification.Primary.Marksman");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Item_Classification_Primary_Heavy, "Item.Classification.Primary.Heavy");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Item_Classification_Primary_Sidearm, "Item.Classification.Primary.Sidearm");
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_Message_AmmoStackCountChanged, "Gameplay.Message.AmmoStackCountChanged");
 
 UPawnCombatSet::UPawnCombatSet()
 	: MaxAmmoStackCount_Rifle(90.0f)
@@ -37,12 +42,12 @@ void UPawnCombatSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmunitionRefill, COND_OwnerOnly, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmunitionSpend, COND_OwnerOnly, REPNOTIFY_Always);
 
-	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmoStackCount, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmoStackCount_Rifle, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmoStackCount_Shotgun, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmoStackCount_Marksman, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmoStackCount_Heavy, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, AmmoStackCount_Sidearm, COND_OwnerOnly, REPNOTIFY_OnChanged);
+
 	DOREPLIFETIME_CONDITION_NOTIFY(UPawnCombatSet, SpreadAngleMultiplier_HipFire, COND_OwnerOnly, REPNOTIFY_OnChanged);
 }
 
@@ -64,11 +69,6 @@ void UPawnCombatSet::OnRep_AmmunitionRefill(const FGameplayAttributeData& OldVal
 void UPawnCombatSet::OnRep_AmmunitionSpend(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPawnCombatSet, AmmunitionSpend, OldValue);
-}
-
-void UPawnCombatSet::OnRep_AmmoStackCount(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UPawnCombatSet, AmmoStackCount, OldValue);
 }
 
 void UPawnCombatSet::OnRep_AmmoStackCount_Rifle(const FGameplayAttributeData& OldValue)
@@ -141,6 +141,18 @@ bool UPawnCombatSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData &Da
 	{
 		return false;
 	}
+	// Do not apply any ammunition refill if the pawn is already at max ammunition
+	else if (Data.EvaluatedData.Attribute == GetAmmunitionRefillAttribute() && Data.EvaluatedData.Magnitude > 0.0f)
+	{
+		const FGameplayTagContainer* SourceTags = Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
+		FGameplayAttribute Attribute_AmmoStackCount = UPawnCombatSet::GetAttributeFromContainer(*SourceTags);
+		FGameplayAttribute Attribute_MaxAmmoStackCount = UPawnCombatSet::GetMaxAttributeFromContainer(*SourceTags);
+
+		if (Attribute_AmmoStackCount.GetNumericValue(this) == Attribute_MaxAmmoStackCount.GetNumericValue(this))
+		{
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -151,7 +163,7 @@ void UPawnCombatSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 
 	float& NewValue = Data.EvaluatedData.Magnitude;
 
-	if (Data.EvaluatedData.Attribute == GetAmmunitionRefillAttribute())
+	if (Data.EvaluatedData.Attribute == GetAmmunitionSpendAttribute())
 	{
 		NewValue = NewValue * -1;
 	}
@@ -161,7 +173,21 @@ void UPawnCombatSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 	{
 		const FGameplayTagContainer* SourceTags = Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
 		FGameplayAttribute CalculatedAttribute = UPawnCombatSet::GetAttributeFromContainer(*SourceTags);
-		NewValue = NewValue * -1;
+
+		// Send a standardized verb message that other systems can observe
+		if (NewValue > 0.0f)
+		{
+			FGameplayVerbMessage Message;
+			Message.Verb = TAG_Gameplay_Message_AmmoStackCountChanged;
+			Message.Instigator = Data.EffectSpec.GetEffectContext().GetEffectCauser();
+			Message.InstigatorTags = *Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
+			Message.Target = GetOwningActor();
+			Message.TargetTags = *Data.EffectSpec.CapturedTargetTags.GetAggregatedTags();
+			Message.Magnitude = Data.EvaluatedData.Magnitude;
+
+			UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());
+			MessageSystem.BroadcastMessage(Message.Verb, Message);
+		}
 
 		if (CalculatedAttribute == GetAmmoStackCount_RifleAttribute())
 		{
@@ -190,30 +216,8 @@ void UPawnCombatSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 			return;
 		}
 
-		SetAmmoStackCount(0.0f);
 		SetAmmunitionRefill(0.0f);
 		SetAmmunitionSpend(0.0f);
-	}
-
-	if (Data.EvaluatedData.Attribute == GetAmmoStackCount_RifleAttribute())
-	{
-		SetAmmoStackCount_Rifle(GetAmmoStackCount_Rifle() + NewValue);
-	}
-	else if (Data.EvaluatedData.Attribute == GetAmmoStackCount_ShotgunAttribute())
-	{
-		SetAmmoStackCount_Shotgun(GetAmmoStackCount_Shotgun() + NewValue);
-	}
-	else if (Data.EvaluatedData.Attribute == GetAmmoStackCount_MarksmanAttribute())
-	{
-		SetAmmoStackCount_Marksman(GetAmmoStackCount_Marksman() + NewValue);
-	}
-	else if (Data.EvaluatedData.Attribute == GetAmmoStackCount_HeavyAttribute())
-	{
-		SetAmmoStackCount_Heavy(GetAmmoStackCount_Heavy() + NewValue);
-	}
-	else if (Data.EvaluatedData.Attribute == GetAmmoStackCount_SidearmAttribute())
-	{
-		SetAmmoStackCount_Sidearm(GetAmmoStackCount_Sidearm() + NewValue);
 	}
 
 	if (Data.EvaluatedData.Attribute == GetMaxAmmoStackCount_RifleAttribute())
@@ -254,11 +258,6 @@ void UPawnCombatSet::PreAttributeChange(const FGameplayAttribute& Attribute, flo
 
 void UPawnCombatSet::ClampAttribute(const FGameplayAttribute& Attribute, float& NewValue) const
 {
-	if (Attribute == GetAmmoStackCountAttribute())
-	{
-		NewValue = FMath::Min(NewValue, 0.0f);
-	}
-
 	if (Attribute == GetAmmoStackCount_RifleAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxAmmoStackCount_Rifle());

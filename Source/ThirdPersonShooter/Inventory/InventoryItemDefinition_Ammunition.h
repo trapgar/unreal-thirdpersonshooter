@@ -52,38 +52,6 @@ class UWeaponAmmunitionFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	// @TODO: Don't like that this is off the InventoryItemInstance class, but the ID_Ammunition instance doesn't have a reference to the Instigator
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Inventory)
-	static const FGameplayEffectSpecHandle MakeOutgoingAmmunitionSpec(UInventoryItemInstance* ItemInstance)
-	{
-		if (ItemInstance != nullptr)
-		{
-			if (UInventoryItemDefinition_Ammunition* ItemDef = Cast<UInventoryItemDefinition_Ammunition>(ItemInstance->GetItemDef()))
-			{
-				if (const AActor* Instigator = ItemInstance->GetInstigator())
-				{
-					if (const UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Instigator))
-					{
-						FGameplayEffectContextHandle GE_RefillOrSpend = ASC->MakeEffectContext();
-						FGameplayEffectSpecHandle GE_Spec_Handle = ASC->MakeOutgoingSpec(ItemDef->AmmunitionRefillOrSpendEffect, /*Level=*/0.0f, GE_RefillOrSpend);
-
-						if (FGameplayEffectSpec* Spec = GE_Spec_Handle.Data.Get())
-						{
-							Spec->AddDynamicAssetTag(ItemDef->WeaponClassification);
-						}
-
-						GE_Spec_Handle.Data.Get()->SetSetByCallerMagnitude(ThirdPersonShooterGameplayTags::SetByCaller_StackCount, ItemDef->StackCount);
-
-						return GE_Spec_Handle;
-						// ASC->ApplyGameplayEffectSpecToTarget(*GE_Spec_Handle.Data.Get(), ASC);
-					}
-				}
-			}
-		}
-
-		return FGameplayEffectSpecHandle();
-	};
-
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory|Ammunition")
 	static const int32 GetAmmunitionStackCount(UInventoryItemInstance* ItemInstance)
 	{
