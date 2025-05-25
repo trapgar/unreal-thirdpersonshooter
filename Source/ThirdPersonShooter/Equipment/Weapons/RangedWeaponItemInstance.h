@@ -72,6 +72,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm/s"))
 	float MuzzleVelocity = 60000.0f;
 
+	// Initial velocity of the projectile on spawn
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, ClampMax=1.0f, UIMin=0.0f, UIMax=1.0f, ForceUnits="x"))
+	float GravityScale = 1.0f;
+
 	// A curve that maps the distance (in cm) to a multiplier on the base damage from the associated gameplay effect
 	// If there is no data in this curve, then the weapon is assumed to have no damage falloff with distance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="cm"))
@@ -102,7 +106,7 @@ public:
 	// Base amount of damage to apply to a on projectile hit
 	// This is pre-multipliers (e.g. damage falloff, headshot, etc.)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects", meta=(ClampMin=0.0f, UIMin=0.0f))
-	float SingleBulletDamage;
+	float SingleBulletDamage = 18.5f;
 
 	// List of special tags that affect how damage is dealt
 	// These tags will be compared to tags in the physical material of the thing being hit

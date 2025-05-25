@@ -15,7 +15,7 @@ ARangedWeaponProjectile::ARangedWeaponProjectile()
 {
 	RootComponent = CollisionVolume = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CollisionVolume"));
 
-	CollisionVolume->InitCapsuleSize(1.0f, 1.0f);
+	CollisionVolume->InitCapsuleSize(1.0f, 2.0f);
 	CollisionVolume->SetCollisionProfileName(NAME_ProjectileCollisionProfile);
 	CollisionVolume->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionVolume->CanCharacterStepUpOn = ECB_No;
@@ -42,35 +42,51 @@ void ARangedWeaponProjectile::OnConstruction(const FTransform & Transform)
 	{
 		ProjectileMovementComponent->InitialSpeed = Weapon->MuzzleVelocity;
 		ProjectileMovementComponent->MaxSpeed = Weapon->MuzzleVelocity;
+		ProjectileMovementComponent->ProjectileGravityScale *= Weapon->GravityScale;
 	}
 }
 
 FGameplayEffectContextHandle ARangedWeaponProjectile::MakeEffectContext() const
 {
 	AActor* AsInstigator = GetInstigator();
-	IAbilitySystemInterface* Abilitor = Cast<IAbilitySystemInterface>(AsInstigator);
-
 	check(AsInstigator);
-	check(Abilitor);
 
-	UAbilitySystemComponent* ASC = Abilitor->GetAbilitySystemComponent();
-	FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
-	FModularGameplayEffectContext* EffectContext = FModularGameplayEffectContext::ExtractEffectContext(ContextHandle);
-	const UObject* Source = Cast<const UObject>(Weapon);
+	UAbilitySystemComponent* ASC;
 
-	check(EffectContext);
-	check(Source);
-
-	EffectContext->AddInstigator(AsInstigator, AsInstigator);
-	EffectContext->AddSourceObject(Source);
-	EffectContext->AddOrigin(StartingLocation);
-
-	if (const IModularAbilityAttenuatorInterface* Attenuator = Cast<const IModularAbilityAttenuatorInterface>(Source))
+	if (IAbilitySystemInterface* Abilitor = Cast<IAbilitySystemInterface>(AsInstigator))
 	{
-		EffectContext->SetAbilityAttenuator(Attenuator, 0.0f);
+		ASC = Abilitor->GetAbilitySystemComponent();
+	}
+	else
+	{
+		ASC = AsInstigator->FindComponentByClass<UAbilitySystemComponent>();
 	}
 
-	return ContextHandle;
+	if (ASC)
+	{
+		FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
+		FModularGameplayEffectContext* EffectContext = FModularGameplayEffectContext::ExtractEffectContext(ContextHandle);
+		const UObject* Source = Cast<const UObject>(Weapon);
+
+		check(EffectContext);
+		check(Source);
+
+		EffectContext->AddInstigator(AsInstigator, AsInstigator);
+		EffectContext->AddSourceObject(Source);
+		EffectContext->AddOrigin(StartingLocation);
+
+		if (const IModularAbilityAttenuatorInterface* Attenuator = Cast<const IModularAbilityAttenuatorInterface>(Source))
+		{
+			EffectContext->SetAbilityAttenuator(Attenuator, 0.0f);
+		}
+
+		return ContextHandle;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ARangedWeaponProjectile::MakeEffectContext failed to find ASC - EffectContext will be empty."));
+		return FGameplayEffectContextHandle();
+	}
 }
 
 void ARangedWeaponProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -135,7 +151,9 @@ void ARangedWeaponProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherA
 		// TODO: calculate force based on mass & velocity, keeping in mind it will probably just tear right through the obj
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 0.5f, GetActorLocation());
 	}
-	else if (OtherActor != nullptr && OtherActor->CanBeDamaged())
+
+	// If the other actor can be damaged, apply damage
+	if (OtherActor != nullptr && OtherActor->CanBeDamaged())
 	{
 		if (HasAuthority())
 		{
