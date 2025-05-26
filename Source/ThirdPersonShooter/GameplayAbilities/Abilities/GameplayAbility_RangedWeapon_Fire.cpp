@@ -1,4 +1,4 @@
-#include "GameplayAbilities/GameplayAbility_RangedWeapon_Fire.h"
+#include "GameplayAbility_RangedWeapon_Fire.h"
 #include "Physics/CustomCollisionChannels.h"
 #include "Inventory/InventoryItemInstance.h"
 #include "Equipment/EquipmentManagerComponent.h"

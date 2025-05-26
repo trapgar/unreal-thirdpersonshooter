@@ -1,4 +1,5 @@
 #include "ModularGameplayAbility.h"
+#include "AbilitySystemLog.h"
 #include "GameplayAbilities/ModularAbilitySystemComponent.h"
 #include "GameplayAbilities/ModularAbilityAttenuatorInterface.h"
 #include "GameplayAbilities/ModularGameplayEffectContext.h"
@@ -286,4 +287,61 @@ void UModularGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityAc
 			}
 		}
 	}
+}
+
+bool UModularGameplayAbility::CanChangeActivationGroup(EModularAbilityActivationGroup NewGroup) const
+{
+	if (!IsInstantiated() || !IsActive())
+	{
+		return false;
+	}
+
+	if (ActivationGroup == NewGroup)
+	{
+		return true;
+	}
+
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+	UModularAbilitySystemComponent* MASC = Cast<UModularAbilitySystemComponent>(ASC);
+
+	check(MASC);
+
+	if ((ActivationGroup != EModularAbilityActivationGroup::Exclusive_Blocking) && MASC->IsActivationGroupBlocked(NewGroup))
+	{
+		// This ability can't change groups if it's blocked (unless it is the one doing the blocking).
+		return false;
+	}
+
+	if ((NewGroup == EModularAbilityActivationGroup::Exclusive_Replaceable) && !CanBeCanceled())
+	{
+		// This ability can't become replaceable if it can't be canceled.
+		return false;
+	}
+
+	return true;
+}
+
+bool UModularGameplayAbility::ChangeActivationGroup(EModularAbilityActivationGroup NewGroup)
+{
+	ENSURE_ABILITY_IS_INSTANTIATED_OR_RETURN(ChangeActivationGroup, false);
+
+	if (!CanChangeActivationGroup(NewGroup))
+	{
+		return false;
+	}
+
+	if (ActivationGroup != NewGroup)
+	{
+		UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+		UModularAbilitySystemComponent* MASC = Cast<UModularAbilitySystemComponent>(ASC);
+
+		check(MASC);
+
+		MASC->RemoveAbilityFromActivationGroup(ActivationGroup, this);
+		MASC->AddAbilityToActivationGroup(NewGroup, this);
+
+		ActivationGroup = NewGroup;
+	}
+
+	return true;
 }

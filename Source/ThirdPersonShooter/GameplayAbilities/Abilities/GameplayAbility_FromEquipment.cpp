@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GameplayAbilities/GameplayAbility_FromEquipment.h"
+#include "GameplayAbility_FromEquipment.h"
 #include "Equipment/EquipmentItemInstance.h"
 #include "Inventory/InventoryItemInstance.h"
 

@@ -143,6 +143,14 @@ protected:
 	virtual bool DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	//~End of UGameplayAbility interface
 
+	// Returns true if the requested activation group is a valid transition.
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Ability", Meta = (ExpandBoolAsExecs = "ReturnValue"))
+	bool CanChangeActivationGroup(EModularAbilityActivationGroup NewGroup) const;
+
+	// Tries to change the activation group.  Returns true if it successfully changed.
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Ability", Meta = (ExpandBoolAsExecs = "ReturnValue"))
+	bool ChangeActivationGroup(EModularAbilityActivationGroup NewGroup);
+
 protected:
 
 	virtual void GetAbilitySourceAsAttenuator(FGameplayAbilitySpecHandle Handle,
