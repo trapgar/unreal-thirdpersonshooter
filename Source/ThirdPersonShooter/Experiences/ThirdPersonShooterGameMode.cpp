@@ -14,6 +14,8 @@ AThirdPersonShooterGameMode::AThirdPersonShooterGameMode(const FObjectInitialize
 
 void AThirdPersonShooterGameMode::BeginPlay()
 {
+	Super::BeginPlay();
+	
 	if (Actions.Num() > 0)
 	{
 		// TODO: properly mock the context so that all the SoftPtr assets are actually loaded
@@ -52,6 +54,8 @@ void AThirdPersonShooterGameMode::BeginPlay()
 
 void AThirdPersonShooterGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	Super::EndPlay(EndPlayReason);
+
 	MyEndPlayReason = EndPlayReason;
 	NumGameFeaturePluginsLoading = GameFeaturesToEnable.Num();
 
