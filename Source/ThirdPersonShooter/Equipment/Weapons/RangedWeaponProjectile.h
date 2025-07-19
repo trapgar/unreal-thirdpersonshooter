@@ -13,7 +13,7 @@
 #include "RangedWeaponProjectile.generated.h"
 
 class UProjectileMovementComponent;
-class UCapsuleComponent;
+class USphereComponent;
 class URangedWeaponItemInstance;
 class UNiagaraComponent;
 
@@ -39,7 +39,7 @@ public:
 
 	// The projectile's collision volume.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UCapsuleComponent> CollisionVolume;
+	TObjectPtr<USphereComponent> CollisionVolume;
 
 	// The projectile's movement component.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Projectile Movement Component"))

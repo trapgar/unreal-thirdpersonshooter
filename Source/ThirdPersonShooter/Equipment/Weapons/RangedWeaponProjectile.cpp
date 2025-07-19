@@ -1,6 +1,6 @@
 #include "Equipment/Weapons/RangedWeaponProjectile.h"
 #include "Equipment/Weapons/RangedWeaponItemInstance.h"
-#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "AbilitySystemGlobals.h"
@@ -13,9 +13,9 @@ static FName NAME_ProjectileCollisionProfile(TEXT("Projectile"));
 
 ARangedWeaponProjectile::ARangedWeaponProjectile()
 {
-	RootComponent = CollisionVolume = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CollisionVolume"));
+	RootComponent = CollisionVolume = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionVolume"));
 
-	CollisionVolume->InitCapsuleSize(1.0f, 2.0f);
+	CollisionVolume->SetSphereRadius(1.0f);
 	CollisionVolume->SetCollisionProfileName(NAME_ProjectileCollisionProfile);
 	CollisionVolume->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionVolume->CanCharacterStepUpOn = ECB_No;
