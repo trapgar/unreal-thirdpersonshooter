@@ -172,7 +172,6 @@ public:
 	float RecoilYawMax = 0.28f;
 
 	// Additional recoil multiplier applied to the first shot of the heat
-	// @experimental
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Handling|Recoil", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="x"))
 	float FirstShotRecoilMultiplier = 2.3f;
 

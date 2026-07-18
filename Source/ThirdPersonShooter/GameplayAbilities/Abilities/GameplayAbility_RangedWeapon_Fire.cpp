@@ -173,3 +173,21 @@ FRotator UGameplayAbility_RangedWeapon_Fire::GetProjectileSpreadRotator() const
 
 	return FRotator(Pitch, Yaw, 0.0f);
 }
+
+FRotator UGameplayAbility_RangedWeapon_Fire::GetWeaponRecoilRotator() const
+{
+	APawn* Pawn = GetPawnFromActorInfo();
+	check(Pawn);
+
+	URangedWeaponItemInstance* RangedWeapon = GetAssociatedWeapon();
+	float Multiplier = 1.0f;
+	float RecoilPitch = RangedWeapon->RecoilPitch * FMath::FRandRange(0.9f, 1.0f) * -1.0f;
+	float RecoilYaw = FMath::FRandRange(RangedWeapon->RecoilYawMin, RangedWeapon->RecoilYawMax);
+
+	if (RangedWeapon->HasFirstShotAccuracy())
+	{
+		Multiplier = RangedWeapon->FirstShotRecoilMultiplier;
+	}
+
+	return FRotator(RecoilPitch * Multiplier, RecoilYaw * Multiplier, 0.0f);
+}

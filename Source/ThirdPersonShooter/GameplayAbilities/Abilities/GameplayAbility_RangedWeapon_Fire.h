@@ -42,9 +42,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon|Accuracy")
 	virtual FTransform GetBaseProjectileSpawnTransform(float Radius, float MaxTraceDistanceInCm = 10000.0f) const;
 
-	// Returns a spread rotator that is based on the current spread angle
+	// Returns a spread rotator that is based on the current spread angle & multipliers
 	UFUNCTION(BlueprintCallable, Category="Weapon|Accuracy")
 	virtual FRotator GetProjectileSpreadRotator() const;
+
+	// Returns a recoil rotator that is based on the current recoil angle multiplier
+	UFUNCTION(BlueprintCallable, Category="Weapon|Accuracy")
+	virtual FRotator GetWeaponRecoilRotator() const;
 
 private:
 	

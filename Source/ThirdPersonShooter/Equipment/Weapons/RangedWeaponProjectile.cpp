@@ -8,6 +8,7 @@
 #include "GameplayCueFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "CoreMinimal.h"
+#include "CustomLogChannels.h"
 
 static FName NAME_ProjectileCollisionProfile(TEXT("Projectile"));
 
@@ -84,7 +85,7 @@ FGameplayEffectContextHandle ARangedWeaponProjectile::MakeEffectContext() const
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ARangedWeaponProjectile::MakeEffectContext failed to find ASC - EffectContext will be empty."));
+		UE_LOG(LogAbilities, Warning, TEXT("ARangedWeaponProjectile::MakeEffectContext failed to find ASC - EffectContext will be empty."));
 		return FGameplayEffectContextHandle();
 	}
 }
