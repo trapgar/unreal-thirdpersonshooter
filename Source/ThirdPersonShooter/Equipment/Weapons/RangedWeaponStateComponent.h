@@ -6,7 +6,10 @@
 
 #include "RangedWeaponStateComponent.generated.h"
 
-// Tracks weapon state and recent confirmed hit markers to display on screen
+/**
+ * Tracks weapon state and recent confirmed hit markers to display on screen.
+ * Attached to the {@see RangedWeaponItemInstance} since UObject is not an actor; it doesn't tick - so we have to add a component which does.
+ */
 UCLASS()
 class URangedWeaponStateComponent : public UControllerComponent
 {

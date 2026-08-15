@@ -34,6 +34,7 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
 - Add a check for IsPlayingAnim for the Feed Widgets before the queue up a new one
 
 ## Developer Notes
+- [sym.gg](https://sym.gg) for weapon balancing stats
 - Lyra uses `FFastArraySerializer` in `LyraEquipmentManagerComponent.h` and the linker breaks when I try to import the header file
     - I'm sure this is important for multiplayer, so will need to address this eventually
     - I've fixed the linker error, but need to go back and implement the removed `FFastArraySerializer` references
@@ -42,6 +43,8 @@ This will prevent Code from searching the entire Unreal Engine source, which is 
     - `UEquipmentItemDefinition`
 - 30000.0 cm/s is a good muzzle velocity for blaster bolts
 - Need to go back and rename a bunch of classes from ModularX to something more descriptive
+- Game names?
+    - ASTRUM - Latin for Star
 
 ## Question and Answer
 - What is the difference between a `GameplayCue`, and a `GameplayEvent` in terms of GameplayTags?

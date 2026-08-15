@@ -41,8 +41,10 @@ void ARangedWeaponProjectile::OnConstruction(const FTransform & Transform)
 
 	if (Weapon)
 	{
-		ProjectileMovementComponent->InitialSpeed = Weapon->MuzzleVelocity;
-		ProjectileMovementComponent->MaxSpeed = Weapon->MuzzleVelocity;
+		// 60000.0 cm/s
+		// 60.0 m/s
+		ProjectileMovementComponent->InitialSpeed = Weapon->MuzzleVelocity * 100;
+		ProjectileMovementComponent->MaxSpeed = Weapon->MuzzleVelocity * 100;
 		ProjectileMovementComponent->ProjectileGravityScale *= Weapon->GravityScale;
 	}
 }

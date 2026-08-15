@@ -68,17 +68,17 @@ public:
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
 	// USoundBase* SoundToPlayOnSpent = nullptr;
 
-	// Initial velocity of the projectile on spawn
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm/s"))
-	float MuzzleVelocity = 60000.0f;
+	// Initial velocity (in m/s) of the projectile on spawn
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="m/s"))
+	float MuzzleVelocity = 650.0f;
 
-	// Initial velocity of the projectile on spawn
+	// Adjusts the scale of gravity applied to the projectile - 1.0f is 9.8 m/s^2
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, ClampMax=1.0f, UIMin=0.0f, UIMax=1.0f, ForceUnits="x"))
 	float GravityScale = 1.0f;
 
-	// A curve that maps the distance (in cm) to a multiplier on the base damage from the associated gameplay effect
+	// A curve that maps the distance (in m) to a multiplier on the base damage from the associated gameplay effect
 	// If there is no data in this curve, then the weapon is assumed to have no damage falloff with distance
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="cm"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="m"))
 	FRuntimeFloatCurve DistanceDamageFalloff;
 
 	// The radius for bullet traces sweep spheres (0.0 will result in a line trace)
@@ -86,9 +86,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="cm"))
 	float BulletTraceSweepRadius = 1.0f;
 
-	// The maximum distance at which this weapon can deal damage - used for despawning
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="cm"))
-	float MaxDamageRange = 50000.0f;
+	// The maximum distance (in meters) at which this weapon can deal damage - used for initial line trace
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics", meta=(ForceUnits="m"))
+	float MaxDamageRange = 500.0f;
 
 	// Bullet actor class definition to spawn on weapon fire
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ballistics")
@@ -226,8 +226,9 @@ public:
 		const FGameplayTagContainer* TargetTags = nullptr
 	) const override
 	{
+		// curve is in multiplier / distance in meters, so we need to convert from cm
 		const FRichCurve* Curve = DistanceDamageFalloff.GetRichCurveConst();
-		return Curve->HasAnyData() ? Curve->Eval(Distance) : 1.0f;
+		return Curve->HasAnyData() ? Curve->Eval(Distance / 100.0f) : 1.0f;
 	};
 	// Returns a multiplier between 0 and 1 based on the physical material (e.g.: weak point etc)
 	virtual float GetPhysicalMaterialAttenuation(const UPhysicalMaterial* PhysicalMaterial,

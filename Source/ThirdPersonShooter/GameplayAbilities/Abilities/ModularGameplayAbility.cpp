@@ -258,6 +258,7 @@ void UModularGameplayAbility::OnAbilityFailedToActivate_Broadcast(const FGamepla
 {
 	FModularAbilityFailureMessage Message;
 	Message.PlayerController = GetActorInfo().PlayerController.Get();
+	Message.Ability = this;
 	Message.FailureTags = FailedReason;
 
 	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(GetWorld());

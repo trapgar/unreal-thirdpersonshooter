@@ -18,15 +18,15 @@ public:
     FRotator Rotation = FRotator(0.f, 0.f, 0.f);
 
     /** Total duration in seconds. */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Shake")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Shake", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="s"))
     float Duration = 0.10f;
 
     /** Blend in time. */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Shake")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Shake", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="s"))
     float BlendInTime = 0.0f;
 
     /** Blend out time. */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Shake")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Shake", meta=(ClampMin=0.0f, UIMin=0.0f, ForceUnits="s"))
     float BlendOutTime = 0.05f;
 
     UFUNCTION(BlueprintCallable, Category="Camera Shake")

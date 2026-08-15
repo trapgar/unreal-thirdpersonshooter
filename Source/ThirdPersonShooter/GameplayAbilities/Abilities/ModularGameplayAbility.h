@@ -82,6 +82,10 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<APlayerController> PlayerController = nullptr;
 
+	// Ability that failed to activate
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<const UGameplayAbility> Ability = nullptr;
+
 	// All the reasons why this ability has failed
 	UPROPERTY(BlueprintReadWrite)
 	FGameplayTagContainer FailureTags;

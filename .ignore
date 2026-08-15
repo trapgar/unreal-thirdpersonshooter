@@ -1,3 +1,4 @@
+/.claude
 /.git
 /.github
 /.vs
@@ -8,8 +9,6 @@
 /Saved
 /Plugins/CommonGame/Intermediate
 /Plugins/CommonUser/Intermediate
-/Plugins/GameFeatures/VehiclesAndNavigation/Content
-/Plugins/GameFeatures/VehiclesAndNavigation/Intermediate
 /Plugins/GameplayMessageRouter/Intermediate
 /Plugins/ModularGameplayActors/Intermediate
 /Plugins/UIExtension/Intermediate

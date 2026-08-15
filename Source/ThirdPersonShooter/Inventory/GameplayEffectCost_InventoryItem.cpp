@@ -23,8 +23,14 @@ bool UGameplayEffectCost_InventoryItem::CheckCost(const UModularGameplayAbility*
 
 			const float NumItemsToConsumeReal = Quantity.GetValueAtLevel(AbilityLevel);
 			const int32 NumItemsToConsume = FMath::TruncToInt(NumItemsToConsumeReal);
+			const bool HasEnough = InventoryComponent->GetTotalItemCountByDefinition(ItemDefinition) >= NumItemsToConsume;
 
-			return InventoryComponent->GetTotalItemCountByDefinition(ItemDefinition) >= NumItemsToConsume;
+			if (!HasEnough)
+			{
+				OptionalRelevantTags->AddTag(FGameplayTag::RequestGameplayTag("Ability.ActivateFail.Cost"));
+			}
+
+			return HasEnough;
 		}
 	}
 	return false;
