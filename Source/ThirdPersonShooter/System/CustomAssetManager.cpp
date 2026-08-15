@@ -18,7 +18,7 @@
 
 
 static FAutoConsoleCommand CVarDumpLoadedAssets(
-	TEXT("AssetManager.DumpLoadedAssets"),
+	TEXT("ThirdPersonShooter.DumpLoadedAssets"),
 	TEXT("Shows all assets that were loaded via the asset manager and are currently in memory."),
 	FConsoleCommandDelegate::CreateStatic(UCustomAssetManager::DumpLoadedAssets)
 );
