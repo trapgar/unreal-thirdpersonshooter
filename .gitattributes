@@ -1,1 +1,6 @@
 Content/** filter=lfs diff=lfs merge=lfs -text
+
+# Python sources under Content/ are text, not assets. Unset the LFS attributes
+# inherited from the blanket rule above so they keep readable diffs and normal
+# three-way merges.
+Content/Python/** !filter !diff !merge text
